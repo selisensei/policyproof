@@ -71,7 +71,7 @@ These are contract tests, not evidence that a live model will always produce the
 ### Component and localization
 
 - Five-step navigation and focused panel state
-- Loading, running, filtering, evidence inspection, decision, receipt, rerun, and reset
+- Loading, running, result and open-decision filtering, keyboard result selection, evidence inspection, decision, receipt, rerun, and reset
 - English/French selector visibility and immediate translation
 - Main navigation, buttons, statuses, validation, accessibility labels, and displayed receipt translation
 - Locale changes preserve controls, results, decisions, comments, and exact source evidence
@@ -79,11 +79,11 @@ These are contract tests, not evidence that a live model will always produce the
 - Hydration-safe persisted locale behavior
 - Guided-demo progress survives locale changes and reflects real workspace actions
 - Live control proposals remain proposed, edited, approved, or rejected through explicit human actions
-- Receipt copy and JSON download controls use current structured state
+- Evidence excerpt/reference copy feedback and receipt copy/JSON download controls use current structured state
 
 ### Browser and responsive behavior
 
-Playwright covers the complete deterministic path, exact currency evidence, override validation, receipt, threshold recalculation, decision reset notice, keyboard navigation, persisted French locale, and absence of main-page horizontal overflow.
+Playwright covers the complete deterministic path, exact currency evidence, override validation, receipt, threshold recalculation, decision reset notice, keyboard result navigation, persisted French locale, concise mobile inline evidence, reduced motion, print media, safe mocked provider failure, and absence of main-page horizontal overflow.
 
 Ignored screenshots are generated for:
 
@@ -92,6 +92,8 @@ Ignored screenshots are generated for:
 - French at 390 px;
 - mixed-status matrix, evidence inspector, validation error, and decision receipt.
 - API unavailable and safely mocked provider-error states.
+
+The Proofroom visual harness creates a consistent nine-screen matrix for Policy, Controls, Documents, Review, Decision, receipt, French Review, English mobile Review, and French mobile Review. Its final pass also captures empty Review, threshold change, print-only receipt, compilation loading, and a safely mocked provider error. All files remain ignored under `test-results/proofroom-integration/`.
 
 ## Latest recorded results — 2026-07-14
 
@@ -150,6 +152,26 @@ Final post-report release gates:
 - `pnpm test:e2e`: PASS — 4 Chromium tests; `test-results/live-gpt56/` was preserved
 - `pnpm audit --prod`: PASS — no known vulnerabilities
 - Production smoke test: PASS — root 200, PolicyProof content, `nosniff`, `DENY`, available `gpt-5.6`, and port 3200 released
+
+## Proofroom design integration — 2026-07-14
+
+- `pnpm test`: PASS — 13 test files, 81 tests
+- `pnpm typecheck`: PASS — no TypeScript errors
+- `pnpm lint`: PASS — no ESLint errors or warnings
+- `pnpm build`: PASS — optimized Next.js production build; static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`
+- `pnpm test:e2e`: PASS — 7 Chromium tests, including the 12-step deterministic judge path, the nine-screen visual matrix, final state captures, responsive EN/FR checks, keyboard navigation, reduced motion, print media, and a safely mocked provider error
+- `pnpm audit --prod`: PASS — no known vulnerabilities
+- `git diff --check`: PASS — no whitespace errors; Windows reported informational LF-to-CRLF conversion warnings
+- Production smoke test: PASS — `GET /` and `GET /api/ai/status` returned 200; PolicyProof content, `gpt-5.6`, boolean availability, `nosniff`, and `DENY` were verified; port 3200 was released
+- Screenshot pass 1: PASS — 9 required captures inspected; duplicate context, first-run folio persistence, premature receipt, overlay obstruction, and mobile density were identified
+- Screenshot pass 2: PASS — 9 required captures inspected; desktop alignment was confirmed and mobile header/evidence density received a second correction
+- Screenshot pass 3: PASS — 9 required captures plus 5 final state captures inspected; English/French desktop and mobile, empty, threshold, print, loading, and safe error states were approved locally
+- Reduced-motion review: PASS — Playwright emulation verified effectively zero animation and transition durations while exact evidence remained available
+- Dependency review: PASS — no package manifest, workspace file, or lockfile changed; no dependency was added, removed, or upgraded
+- Safe changed-file scan: PASS — 29 implementation files scanned, 0 potential secret matches and 0 personal absolute-path matches
+- Ignored-file review: PASS — `.env.local`, `node_modules/`, `.next/`, `test-results/`, `playwright-report/`, `coverage/`, and `.vercel/` remain excluded from commits
+
+No authenticated or paid OpenAI request was made during the Proofroom design integration. Provider loading and failure states were exercised with Playwright route mocks only.
 
 ## Practical accessibility review
 

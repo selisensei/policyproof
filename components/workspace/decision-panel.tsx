@@ -1,25 +1,29 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ControlResult, ReviewDecision } from "@/src/domain/schemas";
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
 import { createConciseReviewSummary, serializeDecisionReceipt } from "@/src/lib/receipt-export";
 import type { ResultSummary } from "@/src/lib/review-summary";
+import { controlRef, decisionGlyph, decisionRef, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
 import { StatusBadge } from "@/components/workspace/status-badge";
 import { useLocale } from "@/src/i18n/locale-context";
-import { localizedControl } from "@/src/i18n/translations";
+import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
 
-export function DecisionPanel({ results, selectedResult, summary, receipt, reviewError, onSelectResult, onCommentChange, onDecision }: {
+export function DecisionPanel({ results, selectedResult, summary, receipt, reviewError, threshold, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
   results: ControlResult[];
   selectedResult: ControlResult | null;
   summary: ResultSummary;
   receipt: DecisionReceipt | null;
   reviewError: string;
+  threshold: string;
   onSelectResult: (controlId: string) => void;
   onCommentChange: (comment: string) => void;
   onDecision: (state: ReviewDecision["state"]) => void;
+  onReopenEvidence: () => void;
 }) {
   const { locale, t } = useLocale();
   const [exportNotice, setExportNotice] = useState("");
+  const commentRef = useRef<HTMLTextAreaElement>(null);
   const selectedTitle = selectedResult ? localizedControl(selectedResult.controlId, locale, selectedResult.title).title : "";
   const decisionCounts = receipt?.outcomes.reduce((counts, outcome) => {
     if (outcome.reviewerDecision === "CONFIRMED") counts.confirmed += 1;
@@ -33,6 +37,7 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(value);
       setExportNotice(t("receipt.copySuccess"));
+      window.setTimeout(() => setExportNotice(""), 1600);
     } catch {
       setExportNotice(t("action.copyFailed"));
     }
@@ -48,90 +53,99 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
     URL.revokeObjectURL(url);
     setExportNotice(t("receipt.downloadSuccess"));
   }
+
+  function applyDecision(state: ReviewDecision["state"]) {
+    onDecision(state);
+    if ((state === "REJECTED" || state === "ACCEPTED_EXCEPTION") && !selectedResult?.reviewerDecision.comment.trim()) {
+      window.setTimeout(() => commentRef.current?.focus(), 0);
+    }
+  }
+
   return (
     <SectionShell id="decision" step={t("step.label", { number: 5 })} title={t("decision.title")} description={t("decision.help")}>
       {!receipt ? (
-        <div className="empty-state"><p className="font-semibold text-slate-800">{t("decision.empty")}</p><p className="mt-1 text-sm text-slate-500">{t("decision.emptyHelp")}</p></div>
+        <div className="empty-state"><strong>{t("decision.empty")}</strong><p>{t("decision.emptyHelp")}</p></div>
       ) : (
-        <div className="receipt-layout">
-          <aside className="receipt-queue" aria-label={t("review.human")}>
-            <div className="receipt-queue-heading"><div><p className="eyebrow">{t("review.human")}</p><h3>{t("summary.pending")}</h3></div><span>{summary.pending}</span></div>
-            <div className="receipt-queue-list">
-              {results.map((result) => {
-                const title = localizedControl(result.controlId, locale, result.title).title;
-                const selected = selectedResult?.controlId === result.controlId;
-                return <button key={result.controlId} type="button" onClick={() => onSelectResult(result.controlId)} aria-label={t("review.inspect", { title })} aria-pressed={selected} className={selected ? "is-selected" : ""}>
-                  <span className="receipt-queue-status" data-status={result.status} aria-hidden="true" />
-                  <span><b>{title}</b><small>{t(`decision.${result.reviewerDecision.state}`)}</small></span>
-                </button>;
-              })}
-            </div>
-          </aside>
+        <>
+          <div className="decision-workspace">
+            <aside className="decision-queue" aria-label={t("review.human")}>
+              <header><span>{locale === "fr" ? "DÉCISIONS" : "DECISIONS"}</span><b>{summary.pending}/7</b></header>
+              <div>
+                {results.map((result) => {
+                  const title = localizedControl(result.controlId, locale, result.title).title;
+                  const selected = selectedResult?.controlId === result.controlId;
+                  return <button key={result.controlId} type="button" onClick={() => onSelectResult(result.controlId)} aria-label={t("review.inspect", { title })} aria-pressed={selected} className={selected ? "is-selected" : ""}>
+                    <span>{decisionRef(result.controlId)}</span><strong>{title}</strong><small data-state={result.reviewerDecision.state}>{decisionGlyph(result.reviewerDecision.state)} {t(`decision.${result.reviewerDecision.state}`)}</small>
+                  </button>;
+                })}
+              </div>
+              <footer>{summary.pending} {locale === "fr" ? "ouvertes" : "open"}</footer>
+            </aside>
 
-          <div className="receipt-actions decision-form">
             {selectedResult ? (
-              <>
-                <div className="flex items-start justify-between gap-3"><div><p className="eyebrow">{t("decision.selected")}</p><h3 className="mt-1 font-semibold text-slate-950">{selectedTitle}</h3></div><StatusBadge status={selectedResult.status} /></div>
-                <label htmlFor="review-comment" className="field-label mt-5 block">{t("decision.comment")}</label>
-                <textarea id="review-comment" rows={4} value={selectedResult.reviewerDecision.comment} onChange={(event) => onCommentChange(event.target.value)} placeholder={t("decision.commentPlaceholder")} aria-invalid={Boolean(reviewError)} aria-describedby="review-comment-help review-comment-error" className="field-control mt-2 resize-y leading-6" />
-                <p id="review-comment-help" className="mt-2 text-xs leading-5 text-slate-500">{t("decision.commentHelp")}</p>
-                {reviewError && <p id="review-comment-error" role="alert" className="error-callout mt-3">{reviewError}</p>}
-                <div className="mt-4 grid gap-2">
-                  <button type="button" onClick={() => onDecision("CONFIRMED")} className="min-h-10 rounded-lg bg-teal-800 px-3 text-sm font-bold text-white hover:bg-teal-700">{t("decision.confirm")}</button>
-                  <DecisionButton label={t("decision.reject")} onClick={() => onDecision("REJECTED")} />
-                  <DecisionButton label={t("decision.exception")} onClick={() => onDecision("ACCEPTED_EXCEPTION")} />
+              <article className="decision-paper">
+                <div className="decision-chain"><span>{requirementRef(selectedResult.controlId)}</span><i /><span>{controlRef(selectedResult.controlId)}</span><i /><StatusBadge status={selectedResult.status} /><i /><span>{decisionRef(selectedResult.controlId)}</span></div>
+                <header><div><p className="eyebrow">{locale === "fr" ? "JUGEMENT HUMAIN" : "HUMAN JUDGMENT"}</p><h3>{selectedTitle}</h3></div><span>{decisionRef(selectedResult.controlId)}</span></header>
+                <p className="automated-conclusion">{locale === "fr" ? "Conclusion automatisée" : "Automated conclusion"}: <StatusBadge status={selectedResult.status} /> — {localizedResultExplanation(selectedResult.controlId, selectedResult.status, selectedResult.explanation, locale, threshold)} <strong>{locale === "fr" ? "La conclusion est conservée quelle que soit votre décision." : "The conclusion is preserved whatever you decide."}</strong></p>
+                <div className="decision-evidence-recap"><span>{selectedResult.controlId === "CTRL-CURRENCY" ? "12,480 EUR ≠ 12,480 USD" : `${selectedResult.supportingEvidence.length + selectedResult.contradictoryEvidence.length + selectedResult.missingEvidence.length} ${locale === "fr" ? "éléments probants" : "evidence items"}`}</span><button type="button" onClick={onReopenEvidence}>← {locale === "fr" ? "Rouvrir les preuves" : "Reopen evidence"}</button></div>
+                <div className="decision-form-grid">
+                  <div className="decision-actions">
+                    <button type="button" onClick={() => applyDecision("CONFIRMED")} aria-label={t("decision.confirm")} className="confirm-decision">{locale === "fr" ? `Confirmer la conclusion ${t(`status.${selectedResult.status}`)}` : `Confirm ${selectedResult.status} conclusion`}</button>
+                    <p>{locale === "fr" ? "Parcours standard — la conclusion automatique reste inchangée." : "Standard path — the automated conclusion remains unchanged."}</p>
+                    <div className="override-rule"><span>{locale === "fr" ? "DÉROGATIONS — JUSTIFICATION REQUISE" : "OVERRIDE PATHS — JUSTIFICATION REQUIRED"}</span></div>
+                    <button type="button" aria-label={t("decision.reject")} onClick={() => applyDecision("REJECTED")} className="override-decision is-reject"><span>{t("decision.reject")}</span><small>✎ {locale === "fr" ? "commentaire requis" : "comment required"}</small></button>
+                    <button type="button" aria-label={t("decision.exception")} onClick={() => applyDecision("ACCEPTED_EXCEPTION")} className="override-decision"><span>{t("decision.exception")}</span><small>✎ {locale === "fr" ? "commentaire requis" : "comment required"}</small></button>
+                  </div>
+                  <div className="reviewer-comment">
+                    <label htmlFor="review-comment" className="field-label">{t("decision.comment")}<span>{locale === "fr" ? "REQUIS POUR LES DÉROGATIONS" : "REQUIRED FOR OVERRIDES"}</span></label>
+                    <textarea ref={commentRef} id="review-comment" rows={7} value={selectedResult.reviewerDecision.comment} onChange={(event) => onCommentChange(event.target.value)} placeholder={t("decision.commentPlaceholder")} aria-label={t("decision.comment")} aria-invalid={Boolean(reviewError)} aria-describedby="review-comment-help review-comment-error" className="field-control" />
+                    <p id="review-comment-help">{t("decision.commentHelp")}</p>
+                    {reviewError && <p id="review-comment-error" role="alert" className="validation-error">× {reviewError}</p>}
+                    <div className="decision-current" data-state={selectedResult.reviewerDecision.state}>{t("decision.current", { decision: t(`decision.${selectedResult.reviewerDecision.state}`) })}</div>
+                  </div>
                 </div>
-                <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{t("decision.current", { decision: t(`decision.${selectedResult.reviewerDecision.state}`) })}</p>
-              </>
-            ) : <p className="text-sm text-slate-500">{t("decision.select")}</p>}
+              </article>
+            ) : <div className="empty-state">{t("decision.select")}</div>}
           </div>
 
-          <article aria-label={t("a11y.receipt")} className="decision-receipt min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="receipt-masthead flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
-              <div><p className="text-[11px] font-bold uppercase tracking-wide text-teal-300">PolicyProof</p><h3 className="mt-1 text-lg font-semibold text-white">{t("receipt.title")}</h3><p className="mt-1 break-all font-mono text-xs text-slate-300">{receipt.reviewId}</p></div>
-              <div className="text-sm text-slate-300">{t("receipt.progress", { reviewed: summary.reviewed, pending: summary.pending })}</div>
+          {summary.reviewed > 0 && <section className="receipt-section">
+            <div className="receipt-toolbar">
+              <button type="button" onClick={() => window.print()} className="receipt-primary-action">{t("action.print")}</button>
+              <button type="button" onClick={downloadReceipt}>{t("action.downloadJson")}</button>
+              <button type="button" onClick={() => copyReceiptContent(receipt.reviewId)}>{t("action.copyReceiptId")}</button>
+              <button type="button" onClick={() => copyReceiptContent(createConciseReviewSummary(receipt))}>{t("action.copySummary")}</button>
+              <span>{receipt.reviewId}.json</span>
             </div>
-            <div className="receipt-toolbar flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50 px-5 py-3">
-              <button type="button" onClick={() => window.print()} className="secondary-button">{t("action.print")}</button>
-              <button type="button" onClick={downloadReceipt} className="secondary-button">{t("action.downloadJson")}</button>
-              <button type="button" onClick={() => copyReceiptContent(receipt.reviewId)} className="secondary-button">{t("action.copyReceiptId")}</button>
-              <button type="button" onClick={() => copyReceiptContent(createConciseReviewSummary(receipt))} className="secondary-button">{t("action.copySummary")}</button>
-            </div>
-            <p aria-live="polite" className="receipt-export-notice min-h-6 px-5 pt-2 text-xs font-medium text-teal-800">{exportNotice}</p>
-            <dl className="grid gap-px bg-slate-200 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              <ReceiptField label={t("receipt.policy")} value={receipt.policyName} />
-              <ReceiptField label={t("receipt.policyVersion")} value={receipt.policyVersion} />
-              <ReceiptField label={t("receipt.case")} value={receipt.caseName === "Northstar Facilities vendor change" ? t("receipt.caseDemo") : receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName} />
-              <ReceiptField label={t("receipt.mode")} value={receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} />
-              <ReceiptField label={t("receipt.language")} value={receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")} />
-              <ReceiptField label={t("receipt.controls")} value={String(receipt.enabledControlCount)} />
-            </dl>
-            <div className="grid grid-cols-2 gap-px border-t border-slate-200 bg-slate-200 sm:grid-cols-4">
-              {(["PASS", "FAIL", "MISSING", "WARNING"] as const).map((status) => <div key={status} className="bg-white px-4 py-3 text-center"><p className="text-lg font-semibold text-slate-950">{receipt.summary[status]}</p><p className="text-[10px] font-bold text-slate-500">{t(`status.${status}`)}</p></div>)}
-            </div>
-            <p className="border-t border-slate-200 bg-white px-5 py-3 text-xs font-medium text-slate-600">{t("receipt.decisionSummary", { ...decisionCounts, pending: receipt.summary.pending })}</p>
-            <div className="max-h-80 divide-y divide-slate-200 overflow-y-auto">
-              {receipt.outcomes.map((outcome) => {
-                const title = localizedControl(outcome.controlId, locale, outcome.title).title;
-                return <div key={outcome.controlId} className="grid gap-2 px-5 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-center">
-                  <div className="min-w-0"><p className="font-medium text-slate-900">{title}</p>{outcome.reviewerComment && <p className="mt-1 break-words text-xs text-slate-500">{outcome.reviewerComment}</p>}</div>
-                  <span className="font-semibold text-slate-700">{t(`status.${outcome.status}`)}</span>
-                  <span className="text-slate-600">{t(`decision.${outcome.reviewerDecision}`)}</span>
-                </div>;
-              })}
-            </div>
-            <div className="border-t border-amber-200 bg-amber-50 px-5 py-4"><p className="text-xs leading-5 text-amber-950">{t("receipt.disclaimer")}</p><p className="mt-1 text-xs text-amber-800">{t("receipt.generated", { date: new Date(receipt.generatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) })}</p></div>
-          </article>
-        </div>
+            <p aria-live="polite" className="receipt-export-notice">{exportNotice}</p>
+            <DecisionReceiptSheet receipt={receipt} results={results} summary={summary} decisionCounts={decisionCounts} />
+          </section>}
+        </>
       )}
     </SectionShell>
   );
 }
 
-function DecisionButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="min-h-10 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-700 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-950">{label}</button>;
-}
-
-function ReceiptField({ label, value }: { label: string; value: string }) {
-  return <div className="min-w-0 bg-white p-4"><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 break-words font-semibold text-slate-900">{value}</dd></div>;
+function DecisionReceiptSheet({ receipt, results, summary, decisionCounts }: { receipt: DecisionReceipt; results: ControlResult[]; summary: ResultSummary; decisionCounts: { confirmed: number; rejected: number; exceptions: number } }) {
+  const { locale, t } = useLocale();
+  const exceptions = receipt.outcomes.filter((outcome) => outcome.reviewerDecision === "ACCEPTED_EXCEPTION");
+  const unresolved = receipt.outcomes.filter((outcome) => outcome.reviewerDecision === "PENDING");
+  return (
+    <article aria-label={t("a11y.receipt")} className="decision-receipt">
+      <header className="receipt-masthead"><div className="receipt-brand"><span aria-hidden="true" className="brand-mark">P</span><div><strong>PolicyProof — {t("receipt.title")}</strong><p>{locale === "fr" ? "Preuves automatisées et décisions humaines consignées ensemble" : "Automated evidence and human decisions recorded together"}</p></div></div><div><strong>{receipt.reviewId}</strong><span>{t("receipt.generated", { date: new Date(receipt.generatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) })}</span></div></header>
+      <dl className="receipt-meta">
+        <div><dt>{t("receipt.policy")}</dt><dd>{receipt.policyName}</dd></div><div><dt>{t("receipt.policyVersion")}</dt><dd>{receipt.policyVersion} · POL-2026-004</dd></div><div><dt>{t("receipt.case")}</dt><dd>{receipt.caseName === "Northstar Facilities vendor change" ? t("receipt.caseDemo") : receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName}</dd></div><div><dt>{t("receipt.mode")} · {t("receipt.language")}</dt><dd>{receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} · {receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")}</dd></div>
+      </dl>
+      <div className="receipt-summary"><p><span data-status="PASS">✓ {receipt.summary.PASS} {t("status.PASS")}</span><span data-status="FAIL">× {receipt.summary.FAIL} {t("status.FAIL")}</span><span data-status="MISSING">⌀ {receipt.summary.MISSING} {t("status.MISSING")}</span><span data-status="WARNING">! {receipt.summary.WARNING} {t("status.WARNING")}</span></p><strong>{t("receipt.decisionSummary", { ...decisionCounts, pending: receipt.summary.pending })}</strong></div>
+      <div className="receipt-outcomes" role="table" aria-label={t("receipt.summary")}>
+        <div className="receipt-outcome-head" role="row"><span>REF</span><span>{locale === "fr" ? "CONTRÔLE" : "CONTROL"}</span><span>{locale === "fr" ? "CONCLUSION" : "CONCLUSION"}</span><span>{locale === "fr" ? "DÉCISION" : "DECISION"}</span><span>{locale === "fr" ? "COMMENTAIRE" : "REVIEWER COMMENT"}</span></div>
+        {receipt.outcomes.map((outcome) => {
+          const result = results.find((candidate) => candidate.controlId === outcome.controlId);
+          const title = localizedControl(outcome.controlId, locale, outcome.title).title;
+          return <div key={outcome.controlId} className="receipt-outcome-row" role="row" data-override={outcome.reviewerDecision === "REJECTED" || outcome.reviewerDecision === "ACCEPTED_EXCEPTION" || undefined}><span>{controlRef(outcome.controlId)}</span><strong>{title}</strong><span data-status={outcome.status}>{outcome.status === "PASS" ? "✓" : outcome.status === "FAIL" ? "×" : outcome.status === "MISSING" ? "⌀" : "!"} {t(`status.${outcome.status}`)}</span><span><i aria-hidden="true">{decisionGlyph(result?.reviewerDecision.state ?? "PENDING")}</i> <span>{t(`decision.${outcome.reviewerDecision}`)}</span></span><p>{outcome.reviewerComment ? <span>{outcome.reviewerComment}</span> : "—"}</p></div>;
+        })}
+      </div>
+      <div className="receipt-followup"><div><strong>{locale === "fr" ? "DÉROGATIONS ACCEPTÉES" : "ACCEPTED EXCEPTIONS"}</strong><p>{exceptions.length ? exceptions.map((item) => decisionRef(item.controlId)).join(" · ") : "—"}</p></div><div><strong>{locale === "fr" ? "DÉCISIONS NON RÉSOLUES" : "UNRESOLVED DECISIONS"}</strong><p>{unresolved.length ? unresolved.map((item) => decisionRef(item.controlId)).join(" · ") : "—"}</p></div></div>
+      <footer><p>{t("receipt.disclaimer")}</p><span>DETERMINISTIC REPLAY · FIXTURE v1.0 · {summary.total} CONTROLS</span></footer>
+    </article>
+  );
 }

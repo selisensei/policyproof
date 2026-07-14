@@ -8,7 +8,7 @@ Preserve one dependable end-to-end workflow before adding breadth. The determini
 
 Completed and locally verified:
 
-- Five-step, responsive B2B workspace focused on the current task
+- Approved Proofroom evidence-led interface with compact header, horizontal workflow ledger, policy folio, control and document registers, split Review workbench, human-decision paper, and formal receipt
 - Immediate English/French switching with state preservation and document-language updates
 - Seven deterministic controls, five fictional case records, all four result statuses, evidence inspection, filtering, reruns, human decisions, and a receipt
 - Hardened local `.txt`, `.md`, and `.json` selection
@@ -17,8 +17,8 @@ Completed and locally verified:
 - Version-controlled fictional evaluation contracts for policy compilation and document analysis
 - Submission draft, demo script, shot list, and checklist
 - Judge-first introduction, optional bilingual guided demo, stronger evidence provenance, and browser-native receipt exports
-- Judge-ready task-first shell with adaptive workflow navigation, compact case context, register-style controls and documents, evidence workbench, decision queue, and polished receipt
-- Three complete screenshot-based redesign iterations across desktop, laptop, tablet, and mobile widths
+- Responsive Proofroom transformations at desktop, tablet, and approximately 390 px, including inline mobile evidence rather than a compressed desktop table
+- Three complete nine-screen Proofroom comparison passes plus empty, threshold, print, loading, and mocked error-state inspection
 - Secret-free core CI plus repository, license, screenshot, judge-Q&A, and Vercel deployment preparation
 - Unit, contract, component, and Playwright coverage
 - Controlled live GPT-5.6 policy compilation and Northstar document analysis with 14 exact, source-verified evidence items and all seven expected deterministic results
@@ -39,12 +39,13 @@ Still pending and requiring builder supervision:
 | Policy to controls | GPT-5.6 proposes structured human-reviewable controls | Live validated for Northstar | Seven controls returned and explicitly approved |
 | Evidence review | Extract evidence, validate excerpts, calculate supported checks | Live validated for Northstar | 14 exact excerpts and seven expected results pass |
 | Human decision | Preserve original outcome and reviewer judgment | Complete | Comment rules, rerun reset, and receipt tests pass |
-| Judge readiness | Polished, accessible, documented public demo | In progress | Three redesign iterations, local automated checks, and supervised live validation complete; manual assistive-technology review, deployment, and video pending |
+| Proofroom integration | Apply the approved evidence-led design without changing validated logic | Complete | Separate handoff commit, implementation mapping, three visual passes, responsive/motion tests, and final quality gates |
+| Judge readiness | Polished, accessible, documented public demo | In progress | Proofroom integration and supervised live validation complete; manual assistive-technology review, deployment, and video pending |
 
 ## Next supervised sequence
 
-1. Review the redesigned deterministic workflow in English and French.
-2. Inspect ignored Playwright screenshots at desktop, laptop, tablet, and mobile widths.
+1. Review the Proofroom deterministic workflow in English and French.
+2. Inspect the ignored three-pass comparison matrix and final state captures.
 3. Review the sanitized live-validation report and its documented limitations.
 4. Rerun all quality gates and perform a manual accessibility pass.
 5. Select a license and final public screenshots.

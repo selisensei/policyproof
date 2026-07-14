@@ -72,6 +72,13 @@ A hackathon judge can run the application, complete the full workflow with the i
 - Clear limitations instead of false certainty
 - One polished workflow before broader coverage
 - Simple enough to explain in a three-minute demo
+- A ledger and case-file visual language rather than a generic AI dashboard
+
+## Evidence-led visual architecture
+
+The approved Proofroom interface treats the policy as a source folio, controls and documents as review registers, Review as a connected result-ledger/evidence-case-file workspace, and Decision as a human-judgment paper followed by a formal receipt. The selected result remains visually connected to exact evidence, the EUR/USD contradiction is compared from actual result data, and only the affected approval control is emphasized after the EUR 15,000 rerun.
+
+Desktop prioritizes density suitable for a 13-inch work screen. Mobile uses stacked result entries with inline evidence instead of shrinking the desktop register. Motion is restrained, communicates state changes, and is removed when `prefers-reduced-motion` is enabled.
 
 ## Implemented product boundaries
 

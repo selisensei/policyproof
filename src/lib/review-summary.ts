@@ -1,6 +1,6 @@
 import type { ControlResult } from "@/src/domain/schemas";
 
-export type ResultFilter = "ALL" | ControlResult["status"];
+export type ResultFilter = "ALL" | "OPEN" | ControlResult["status"];
 
 export type ResultSummary = Record<ControlResult["status"], number> & {
   total: number;
@@ -29,5 +29,7 @@ export function summarizeResults(results: ControlResult[]): ResultSummary {
 }
 
 export function filterResults(results: ControlResult[], filter: ResultFilter): ControlResult[] {
-  return filter === "ALL" ? results : results.filter((result) => result.status === filter);
+  if (filter === "ALL") return results;
+  if (filter === "OPEN") return results.filter((result) => result.reviewerDecision.state === "PENDING");
+  return results.filter((result) => result.status === filter);
 }

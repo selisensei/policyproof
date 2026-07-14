@@ -4,7 +4,7 @@ Target duration: approximately 2 minutes 45 seconds. Use the deterministic path 
 
 ## 0:00–0:15 — Problem and product
 
-**Screen:** Policy step, English interface. Select **Start guided demo**.
+**Screen:** Proofroom Policy folio, English interface. Select **Start guided demo**, then dismiss the checklist if it covers the recording area.
 
 **Narration:** “Finance and procurement reviewers spend time matching written policy to scattered documents, then explaining how each conclusion was reached. PolicyProof turns policies into reviewable controls and shows the exact evidence behind every conclusion.”
 
@@ -22,7 +22,7 @@ Target duration: approximately 2 minutes 45 seconds. Use the deterministic path 
 
 ## 0:50–1:15 — Review matrix
 
-**Action:** Run the review and let the Evidence review workspace open automatically.
+**Action:** Run the review and let the Proofroom Evidence review workspace open automatically.
 
 **Narration:** “At a ten-thousand-euro threshold, PolicyProof calculates three passes, two failures, one missing item, and one warning. The result register separates the control outcome from the pending human decision.”
 
@@ -30,7 +30,7 @@ Target duration: approximately 2 minutes 45 seconds. Use the deterministic path 
 
 **Action:** Select Currency consistency in the result register.
 
-**Narration:** “Currency consistency fails because the purchase order says EUR while the invoice says USD. Both exact excerpts, document names, and field locators remain visible beside the matrix. Missing controls identify the evidence that should have been present.”
+**Narration:** “Currency consistency fails because the purchase order says EUR while the invoice says USD. The selected ledger row stays connected to both exact excerpts and a direct amount-and-currency comparison. Missing controls identify the evidence that should have been present.”
 
 ## 1:40–2:00 — Human decision and receipt
 
@@ -54,7 +54,7 @@ Target duration: approximately 2 minutes 45 seconds. Use the deterministic path 
 
 **Screen:** Mode selector and architecture diagram in README, or Live mode disabled state.
 
-**Narration:** “GPT-5.6 is responsible for policy interpretation and evidence extraction. Strict schemas and source checks validate its output; TypeScript performs supported calculations. Codex was the primary engineering partner for the architecture, implementation, testing, diagnostics, and documentation.”
+**Narration:** “GPT-5.6 is responsible for policy interpretation and evidence extraction. The fictional Northstar flow was validated live, while strict schemas and source checks validate output and TypeScript performs supported calculations. Codex implemented and tested the approved Proofroom design inside the existing architecture.”
 
 ## 2:50–2:58 — Close
 

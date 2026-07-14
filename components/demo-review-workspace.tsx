@@ -66,7 +66,6 @@ export function DemoReviewWorkspace() {
   const [thresholdInvalid, setThresholdInvalid] = useState(false);
   const [proposals, setProposals] = useState<AiControlProposal[]>([]);
   const [proposalsApproved, setProposalsApproved] = useState(false);
-  const [proposalValidationFailed, setProposalValidationFailed] = useState(false);
   const [proposalStates, setProposalStates] = useState<Record<string, ProposalReviewState>>({});
   const [localDocuments, setLocalDocuments] = useState<LocalDocument[]>([]);
   const [documentError, setDocumentError] = useState("");
@@ -78,6 +77,7 @@ export function DemoReviewWorkspace() {
   const [filter, setFilter] = useState<ResultFilter>("ALL");
   const [reviewError, setReviewError] = useState("");
   const [runGeneratedAt, setRunGeneratedAt] = useState<string | null>(null);
+  const [changedControlId, setChangedControlId] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [guideDismissed, setGuideDismissed] = useState(false);
@@ -135,6 +135,7 @@ export function DemoReviewWorkspace() {
     setRunGeneratedAt(null);
     setFilter("ALL");
     setReviewError("");
+    setChangedControlId(null);
     setWorkspaceError("");
     setNotice(nextNotice);
   }
@@ -147,7 +148,6 @@ export function DemoReviewWorkspace() {
     setThresholdInvalid(false);
     setProposals([]);
     setProposalsApproved(false);
-    setProposalValidationFailed(false);
     setProposalStates({});
     setLocalDocuments([]);
     setDocumentError("");
@@ -169,6 +169,7 @@ export function DemoReviewWorkspace() {
     setThreshold(value);
     const amount = Number(value);
     setThresholdInvalid(value.trim() === "" || !Number.isFinite(amount) || amount < 0);
+    setChangedControlId(null);
     if (results.length) setNotice({ key: "notice.settingsChanged" });
     if (Number(value) === 15_000) completeGuide("THRESHOLD_UPDATED");
   }
@@ -198,7 +199,6 @@ export function DemoReviewWorkspace() {
       setProposals(parsed.compilation.controls);
       setProposalStates(Object.fromEntries(parsed.compilation.controls.map((control) => [control.id, "PROPOSED" as const])));
       setProposalsApproved(false);
-      setProposalValidationFailed(false);
       setNotice({ key: "notice.proposalsReady", values: { count: parsed.compilation.controls.length } });
       setCurrentStep("controls");
     } catch (error) {
@@ -213,14 +213,12 @@ export function DemoReviewWorkspace() {
     setProposals((current) => current.map((control) => control.id === id ? { ...control, ...patch } : control));
     setProposalStates((current) => ({ ...current, [id]: "EDITED" }));
     setProposalsApproved(false);
-    setProposalValidationFailed(false);
   }
 
   function rejectProposal(id: string) {
     setProposals((current) => current.map((control) => control.id === id ? { ...control, enabled: false } : control));
     setProposalStates((current) => ({ ...current, [id]: "REJECTED" }));
     setProposalsApproved(false);
-    setProposalValidationFailed(false);
   }
 
   function approveProposals() {
@@ -228,13 +226,11 @@ export function DemoReviewWorkspace() {
       const activeProposals = proposals.filter((proposal) => proposalStates[proposal.id] !== "REJECTED" && proposal.enabled);
       z.array(AiControlProposalSchema).min(1).parse(activeProposals);
       setProposalsApproved(true);
-      setProposalValidationFailed(false);
       setProposalStates((current) => Object.fromEntries(Object.entries(current).map(([id, state]) => [id, state === "REJECTED" ? state : "APPROVED"])));
       setWorkspaceError("");
       setNotice({ key: "notice.proposalsApproved" });
       setCurrentStep("documents");
     } catch {
-      setProposalValidationFailed(true);
       setWorkspaceError(t("error.approveControls"));
     }
   }
@@ -298,6 +294,7 @@ export function DemoReviewWorkspace() {
 
   async function runReview() {
     const hadReviewerDecisions = results.some((result) => result.reviewerDecision.state !== "PENDING");
+    const previousStatuses = new Map(results.map((result) => [result.controlId, result.status]));
     setIsRunning(true);
     setWorkspaceError("");
     try {
@@ -321,6 +318,7 @@ export function DemoReviewWorkspace() {
         nextResults = runDeterministicReview(deterministicControls, toCaseDocuments(analysis, localDocuments));
       }
       setResults(nextResults);
+      setChangedControlId(nextResults.find((result) => previousStatuses.has(result.controlId) && previousStatuses.get(result.controlId) !== result.status)?.controlId ?? null);
       setSelectedControlId(nextResults[0]?.controlId ?? null);
       setFilter("ALL");
       setRunGeneratedAt(new Date().toISOString());
@@ -363,29 +361,54 @@ export function DemoReviewWorkspace() {
   }
 
   const panel = currentStep === "policy" ? (
-    <PolicyPanel mode={mode} ai={ai} policyText={policyText} expanded={policyExpanded} isCompiling={isCompiling} compilationError={compilationError} onPolicyTextChange={(value) => { setPolicyText(value); setProposalsApproved(false); }} onToggleExpanded={() => { setPolicyExpanded((current) => !current); completeGuide("POLICY_REVIEWED"); }} onCompile={compilePolicy} />
+    <PolicyPanel mode={mode} ai={ai} policyText={policyText} expanded={policyExpanded} isCompiling={isCompiling} compilationError={compilationError} onPolicyTextChange={(value) => { setPolicyText(value); setProposalsApproved(false); }} onToggleExpanded={() => { setPolicyExpanded((current) => !current); completeGuide("POLICY_REVIEWED"); }} onCompile={compilePolicy} onOpenControls={() => navigate("controls")} />
   ) : currentStep === "controls" ? (
     <ControlsPanel mode={mode} controls={controls} proposals={proposals} proposalsApproved={proposalsApproved} proposalStates={proposalStates} threshold={threshold} thresholdError={thresholdInvalid ? t("error.threshold") : ""} onThresholdChange={updateThreshold} onToggleControl={toggleControl} onResetControls={resetControls} onProposalChange={updateProposal} onApproveProposals={approveProposals} onRejectProposal={rejectProposal} />
   ) : currentStep === "documents" ? (
     <DocumentsPanel mode={mode} demoDocuments={demoDocuments} localDocuments={localDocuments} documentError={documentError} onSelectFiles={selectFiles} onRemoveDocument={removeDocument} onUpdateLabel={updateDocumentLabel} onLoadDemo={loadDemo} onResetDemo={loadDemo} />
   ) : currentStep === "review" ? (
-    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documentTypes={documentTypes} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} />
+    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documentTypes={documentTypes} changedControlId={changedControlId} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} onGoDecision={() => navigate("decision")} />
   ) : (
-    <DecisionPanel results={results} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} />
+    <DecisionPanel results={results} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} />
   );
 
+  const primaryLabel = currentStep === "policy"
+    ? mode === "LIVE_GPT_5_6" ? (locale === "fr" ? "Compiler la politique" : "Compile policy") : (locale === "fr" ? "Ouvrir le registre" : "Open register")
+    : currentStep === "controls" || currentStep === "documents"
+      ? isRunning ? t("action.running") : t("action.run")
+      : currentStep === "review"
+        ? (locale === "fr" ? "Accéder aux décisions" : "Go to decisions")
+        : t("action.print");
+
+  function runPrimaryAction() {
+    if (currentStep === "policy") {
+      if (mode === "LIVE_GPT_5_6") void compilePolicy();
+      else navigate("controls");
+      return;
+    }
+    if (currentStep === "controls" || currentStep === "documents") {
+      void runReview();
+      return;
+    }
+    if (currentStep === "review") {
+      navigate("decision");
+      return;
+    }
+    window.print();
+  }
+
   return (
-    <main className="min-h-screen bg-[var(--page)]" aria-busy={isCompiling || isRunning}>
-      <a href="#workspace" className="sr-only z-50 rounded bg-white p-3 font-semibold text-slate-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3">{t("a11y.skip")}</a>
-      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} onRun={runReview} isRunning={isRunning} />
+    <main className="app-root" aria-busy={isCompiling || isRunning}>
+      <a href="#workspace" className="skip-link">{t("a11y.skip")}</a>
+      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} primaryLabel={primaryLabel} onPrimaryAction={runPrimaryAction} primaryDisabled={isRunning || isCompiling || (currentStep === "policy" && mode === "LIVE_GPT_5_6" && (!ai.available || policyText.trim().length < 50))} onShowGuide={() => setGuideDismissed(false)} />
       <div className="workspace-frame">
-        <StepNavigation current={currentStep} onChange={navigate} />
-        <div id="workspace" className="min-w-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8 lg:pt-6">
-          {currentStep === "policy" && <IntroPanel onStartDemo={loadDemo} />}
-          <WorkspaceSummary enabledControlCount={enabledControlCount} documentCount={documentCount} summary={summary} results={results} currentStep={currentStep} onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} mode={mode} aiAvailable={ai.available} isCompiling={isCompiling} compilationError={compilationError} proposals={proposals} proposalStates={proposalStates} proposalsApproved={proposalsApproved} proposalValidationFailed={proposalValidationFailed} isRunning={isRunning} workspaceError={workspaceError} />
-          <div className="workspace-notice mt-3" data-tone={workspaceError ? "error" : "neutral"}>
+        <StepNavigation current={currentStep} onChange={navigate} enabledControls={enabledControlCount} documentCount={documentCount} summary={summary} />
+        <div id="workspace" className="workspace-surface">
+          {currentStep === "policy" && !guideMilestones.has("CASE_LOADED") && <IntroPanel onStartDemo={loadDemo} />}
+          <WorkspaceSummary onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} />
+          <div className="workspace-notice" data-tone={workspaceError ? "error" : "neutral"}>
             <span aria-hidden="true" className="workspace-notice-dot" />
-            <div className="min-w-0">
+            <div>
               <p aria-live="polite" role="status">
                 {t(
                   notice.key,
@@ -397,13 +420,13 @@ export function DemoReviewWorkspace() {
                     : notice.values,
                 )}
               </p>
-              {workspaceError && <p role="alert" className="mt-1 font-semibold text-red-800">{workspaceError}</p>}
+              {workspaceError && <p role="alert" className="workspace-error-copy">{workspaceError}</p>}
             </div>
           </div>
 
-          <div className="mt-4 min-w-0">
+          <div className="active-workflow">
             {panel}
-            <div className="workflow-actions mt-4 flex items-center justify-between gap-3">
+            <div className="workflow-actions">
               <button type="button" onClick={() => navigate(steps[Math.max(0, currentStepIndex - 1)])} disabled={currentStepIndex === 0} className="secondary-button disabled:invisible">← {t("action.back")}</button>
               {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button">{t("action.next")} →</button>}
             </div>

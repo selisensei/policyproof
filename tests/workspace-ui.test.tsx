@@ -26,6 +26,11 @@ function renderWorkspace() {
   );
 }
 
+async function runReviewFromControls(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: /^(Controls|Contrôles)$/ }));
+  await user.click(screen.getByRole("button", { name: /^(Run review|Lancer la revue)$/ }));
+}
+
 describe("PolicyProof workspace interactions", () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -42,11 +47,13 @@ describe("PolicyProof workspace interactions", () => {
 
   it("loads the deterministic demo, runs it, filters results, and inspects evidence", async () => {
     const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
     renderWorkspace();
 
-    expect(screen.getByText(/Version-controlled fictional evidence/)).toBeTruthy();
+    expect(screen.getByText(/The deterministic demo makes no AI request/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Load demo case" }));
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
 
     const approval = screen.getByRole("button", { name: "Inspect Approval threshold" });
     expect(within(approval).getByText("FAIL")).toBeTruthy();
@@ -59,20 +66,24 @@ describe("PolicyProof workspace interactions", () => {
     const evidence = screen.getByLabelText("Evidence details");
     expect(within(evidence).getByText(/Purchase order amount: 12,480 EUR/)).toBeTruthy();
     expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
+    await user.click(within(evidence).getAllByRole("button", { name: "Copy excerpt" })[0]);
+    expect(writeText).toHaveBeenCalledWith("Purchase order amount: 12,480 EUR.");
+    await user.click(within(evidence).getAllByRole("button", { name: "Copy reference" })[0]);
+    expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("FACT-PO-CURRENCY"));
   });
 
   it("recomputes approval at EUR 15,000 and resets the demo", async () => {
     const user = userEvent.setup();
     renderWorkspace();
 
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
     expect(within(screen.getByRole("button", { name: "Inspect Approval threshold" })).getByText("FAIL")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Controls" }));
     const threshold = screen.getByLabelText("Approval threshold (EUR)");
     await user.clear(threshold);
     await user.type(threshold, "15000");
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
     expect(within(screen.getByRole("button", { name: "Inspect Approval threshold" })).getByText("PASS")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Controls" }));
@@ -87,7 +98,7 @@ describe("PolicyProof workspace interactions", () => {
   it("requires a reviewer comment for overrides and updates the receipt", async () => {
     const user = userEvent.setup();
     renderWorkspace();
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Inspect Currency consistency" }));
     await user.click(screen.getByRole("button", { name: "Decision" }));
 
@@ -110,7 +121,7 @@ describe("PolicyProof workspace interactions", () => {
     const liveMode = screen.getByRole("button", { name: "Live GPT-5.6" });
     await waitFor(() => expect((liveMode as HTMLButtonElement).disabled).toBe(true));
     expect(liveMode.getAttribute("title")).toMatch(/OPENAI_API_KEY/);
-    expect(screen.getByText(/Live GPT-5.6 is unavailable/)).toBeTruthy();
+    expect((liveMode as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("selects and removes a supported local document in configured Live mode", async () => {
@@ -174,13 +185,13 @@ describe("PolicyProof workspace interactions", () => {
     const user = userEvent.setup();
     renderWorkspace();
 
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Inspect Currency consistency" }));
     expect(screen.getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Français" }));
     expect(screen.getByRole("button", { name: "Revue" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Lancer la revue" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Accéder aux décisions" })).toBeTruthy();
     expect(screen.getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
     expect(document.documentElement.lang).toBe("fr");
 
@@ -219,8 +230,9 @@ describe("PolicyProof workspace interactions", () => {
     const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     renderWorkspace();
 
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Decision" }));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
     await user.click(screen.getByRole("button", { name: "Copy receipt ID" }));
     expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/^PP-/));
     await user.click(screen.getByRole("button", { name: "Copy summary" }));
@@ -259,8 +271,9 @@ describe("PolicyProof workspace interactions", () => {
     await user.type(screen.getByLabelText("Control title CTRL-MOCK"), " edited");
     expect(screen.getByText("Edited — approval required")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Reject proposal" }));
-    expect(screen.getByText("Rejected by reviewer")).toBeTruthy();
-    expect(screen.getByText(/Control proposal: Rejected by reviewer/)).toBeTruthy();
+    const rejectedState = screen.getByText("Rejected by reviewer");
+    expect(rejectedState).toBeTruthy();
+    expect(rejectedState.closest(".proposal-row")?.getAttribute("data-state")).toBe("REJECTED");
   });
 
   it("runs the complete mocked Live pipeline through evidence, human decision, and receipt", async () => {
@@ -287,7 +300,7 @@ describe("PolicyProof workspace interactions", () => {
     const files = liveFixture.documents.map((document) =>
       new File([document.content], document.name, { type: "text/plain" }));
     await user.upload(screen.getByLabelText("Select local documents"), files);
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
 
     expect(within(await screen.findByRole("button", { name: "Inspect Two approvers above EUR 10,000" })).getByText("FAIL")).toBeTruthy();
     expect(within(screen.getByRole("button", { name: "Inspect Purchase order predates invoice" })).getByText("PASS")).toBeTruthy();
@@ -331,7 +344,7 @@ describe("PolicyProof workspace interactions", () => {
     const files = liveFixture.documents.map((document) =>
       new File([document.content], document.name, { type: "text/plain" }));
     await user.upload(screen.getByLabelText("Select local documents"), files);
-    await user.click(screen.getByRole("button", { name: "Run review" }));
+    await runReviewFromControls(user);
 
     expect(await screen.findByRole("button", { name: "Show 3 PASS results" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Show 2 FAIL results" })).toBeTruthy();

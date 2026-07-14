@@ -1,5 +1,6 @@
 import type { WorkflowStep } from "@/components/workspace/types";
 import { useLocale } from "@/src/i18n/locale-context";
+import type { ResultSummary } from "@/src/lib/review-summary";
 
 const steps: Array<{ id: WorkflowStep; number: number; key: "step.policy" | "step.controls" | "step.documents" | "step.review" | "step.decision" }> = [
   { id: "policy", number: 1, key: "step.policy" },
@@ -9,14 +10,19 @@ const steps: Array<{ id: WorkflowStep; number: number; key: "step.policy" | "ste
   { id: "decision", number: 5, key: "step.decision" },
 ];
 
-export function StepNavigation({ current, onChange }: { current: WorkflowStep; onChange: (step: WorkflowStep) => void }) {
+export function StepNavigation({ current, onChange, enabledControls, documentCount, summary }: {
+  current: WorkflowStep;
+  onChange: (step: WorkflowStep) => void;
+  enabledControls: number;
+  documentCount: number;
+  summary: ResultSummary;
+}) {
   const { t } = useLocale();
   const currentIndex = steps.findIndex((step) => step.id === current);
 
   return (
     <nav aria-label={t("a11y.progress")} className="workflow-nav">
       <div className="workflow-nav-inner">
-        <p className="workflow-nav-title">{t("a11y.progress")}</p>
         <ol>
           {steps.map((step, index) => {
             const isCurrent = current === step.id;
@@ -30,23 +36,18 @@ export function StepNavigation({ current, onChange }: { current: WorkflowStep; o
                   aria-label={t(step.key)}
                   className={isCurrent ? "is-current" : isPast ? "is-complete" : ""}
                 >
-                  <span className="step-number" aria-hidden="true">{isPast ? "✓" : String(step.number).padStart(2, "0")}</span>
-                  <span className="step-copy">
-                    <span>{t(step.key)}</span>
-                    <small>{t("step.label", { number: step.number })}</small>
-                  </span>
-                  <svg aria-hidden="true" viewBox="0 0 20 20" className="step-arrow" fill="none">
-                    <path d="m8 5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <span className="step-number" aria-hidden="true">{String(step.number).padStart(2, "0")}</span>
+                  <span className="step-copy">{t(step.key)}{isPast && <span aria-hidden="true" className="step-check">✓</span>}</span>
+                  {step.id === "decision" && summary.pending > 0 && summary.total > 0 && <span className="step-open-count">{summary.pending}</span>}
                 </button>
               </li>
             );
           })}
         </ol>
-        <div className="workflow-boundary">
-          <span aria-hidden="true">◎</span>
-          <p>{t("intro.responsibility")}</p>
-        </div>
+        <p className="context-summary" aria-label={t("a11y.summary")}>
+          NORTHSTAR <span>·</span> POL-2026-004 v1.0 <span>·</span> CTRL {enabledControls} <span>·</span> DOC {documentCount}
+          {summary.total > 0 && <> <span>·</span> <b data-status="PASS">{summary.PASS}✓</b> <b data-status="FAIL">{summary.FAIL}×</b> <b data-status="MISSING">{summary.MISSING}⌀</b> <b data-status="WARNING">{summary.WARNING}!</b> <span>·</span> DEC {summary.reviewed}/{summary.total}</>}
+        </p>
       </div>
     </nav>
   );

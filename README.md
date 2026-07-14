@@ -10,13 +10,13 @@ PolicyProof provides one focused, bilingual workspace to review controls, run a 
 
 ## Current status
 
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A task-first shell combines a compact utility header, adaptive five-step navigation, one case-context strip, and a wide review canvas. The optional judge checklist stays collapsed until needed, while English and French switch immediately without resetting review or guide state.
+The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, policy and case-file folios, dense control and result registers, a split evidence inspector, and a formal decision receipt. The optional judge checklist can be dismissed and reopened, while English and French switch immediately without resetting review or guide state.
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
 ## Screenshots
 
-Local Playwright runs generate ignored English and French screenshots at desktop, laptop, tablet, and mobile widths. The redesign was inspected across three complete capture iterations. Selected production screenshots will be added here before publication.
+Local Playwright runs generate ignored English and French screenshots at desktop and mobile widths. The Proofroom integration was inspected across three complete nine-screen comparison passes, followed by empty, threshold-change, print, loading, and safely mocked provider-error captures. Selected production screenshots will be added here before publication.
 
 - TODO: Desktop evidence workbench with the EUR/USD contradiction selected
 - TODO: Human decision and receipt workspace
@@ -32,7 +32,13 @@ Mocked provider-error captures remain local-only and are not public product scre
 4. Run the deterministic review and filter its outcomes.
 5. Inspect evidence, record a human decision, and read the decision receipt.
 
-The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. On desktop the workflow sits in a persistent left rail; tablet and mobile widths use a compact horizontal step switcher.
+The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
+
+## Proofroom design direction
+
+The production interface translates the approved package in `docs/design/proofroom-ui/` into the validated React architecture. The design package controls visual hierarchy, tokens, evidence-led composition, responsive transformations, motion, and receipt treatment. Existing PolicyProof schemas, exact-excerpt validation, deterministic calculations, GPT-5.6 routes, security boundaries, and human-decision rules remain authoritative.
+
+Codex implemented this direction in the application; the static HTML boards were references, not generated production code. No design-system dependency, remote font, state library, database, or new runtime package was added.
 
 ## Technical stack
 

@@ -12,12 +12,12 @@
 
 | Image | Required state | Intended use |
 | --- | --- | --- |
-| English product overview | Policy step, deterministic mode, guide visible | Devpost introduction |
-| Evidence workbench | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING | README hero and Devpost |
-| Evidence inspector | Currency consistency selected; EUR and USD excerpts visible | Main differentiation |
+| English product overview | Proofroom Policy folio, deterministic mode, guide dismissed | Devpost introduction |
+| Evidence workbench | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING; Currency consistency selected | README hero and Devpost |
+| Evidence inspector | Selected-row bridge, exact EUR and USD excerpts, and currency comparison visible | Main differentiation |
 | Decision receipt | Rejected currency result with fictional comment | Human oversight and export story |
 | French workspace | French Review or Decision step with preserved evidence | Bilingual capability |
-| Mobile workspace | English policy or review state without overflow | Responsive proof |
+| Mobile workspace | English or French Review with selected inline evidence and no overflow | Responsive proof |
 
 ## Local-only diagnostic captures
 
@@ -26,3 +26,5 @@ Keep API-unavailable and safely mocked provider-error screenshots in ignored `te
 ## Final review
 
 Confirm exact excerpts are unchanged, counts match the tested fixture, status meaning is visible without color alone, French copy fits, focus rings are absent unless intentionally demonstrating keyboard use, and no unverified Live success claim appears.
+
+The local comparison source is `docs/design/proofroom-ui/codex-refs/`. Three ignored implementation passes use the same nine filenames under `test-results/proofroom-integration/pass-1/`, `pass-2/`, and `pass-3/`. Recreate public images from the production build; do not publish local diagnostic captures.
