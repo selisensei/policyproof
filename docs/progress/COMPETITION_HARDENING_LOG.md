@@ -47,5 +47,15 @@
 - **Files changed:** Scenario validation matrix, README, product narrative, feature guide, architecture, security/limitations, Devpost, video script, demo runbook, judge Q&A, screenshot plan, testing strategy, decision log, and this log.
 - **Tests run:** Documentation consistency and timing review; Markdown whitespace check at checkpoint; full release gates are recorded in the final test commit.
 - **Results:** Scenario matrix complete; hard-coding objection answered without cross-industry claims; exact video script ends at 2:50; four screenshot passes documented; remaining manual accessibility checks are explicit.
-- **Commit:** Pending documentation checkpoint.
+- **Commit:** `8d11328` — `docs: document PolicyProof scenario validation`.
 - **Blockers:** Public deployment captures, assistive-technology review, video recording, and owner validation remain external submission tasks.
+
+## Phases 23–24 — Competition release verification
+
+- **Objective:** Re-run the complete local release gate, strengthen export/audit assertions, and leave a clean reproducible branch.
+- **Decisions:** Add no dependency or product feature; exercise GPT paths only with mocks; keep all generated browser captures ignored; validate the production server locally without an authenticated provider request.
+- **Files changed:** Decision-receipt and workspace UI tests, testing guide, and this progress log.
+- **Tests run:** Full unit/component suite, focused mocked OpenAI/scenario contracts, typecheck, lint, production build, full Playwright suite, production HTTP smoke test, production dependency audit, whitespace check, safe secret-pattern scan, personal-path scan, dependency review, and ignored/generated-file review.
+- **Results:** PASS — 16 files / 109 tests, 4 focused files / 38 tests, 16 Playwright tests, production root and AI status HTTP 200, `gpt-5.6`, boolean availability, expected security headers, no known production vulnerability, no manifest or lockfile change, and no tracked generated artifact.
+- **Commit:** `test: harden PolicyProof competition release`.
+- **Blockers:** Only the documented external submission and real assistive-technology tasks remain.

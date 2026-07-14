@@ -4,6 +4,7 @@ import { createDecisionReceipt, DecisionReceiptSchema, REVIEW_DISCLAIMER } from 
 import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown } from "@/src/lib/receipt-export";
 import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
+import { createAuditEvent } from "@/src/lib/audit-trail";
 
 describe("decision receipt", () => {
   it("creates a validated, reproducible receipt with reviewer decisions", () => {
@@ -36,5 +37,15 @@ describe("decision receipt", () => {
     expect(serializeDecisionReceiptMarkdown(first)).toContain("| Approval threshold (CTRL-APPROVAL) | FAIL | CONFIRMED | Evidence checked. |");
     expect(serializeDecisionReceiptMarkdown(first)).toContain(REVIEW_DISCLAIMER);
     expect(createConciseReviewSummary(first)).toContain("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING");
+  });
+
+  it("includes only schema-validated audit metadata in the JSON receipt", () => {
+    const results = runDeterministicReview(demoControls, demoDocuments);
+    const auditTrail = [createAuditEvent({ action: "REVIEW_RUN", scenarioId: "northstar-mixed-risk", description: "Evaluated seven controls.", timestamp: "2026-07-14T08:00:00.000Z" })];
+    const receipt = createDecisionReceipt({ results, policyName: demoPolicy.title, policyVersion: demoPolicy.version, caseName: "Northstar Facilities — Mixed-Risk Case", selectedLanguage: "en", runMode: "DETERMINISTIC_DEMO", generatedAt: "2026-07-14T08:00:01.000Z", enabledControlCount: 7, auditTrail });
+    const json = serializeDecisionReceipt(receipt);
+    expect(receipt.auditTrail).toEqual(auditTrail);
+    expect(json).toContain('"action": "REVIEW_RUN"');
+    expect(json).not.toContain("Purchase order amount: 12,480 EUR");
   });
 });

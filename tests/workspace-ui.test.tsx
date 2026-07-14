@@ -247,6 +247,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING"));
     await user.click(screen.getByRole("button", { name: "Download JSON" }));
     await user.click(screen.getByRole("button", { name: "Download Markdown" }));
+    await user.click(screen.getByRole("button", { name: "Download CSV" }));
     expect(createObjectURL).toHaveBeenCalled();
     expect(anchorClick).toHaveBeenCalled();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:receipt");
@@ -261,6 +262,7 @@ describe("PolicyProof workspace interactions", () => {
     await runReviewFromControls(user);
     expect(screen.getByRole("button", { name: "Show 7 PASS results" })).toBeTruthy();
     expect(screen.queryByText(/Northstar Facilities vendor change/, { selector: "h3" })).toBeNull();
+    expect(screen.queryByText(/12,480 (EUR|USD)/)).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Policy" }));
     await user.click(screen.getByRole("button", { name: /Atlas Workplace Supply/ }));
@@ -321,6 +323,19 @@ describe("PolicyProof workspace interactions", () => {
     expect(within(comparison).getByText(/no score or ranking/i)).toBeTruthy();
     await user.click(within(comparison).getByRole("button", { name: /Northstar Facilities/ }));
     expect(screen.getByRole("button", { name: "Review" }).getAttribute("aria-current")).toBe("step");
+  });
+
+  it("shows and clears only safe audit metadata", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+    await runReviewFromControls(user);
+    await user.click(screen.getByText("Audit trail (2)"));
+    expect(screen.getByText("REVIEW RUN")).toBeTruthy();
+    expect(screen.getByText("CONTROLS APPROVED")).toBeTruthy();
+    expect(screen.queryByText("Purchase order amount: 12,480 EUR.")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByText("No event recorded.")).toBeTruthy();
+    expect(screen.getByText("Audit trail (0)")).toBeTruthy();
   });
 
   it("keeps mocked GPT-5.6 proposals unapproved until human review", async () => {

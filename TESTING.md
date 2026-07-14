@@ -284,3 +284,18 @@ Manual checks still required before public submission:
 3. deployed print preview and downloaded JSON/Markdown/CSV inspection;
 4. production-host headers and deterministic smoke test;
 5. public video and screenshot review for credentials, paths, or private tabs.
+
+## Competition release gate — 2026-07-15
+
+Fresh final local results:
+
+- `pnpm test`: PASS — 16 test files, 109 tests.
+- focused mocked OpenAI and scenario contracts: PASS — 4 test files, 38 tests.
+- `pnpm typecheck`: PASS — no TypeScript errors.
+- `pnpm lint`: PASS — no ESLint errors or warnings.
+- `pnpm build`: PASS — optimized Next.js build; static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`.
+- `pnpm test:e2e`: PASS — 16 Chromium tests.
+- `pnpm audit --prod`: PASS — no known vulnerabilities.
+- production smoke test: PASS — root and `/api/ai/status` returned 200; PolicyProof content, `gpt-5.6`, boolean availability, `nosniff`, and `strict-origin-when-cross-origin` were verified.
+
+No live OpenAI request was made during competition hardening. All provider behavior in this phase was mocked, and the previously validated live-model evidence remains documented separately.
