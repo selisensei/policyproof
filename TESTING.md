@@ -43,6 +43,10 @@ The final review also includes a local production HTTP smoke test, secret-patter
 - 400 schema, 401 authentication, 403 permission/model access, 429 quota, 429 rate limit, 5xx provider, connection, and timeout failures
 - Safe correlation/request identifiers and credential redaction
 - Duplicate browser policy-submission protection
+- Final-analysis capture persists the structured response before cleanup and waits for a simulated 30-second response
+- Saved analysis reload, exact source excerpts, source locators, known control relations, and secret-field exclusion
+- Approved live controls, extracted facts, seven deterministic outcomes, human decision, and Live-mode receipt in one mocked end-to-end pipeline
+- When the ignored final live artifact exists locally, `tests/live-artifact.test.ts` reloads it independently and applies the same schema, evidence, and deterministic-result gates; otherwise that single environment-specific test is skipped
 
 ### Evaluation contracts
 
@@ -123,6 +127,29 @@ Judge-ready redesign verification:
 - Final English/French screenshot review: PASS — 16 ignored captures covering desktop and mobile layouts, controls, documents, evidence workbench, validation, receipt, API-unavailable state, and mocked error; final public captures still require production recapture
 
 No authenticated or paid OpenAI endpoint was called by these checks.
+
+## Controlled live validation — 2026-07-14
+
+- Policy compilation: PASS — HTTP 200, seven structured controls, 16,139 ms, followed by explicit human approval
+- Final document analysis: PASS — HTTP 200, five findings, 14 evidence items, 23,054 ms, zero SDK retries
+- Exact-source verification: PASS — 14/14 excerpts and 14/14 locators verified; zero invented excerpts
+- Deterministic comparison: PASS — 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING across the seven approved controls
+- Saved-artifact reload: PASS — Zod schema, sources, fact values, relations, mappers, engine, secret exclusion, and SHA-256 fingerprint verified
+- Interface replay: PASS — captured response produced all seven statuses, EUR/USD evidence, a confirmed human decision, and a Live-mode receipt without another provider call
+- Full structured artifact: intentionally ignored at `test-results/live-gpt56/final-case-analysis.json`
+- Sanitized report: `docs/evaluation/LIVE_GPT56_VALIDATION.md`
+
+Four provider requests were used across the complete supervised investigation: one 401 policy attempt, one successful policy compilation, one successful analysis whose body was lost by the original browser-lifecycle race, and one successful final analysis captured by the corrected zero-retry harness. No further provider request is authorized or required for this validation.
+
+Final post-report release gates:
+
+- `pnpm test`: PASS — 13 files, 81 tests
+- `pnpm typecheck`: PASS — no TypeScript errors
+- `pnpm lint`: PASS — no ESLint errors or warnings
+- `pnpm build`: PASS — static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, `/api/ai/analyze`
+- `pnpm test:e2e`: PASS — 4 Chromium tests; `test-results/live-gpt56/` was preserved
+- `pnpm audit --prod`: PASS — no known vulnerabilities
+- Production smoke test: PASS — root 200, PolicyProof content, `nosniff`, `DENY`, available `gpt-5.6`, and port 3200 released
 
 ## Practical accessibility review
 

@@ -21,11 +21,10 @@ Completed and locally verified:
 - Three complete screenshot-based redesign iterations across desktop, laptop, tablet, and mobile widths
 - Secret-free core CI plus repository, license, screenshot, judge-Q&A, and Vercel deployment preparation
 - Unit, contract, component, and Playwright coverage
+- Controlled live GPT-5.6 policy compilation and Northstar document analysis with 14 exact, source-verified evidence items and all seven expected deterministic results
 
 Still pending and requiring builder supervision:
 
-- One controlled GPT-5.6 retry with fictional policy text to observe the new safe diagnostic
-- Any evidence-backed prompt or configuration adjustment revealed by that retry
 - Manual assistive-technology and final browser checks
 - Selection of final screenshots for the public README
 - License selection
@@ -37,20 +36,19 @@ Still pending and requiring builder supervision:
 | --- | --- | --- | --- |
 | Foundation | Safe, understandable application baseline | Complete | Setup, strict types, lint, tests, lockfile, ignored secrets |
 | Fictional case | Stable review inputs and expected results | Complete | 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING tested |
-| Policy to controls | GPT-5.6 proposes structured human-reviewable controls | Mock-complete; live pending | Strict mocked contracts pass; supervised retry required |
-| Evidence review | Extract evidence, validate excerpts, calculate supported checks | Mock-complete; live pending | Exact-excerpt and deterministic-engine tests pass |
+| Policy to controls | GPT-5.6 proposes structured human-reviewable controls | Live validated for Northstar | Seven controls returned and explicitly approved |
+| Evidence review | Extract evidence, validate excerpts, calculate supported checks | Live validated for Northstar | 14 exact excerpts and seven expected results pass |
 | Human decision | Preserve original outcome and reviewer judgment | Complete | Comment rules, rerun reset, and receipt tests pass |
-| Judge readiness | Polished, accessible, documented public demo | In progress | Three redesign iterations and local automated checks complete; manual assistive-technology review, supervised live validation, deployment, and video pending |
+| Judge readiness | Polished, accessible, documented public demo | In progress | Three redesign iterations, local automated checks, and supervised live validation complete; manual assistive-technology review, deployment, and video pending |
 
 ## Next supervised sequence
 
 1. Review the redesigned deterministic workflow in English and French.
 2. Inspect ignored Playwright screenshots at desktop, laptop, tablet, and mobile widths.
-3. Run one fictional GPT-5.6 policy compilation and record only the safe category/reference plus the server diagnostic fields.
-4. Make changes only if the observed diagnostic provides a documented reason.
-5. Rerun all quality gates and perform a manual accessibility pass.
-6. Select a license and final public screenshots.
-7. With explicit approval, commit, publish, deploy, smoke-test, record the video, and complete submission metadata.
+3. Review the sanitized live-validation report and its documented limitations.
+4. Rerun all quality gates and perform a manual accessibility pass.
+5. Select a license and final public screenshots.
+6. With explicit approval, publish, deploy, smoke-test, record the video, and complete submission metadata.
 
 ## Deferred until explicitly approved
 

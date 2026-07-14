@@ -12,7 +12,7 @@ PolicyProof provides one focused, bilingual workspace to review controls, run a 
 
 The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A task-first shell combines a compact utility header, adaptive five-step navigation, one case-context strip, and a wide review canvas. The optional judge checklist stays collapsed until needed, while English and French switch immediately without resetting review or guide state.
 
-The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. All automated AI tests use mocks; no paid model request was made during this phase, so a controlled live evaluation is still required before deployment.
+The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
 ## Screenshots
 
@@ -205,7 +205,7 @@ See `docs/DEPLOYMENT.md` for the supervised Vercel configuration, environment bo
 
 - The prototype covers one procurement and vendor-change case only.
 - Browser state is temporary and is lost on refresh.
-- Live GPT-5.6 behavior has automated mocked coverage but has not yet received a paid controlled evaluation.
+- Live GPT-5.6 passed one paid controlled evaluation with the fictional Northstar case; broader policies, documents, and repeated-run accuracy remain unvalidated.
 - Semantic controls that cannot be computed deterministically are not converted into a final automated approval.
 - Only `.txt`, `.md`, and `.json` local files are supported; there is no PDF or OCR workflow.
 - There is no deployed URL, persistence, authentication, collaboration, or external business-system integration.
@@ -227,7 +227,7 @@ This primary Codex task contains the core build history. Codex inspected the bas
 ## Hackathon submission checklist
 
 - [ ] Builder validates the deterministic demo manually
-- [ ] Controlled GPT-5.6 evaluation passes with fictional data
+- [x] Controlled GPT-5.6 evaluation passes with fictional data
 - [ ] Repository is committed and published
 - [ ] Application is deployed and smoke-tested
 - [ ] English README includes final screenshots and deployment URL

@@ -1,0 +1,190 @@
+{
+  "compilation": {
+    "policyTitle": "Procurement and Vendor Change Policy",
+    "policySummary": "Proposed controls for human review covering approval thresholds, document chronology, amount and currency matching, delivery evidence, bank-change verification, and segregation of duties. These controls remain unapproved until reviewed by a human.",
+    "controls": [
+      {
+        "id": "PVC-001",
+        "title": "Two approvers above EUR 10,000",
+        "description": "Require two distinct approvers when the transaction amount exceeds EUR 10,000.",
+        "condition": "Transaction currency is EUR and transaction amount is greater than 10000.",
+        "requiredEvidence": ["Transaction amount and currency", "Approval records", "Unique approver identities"],
+        "severity": "HIGH",
+        "controlType": "APPROVAL_THRESHOLD",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": 10000, "currency": "EUR", "requiredApprovers": 2 },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-002",
+        "title": "Purchase order predates invoice",
+        "description": "Verify that the purchase order date is earlier than the invoice date.",
+        "condition": "A purchase order and invoice are associated with the transaction.",
+        "requiredEvidence": ["Purchase order showing issue date", "Invoice showing invoice date"],
+        "severity": "HIGH",
+        "controlType": "PO_BEFORE_INVOICE",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-003",
+        "title": "Purchase order and invoice amount match",
+        "description": "Verify that the purchase order amount equals the invoice amount.",
+        "condition": "A purchase order and invoice are associated with the transaction.",
+        "requiredEvidence": ["Purchase order amount", "Invoice amount"],
+        "severity": "HIGH",
+        "controlType": "AMOUNT_MATCH",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-004",
+        "title": "Purchase order and invoice currency match",
+        "description": "Verify that the purchase order currency equals the invoice currency.",
+        "condition": "A purchase order and invoice are associated with the transaction.",
+        "requiredEvidence": ["Purchase order currency", "Invoice currency"],
+        "severity": "HIGH",
+        "controlType": "CURRENCY_MATCH",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-005",
+        "title": "Delivery evidence exists",
+        "description": "Require delivery evidence for the transaction.",
+        "condition": "The transaction involves delivery of goods or services.",
+        "requiredEvidence": ["Delivery receipt, proof of service, goods receipt, or equivalent delivery record"],
+        "severity": "HIGH",
+        "controlType": "DELIVERY_EVIDENCE",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-006",
+        "title": "Independent verification of bank-details changes",
+        "description": "Require independent verification whenever vendor bank details are changed.",
+        "condition": "Vendor bank details have changed.",
+        "requiredEvidence": ["Bank-change request", "Independent verification record", "Identity of verifier", "Verification date and method"],
+        "severity": "CRITICAL",
+        "controlType": "BANK_CHANGE_VERIFICATION",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      },
+      {
+        "id": "PVC-007",
+        "title": "Initiator and approver segregation",
+        "description": "Verify that the transaction initiator and approver are different people.",
+        "condition": "A transaction has been initiated and submitted for approval.",
+        "requiredEvidence": ["Initiator identity", "Approver identity", "Approval audit trail"],
+        "severity": "HIGH",
+        "controlType": "SEGREGATION_OF_DUTIES",
+        "enabled": false,
+        "deterministicParameters": { "thresholdAmount": null, "currency": null, "requiredApprovers": null },
+        "semanticReviewQuestion": null
+      }
+    ]
+  },
+  "approvedControlIds": ["PVC-001", "PVC-002", "PVC-003", "PVC-004", "PVC-005", "PVC-006", "PVC-007"],
+  "documents": [
+      {
+        "id": "LOCAL-1-PURCHASE-ORDER-PO-1042-TXT",
+        "name": "purchase-order-po-1042.txt",
+        "label": "purchase order po 1042",
+        "format": "TEXT",
+        "inferredType": "PURCHASE_ORDER",
+        "size": 127,
+        "content": "Purchase Order PO-1042\n\nSupplier: Northstar Facilities Ltd.\nPurchase order amount: 12,480 EUR.\nPurchase order date: 2026-07-03."
+      },
+      {
+        "id": "LOCAL-2-INVOICE-INV-8821-TXT",
+        "name": "invoice-inv-8821.txt",
+        "label": "invoice inv 8821",
+        "format": "TEXT",
+        "inferredType": "INVOICE",
+        "size": 107,
+        "content": "Invoice INV-8821\n\nSupplier: Northstar Facilities Ltd.\nInvoice amount: 12,480 USD.\nInvoice date: 2026-07-05."
+      },
+      {
+        "id": "LOCAL-3-DELIVERY-NOTE-DN-447-TXT",
+        "name": "delivery-note-dn-447.txt",
+        "label": "delivery note dn 447",
+        "format": "TEXT",
+        "inferredType": "DELIVERY_NOTE",
+        "size": 70,
+        "content": "Delivery Note DN-447\n\nDelivery note exists.\nDelivery date: 2026-07-04."
+      },
+      {
+        "id": "LOCAL-4-APPROVAL-WORKFLOW-WF-209-TXT",
+        "name": "approval-workflow-wf-209.txt",
+        "label": "approval workflow wf 209",
+        "format": "TEXT",
+        "inferredType": "WORKFLOW",
+        "size": 97,
+        "content": "Approval Workflow WF-209\n\nInitiator: Emma Reed.\nApprovers recorded: Emma Reed.\nApprover count: 1."
+      },
+      {
+        "id": "LOCAL-5-VENDOR-CHANGE-REQUEST-VC-031-TXT",
+        "name": "vendor-change-request-vc-031.txt",
+        "label": "vendor change request vc 031",
+        "format": "TEXT",
+        "inferredType": "VENDOR_CHANGE",
+        "size": 121,
+        "content": "Vendor Change Request VC-031\n\nSupplier bank details were changed.\nNo independent bank-verification evidence was attached."
+      }
+  ],
+  "mockAnalysis": {
+    "documentFindings": [
+      {
+        "documentIdentifier": "LOCAL-1-PURCHASE-ORDER-PO-1042-TXT",
+        "documentName": "purchase-order-po-1042.txt",
+        "documentType": "PURCHASE_ORDER",
+        "evidence": [
+          { "id": "LIVE-PO-AMOUNT", "factKey": "purchaseOrderAmount", "factValue": "12480", "documentIdentifier": "LOCAL-1-PURCHASE-ORDER-PO-1042-TXT", "documentName": "purchase-order-po-1042.txt", "pageOrSection": "Purchase Order PO-1042", "exactExcerpt": "Purchase order amount: 12,480 EUR.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-001" },
+          { "id": "LIVE-PO-CURRENCY", "factKey": "purchaseOrderCurrency", "factValue": "EUR", "documentIdentifier": "LOCAL-1-PURCHASE-ORDER-PO-1042-TXT", "documentName": "purchase-order-po-1042.txt", "pageOrSection": "Purchase Order PO-1042", "exactExcerpt": "Purchase order amount: 12,480 EUR.", "evidenceType": "CONTRADICTORY", "confidence": 0.99, "relationToControl": "PVC-004" },
+          { "id": "LIVE-PO-DATE", "factKey": "purchaseOrderDate", "factValue": "2026-07-03", "documentIdentifier": "LOCAL-1-PURCHASE-ORDER-PO-1042-TXT", "documentName": "purchase-order-po-1042.txt", "pageOrSection": "Purchase Order PO-1042", "exactExcerpt": "Purchase order date: 2026-07-03.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-002" }
+        ]
+      },
+      {
+        "documentIdentifier": "LOCAL-2-INVOICE-INV-8821-TXT",
+        "documentName": "invoice-inv-8821.txt",
+        "documentType": "INVOICE",
+        "evidence": [
+          { "id": "LIVE-INVOICE-AMOUNT", "factKey": "invoiceAmount", "factValue": "12480", "documentIdentifier": "LOCAL-2-INVOICE-INV-8821-TXT", "documentName": "invoice-inv-8821.txt", "pageOrSection": "Invoice INV-8821", "exactExcerpt": "Invoice amount: 12,480 USD.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-003" },
+          { "id": "LIVE-INVOICE-CURRENCY", "factKey": "invoiceCurrency", "factValue": "USD", "documentIdentifier": "LOCAL-2-INVOICE-INV-8821-TXT", "documentName": "invoice-inv-8821.txt", "pageOrSection": "Invoice INV-8821", "exactExcerpt": "Invoice amount: 12,480 USD.", "evidenceType": "CONTRADICTORY", "confidence": 0.99, "relationToControl": "PVC-004" },
+          { "id": "LIVE-INVOICE-DATE", "factKey": "invoiceDate", "factValue": "2026-07-05", "documentIdentifier": "LOCAL-2-INVOICE-INV-8821-TXT", "documentName": "invoice-inv-8821.txt", "pageOrSection": "Invoice INV-8821", "exactExcerpt": "Invoice date: 2026-07-05.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-002" }
+        ]
+      },
+      {
+        "documentIdentifier": "LOCAL-3-DELIVERY-NOTE-DN-447-TXT",
+        "documentName": "delivery-note-dn-447.txt",
+        "documentType": "DELIVERY_NOTE",
+        "evidence": [
+          { "id": "LIVE-DELIVERY", "factKey": "deliveryEvidenceExists", "factValue": "true", "documentIdentifier": "LOCAL-3-DELIVERY-NOTE-DN-447-TXT", "documentName": "delivery-note-dn-447.txt", "pageOrSection": "Delivery Note DN-447", "exactExcerpt": "Delivery note exists.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-005" }
+        ]
+      },
+      {
+        "documentIdentifier": "LOCAL-4-APPROVAL-WORKFLOW-WF-209-TXT",
+        "documentName": "approval-workflow-wf-209.txt",
+        "documentType": "WORKFLOW",
+        "evidence": [
+          { "id": "LIVE-INITIATOR", "factKey": "initiator", "factValue": "Emma Reed", "documentIdentifier": "LOCAL-4-APPROVAL-WORKFLOW-WF-209-TXT", "documentName": "approval-workflow-wf-209.txt", "pageOrSection": "Approval Workflow WF-209", "exactExcerpt": "Initiator: Emma Reed.", "evidenceType": "CONTRADICTORY", "confidence": 0.99, "relationToControl": "PVC-007" },
+          { "id": "LIVE-APPROVERS", "factKey": "approvers", "factValue": "[\"Emma Reed\"]", "documentIdentifier": "LOCAL-4-APPROVAL-WORKFLOW-WF-209-TXT", "documentName": "approval-workflow-wf-209.txt", "pageOrSection": "Approval Workflow WF-209", "exactExcerpt": "Approvers recorded: Emma Reed.", "evidenceType": "CONTRADICTORY", "confidence": 0.99, "relationToControl": "PVC-001, PVC-007" }
+        ]
+      },
+      {
+        "documentIdentifier": "LOCAL-5-VENDOR-CHANGE-REQUEST-VC-031-TXT",
+        "documentName": "vendor-change-request-vc-031.txt",
+        "documentType": "VENDOR_CHANGE",
+        "evidence": [
+          { "id": "LIVE-BANK-CHANGED", "factKey": "bankDetailsChanged", "factValue": "true", "documentIdentifier": "LOCAL-5-VENDOR-CHANGE-REQUEST-VC-031-TXT", "documentName": "vendor-change-request-vc-031.txt", "pageOrSection": "Vendor Change Request VC-031", "exactExcerpt": "Supplier bank details were changed.", "evidenceType": "SUPPORTING", "confidence": 0.99, "relationToControl": "PVC-006" },
+          { "id": "LIVE-BANK-VERIFICATION", "factKey": "independentBankVerificationExists", "factValue": "false", "documentIdentifier": "LOCAL-5-VENDOR-CHANGE-REQUEST-VC-031-TXT", "documentName": "vendor-change-request-vc-031.txt", "pageOrSection": "Vendor Change Request VC-031", "exactExcerpt": "No independent bank-verification evidence was attached.", "evidenceType": "CONTRADICTORY", "confidence": 0.99, "relationToControl": "PVC-006" }
+        ]
+      }
+    ]
+  }
+}

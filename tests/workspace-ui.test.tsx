@@ -1,10 +1,18 @@
 // @vitest-environment jsdom
 
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DemoReviewWorkspace } from "@/components/demo-review-workspace";
+import liveFixture from "@/src/fixtures/evaluation/live-gpt56-northstar.json";
 import { LocaleProvider } from "@/src/i18n/locale-context";
+
+const liveArtifactPath = resolve("test-results/live-gpt56/final-case-analysis.json");
+const liveArtifact = existsSync(liveArtifactPath)
+  ? JSON.parse(readFileSync(liveArtifactPath, "utf8")) as { response: { analysis: unknown } }
+  : null;
 
 function jsonResponse(body: unknown, ok = true) {
   return { ok, json: async () => body } as Response;
@@ -253,5 +261,92 @@ describe("PolicyProof workspace interactions", () => {
     await user.click(screen.getByRole("button", { name: "Reject proposal" }));
     expect(screen.getByText("Rejected by reviewer")).toBeTruthy();
     expect(screen.getByText(/Control proposal: Rejected by reviewer/)).toBeTruthy();
+  });
+
+  it("runs the complete mocked Live pipeline through evidence, human decision, and receipt", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ available: true, model: "gpt-5.6" }))
+      .mockResolvedValueOnce(jsonResponse({ compilation: liveFixture.compilation }))
+      .mockResolvedValueOnce(jsonResponse({ analysis: liveFixture.mockAnalysis }));
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    const liveMode = screen.getByRole("button", { name: "Live GPT-5.6" });
+    await waitFor(() => expect((liveMode as HTMLButtonElement).disabled).toBe(false));
+    await user.click(liveMode);
+    await user.click(screen.getByRole("button", { name: "Propose controls with GPT-5.6" }));
+    expect(await screen.findAllByText("Proposal received")).toHaveLength(7);
+
+    for (const control of liveFixture.compilation.controls) {
+      await user.click(screen.getByLabelText(`Enable ${control.title}`));
+    }
+    await user.click(screen.getByRole("button", { name: "Approve proposed controls" }));
+    expect(screen.getByText(/Proposed controls approved by the reviewer/)).toBeTruthy();
+
+    const files = liveFixture.documents.map((document) =>
+      new File([document.content], document.name, { type: "text/plain" }));
+    await user.upload(screen.getByLabelText("Select local documents"), files);
+    await user.click(screen.getByRole("button", { name: "Run review" }));
+
+    expect(within(await screen.findByRole("button", { name: "Inspect Two approvers above EUR 10,000" })).getByText("FAIL")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: "Inspect Purchase order predates invoice" })).getByText("PASS")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: "Inspect Purchase order and invoice amount match" })).getByText("PASS")).toBeTruthy();
+    const currency = screen.getByRole("button", { name: "Inspect Purchase order and invoice currency match" });
+    expect(within(currency).getByText("FAIL")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: "Inspect Delivery evidence exists" })).getByText("PASS")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: "Inspect Independent verification of bank-details changes" })).getByText("MISSING")).toBeTruthy();
+    expect(within(screen.getByRole("button", { name: "Inspect Initiator and approver segregation" })).getByText("WARNING")).toBeTruthy();
+
+    await user.click(currency);
+    const evidence = screen.getByLabelText("Evidence details");
+    expect(within(evidence).getByText(/Purchase order amount: 12,480 EUR/)).toBeTruthy();
+    expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Decision" }));
+    await user.type(screen.getByLabelText("Reviewer comment"), "Exact EUR and USD excerpts verified.");
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    const receipt = screen.getByLabelText("Decision receipt");
+    expect(within(receipt).getByText("Exact EUR and USD excerpts verified.")).toBeTruthy();
+    expect(within(receipt).getByText(/1 confirmed/)).toBeTruthy();
+  });
+
+  it.skipIf(!liveArtifact)("replays the captured Live artifact through the interface without a provider call", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ available: true, model: "gpt-5.6" }))
+      .mockResolvedValueOnce(jsonResponse({ compilation: liveFixture.compilation }))
+      .mockResolvedValueOnce(jsonResponse({ analysis: liveArtifact!.response.analysis }));
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    const liveMode = screen.getByRole("button", { name: "Live GPT-5.6" });
+    await waitFor(() => expect((liveMode as HTMLButtonElement).disabled).toBe(false));
+    await user.click(liveMode);
+    await user.click(screen.getByRole("button", { name: "Propose controls with GPT-5.6" }));
+    await screen.findAllByText("Proposal received");
+    for (const control of liveFixture.compilation.controls) {
+      await user.click(screen.getByLabelText(`Enable ${control.title}`));
+    }
+    await user.click(screen.getByRole("button", { name: "Approve proposed controls" }));
+    const files = liveFixture.documents.map((document) =>
+      new File([document.content], document.name, { type: "text/plain" }));
+    await user.upload(screen.getByLabelText("Select local documents"), files);
+    await user.click(screen.getByRole("button", { name: "Run review" }));
+
+    expect(await screen.findByRole("button", { name: "Show 3 PASS results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 2 FAIL results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 1 MISSING results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 1 WARNING results" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Inspect Purchase order and invoice currency match" }));
+    const evidence = screen.getByLabelText("Evidence details");
+    expect(within(evidence).getByText(/Purchase order amount: 12,480 EUR/)).toBeTruthy();
+    expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Decision" }));
+    await user.type(screen.getByLabelText("Reviewer comment"), "Captured EUR and USD excerpts verified.");
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    const receipt = screen.getByLabelText("Decision receipt");
+    expect(within(receipt).getByText("Captured EUR and USD excerpts verified.")).toBeTruthy();
+    expect(within(receipt).getByText(/1 confirmed/)).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });
