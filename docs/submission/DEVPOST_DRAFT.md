@@ -1,5 +1,7 @@
 # PolicyProof — Devpost Draft
 
+> Superseded by `DEVPOST_FINAL_DRAFT.md`, which reflects the completed supervised GPT-5.6 validation and review-intelligence workspace. This file is retained as an earlier drafting checkpoint.
+
 ## One-line pitch
 
 PolicyProof turns written business policy into human-reviewable controls and shows the exact evidence behind every result.
@@ -72,7 +74,7 @@ The primary Codex task is the core build history. Codex inspected the environmen
 
 ## Current status and limitations
 
-The deterministic workflow and mocked GPT contracts are locally tested. The first supervised live policy-compilation attempt failed before the improved diagnostic layer was available. No subsequent paid request was made during unattended development, so live GPT-5.6 success is not yet claimed.
+The deterministic workflow and mocked GPT contracts are locally tested. One supervised live Northstar validation subsequently succeeded: seven human-reviewed controls and 14 evidence items passed schema, source, excerpt, locator, mapper, and deterministic-result checks. This single fictional case does not establish general model accuracy. See `docs/evaluation/LIVE_GPT56_VALIDATION.md` and the final Devpost draft.
 
 The prototype supports one fictional case and `.txt`, `.md`, and `.json` files only. State is temporary. There is no PDF/OCR workflow, persistence, authentication, collaboration, ERP integration, or deployed URL yet.
 

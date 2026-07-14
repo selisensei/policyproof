@@ -25,10 +25,12 @@ The first working version supports one fictional procurement and vendor-change s
 5. Use GPT-5.6 for policy interpretation and evidence extraction in Live mode.
 6. Use deterministic TypeScript logic for supported calculations and comparisons.
 7. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
-8. Let the user confirm, reject, or accept an exception while preserving the original result.
-9. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
-10. Switch the complete application presentation between English and French without resetting the review.
-11. Follow an optional state-based judge checklist and export the current structured receipt through print, JSON, or copy actions.
+8. Derive review intelligence—outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison—from the same structured review state.
+9. Prioritize unresolved controls for human attention without inventing a composite risk score.
+10. Let the user confirm, reject, or accept an exception while preserving the original result.
+11. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
+12. Switch the complete application presentation between English and French without resetting the review.
+13. Follow an optional state-based judge checklist and export the current structured receipt through print, JSON, Markdown, or copy actions.
 
 ## Status definitions
 
@@ -73,6 +75,7 @@ A hackathon judge can run the application, complete the full workflow with the i
 - One polished workflow before broader coverage
 - Simple enough to explain in a three-minute demo
 - A ledger and case-file visual language rather than a generic AI dashboard
+- Review intelligence must explain evidence, attention, or causality; decorative metrics and unsupported confidence scores are excluded
 
 ## Evidence-led visual architecture
 
@@ -89,3 +92,4 @@ Desktop prioritizes density suitable for a 13-inch work screen. Mobile uses stac
 - English is the default interface language; French is available immediately from the application header. Stable technical identifiers and original source evidence are not translated.
 - Guided-demo completion is based only on real user actions and remains optional, dismissible, keyboard-accessible, and temporary.
 - Receipt exports are generated from current validated review state; no PDF service, server storage, or invented audit metadata is used.
+- Run comparison stores at most one versioned minimal snapshot in optional browser storage; current review behavior does not depend on persistence.

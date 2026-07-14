@@ -1,0 +1,80 @@
+# PolicyProof Data Dictionary
+
+## Core entities
+
+### PolicyDefinition
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `id` | string | Stable internal policy identifier. |
+| `title` | string | Source policy title. |
+| `version` | string | Policy version shown in the receipt. |
+| `text` | string | Complete source policy text. |
+| `controlIds` | string[] | Controls expected from the policy. |
+
+### ControlDefinition
+
+All controls include `id`, `title`, `description`, `severity`, `enabled`, `kind`, and typed `parameters`. Supported kinds are approval threshold, PO-before-invoice, amount match, currency match, delivery evidence, bank-change verification, and segregation of duties.
+
+### CaseDocument
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `id` | string | Stable source identifier such as `DOC-PO-1042`. |
+| `title` | string | Human-readable fictional filename/title. |
+| `type` | enum | Purchase order, invoice, delivery note, workflow, or vendor change. |
+| `content` | string | Fictional source text used for exact-excerpt validation. |
+| `facts` | ExtractedFact[] | Structured values and source citations. |
+
+### ExtractedFact
+
+Each fact has an ID, key, value, locator, exact excerpt, optional semantic confidence, optional evidence type, and optional control-relation explanation. Confidence is retained in the validated data contract but is not displayed as evidence quality.
+
+### ControlResult
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `controlId` | string | Links the result to one control. |
+| `title` | string | Stable fallback title. |
+| `status` | enum | PASS, FAIL, MISSING, or WARNING. |
+| `explanation` | string | Deterministic conclusion explanation. |
+| `severity` | enum | LOW, MEDIUM, HIGH, or CRITICAL. |
+| `supportingEvidence` | EvidenceReference[] | Evidence supporting the conclusion. |
+| `contradictoryEvidence` | EvidenceReference[] | Evidence contradicting the requirement. |
+| `missingEvidence` | MissingEvidence[] | Required evidence not available. |
+| `reviewerDecision` | ReviewDecision | Human state and comment, stored separately. |
+
+### ReviewDecision
+
+States are PENDING, CONFIRMED, REJECTED, and ACCEPTED_EXCEPTION. Rejecting or accepting an exception requires a non-empty comment.
+
+### RunSnapshot
+
+The local comparison snapshot contains `id`, `generatedAt`, `threshold`, `summary`, and a control-ID-to-status map. It deliberately excludes source content and human comments.
+
+## Status meanings
+
+- **PASS:** available evidence supports the control.
+- **FAIL:** evidence contradicts the control or proves non-compliance.
+- **MISSING:** required evidence is absent.
+- **WARNING:** evidence requires professional judgment or shows an ambiguous workflow.
+
+## Northstar reference values
+
+| Fact | Value | Source |
+| --- | --- | --- |
+| Purchase order amount | 12,480 | PO-1042 |
+| Purchase order currency | EUR | PO-1042 |
+| Invoice amount | 12,480 | INV-8821 |
+| Invoice currency | USD | INV-8821 |
+| Purchase order date | 2026-07-03 | PO-1042 |
+| Delivery date | 2026-07-04 | DN-447 |
+| Invoice date | 2026-07-05 | INV-8821 |
+| Required approvers | 2 | Policy/control parameter |
+| Recorded approvers | 1 | WF-209 |
+| Bank details changed | true | VC-031 |
+| Independent verification exists | false | VC-031 |
+
+## Presentation rules
+
+Stable IDs and exact excerpts are never translated. Interface labels, explanations, statuses, and receipt structure are localized. Evidence coverage states are supporting, contradictory, missing, and not applicable; they are relationships, not confidence scores.

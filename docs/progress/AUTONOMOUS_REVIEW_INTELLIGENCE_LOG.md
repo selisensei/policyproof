@@ -57,5 +57,15 @@
 - **Files changed:** `src/lib/review-run-history.ts`, `components/demo-review-workspace.tsx`, `components/workspace/decision-panel.tsx`, `tests/review-intelligence.test.ts`, progress log.
 - **Tests run:** Focused review-intelligence and workspace tests (2 files / 20 tests), `pnpm typecheck`, `pnpm lint`.
 - **Result:** PASS, including blocked-storage behavior.
-- **Commit hash:** Pending.
+- **Commit hash:** `ada3e117af2a14e01291b7f8d1d87927eab68954`.
 - **Blockers:** None.
+
+## Phase 6 — Product and submission documentation
+
+- **Objective:** Make the product, architecture, data, operation, security boundaries, and final submission story understandable without reading source code.
+- **Decisions:** Keep all public claims bounded to one fictional case and one supervised live validation; make the deterministic path the primary demo; provide a separate final Devpost draft and under-three-minute runbook.
+- **Files changed:** `README.md`, `PRODUCT.md`, `PLAN.md`, six product guides under `docs/`, three final submission documents, judge Q&A, submission checklist, and this log.
+- **Tests run:** Markdown structure review, documentation consistency review, public-path scan, and `git diff --check` before the documentation checkpoint.
+- **Result:** PASS. Required documents were present, internally consistent with the single supervised live validation, free of unresolved placeholders, and clean under Markdown/diff and safe-content checks.
+- **Commit hash:** Pending documentation checkpoint.
+- **Blockers:** License, deployment, public URLs, video recording, and manual assistive-technology review remain builder-owned submission tasks.

@@ -22,6 +22,9 @@ Completed and locally verified:
 - Secret-free core CI plus repository, license, screenshot, judge-Q&A, and Vercel deployment preparation
 - Unit, contract, component, and Playwright coverage
 - Controlled live GPT-5.6 policy compilation and Northstar document analysis with 14 exact, source-verified evidence items and all seven expected deterministic results
+- Evidence-led review intelligence: case overview, filterable outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison
+- Reviewer attention queue, evidence-integrity language, keyboard-operable visual controls, and dependency-free Markdown receipts
+- Complete product narrative, feature guide, architecture, data dictionary, user guide, security/limitations guide, final Devpost draft, video script, and demo runbook
 
 Still pending and requiring builder supervision:
 
@@ -40,14 +43,15 @@ Still pending and requiring builder supervision:
 | Evidence review | Extract evidence, validate excerpts, calculate supported checks | Live validated for Northstar | 14 exact excerpts and seven expected results pass |
 | Human decision | Preserve original outcome and reviewer judgment | Complete | Comment rules, rerun reset, and receipt tests pass |
 | Proofroom integration | Apply the approved evidence-led design without changing validated logic | Complete | Separate handoff commit, implementation mapping, three visual passes, responsive/motion tests, and final quality gates |
+| Review intelligence | Turn structured evidence into reviewer attention, causality, and local run comparison | Complete | Pure TypeScript derivations, semantic visuals, prioritized queue, responsive browser tests, and no new dependency |
 | Judge readiness | Polished, accessible, documented public demo | In progress | Proofroom integration and supervised live validation complete; manual assistive-technology review, deployment, and video pending |
 
 ## Next supervised sequence
 
-1. Review the Proofroom deterministic workflow in English and French.
-2. Inspect the ignored three-pass comparison matrix and final state captures.
+1. Review the complete deterministic workflow and review intelligence in English and French.
+2. Inspect the ignored final viewport and component captures.
 3. Review the sanitized live-validation report and its documented limitations.
-4. Rerun all quality gates and perform a manual accessibility pass.
+4. Perform the remaining manual screen-reader and deployed-browser checks.
 5. Select a license and final public screenshots.
 6. With explicit approval, publish, deploy, smoke-test, record the video, and complete submission metadata.
 

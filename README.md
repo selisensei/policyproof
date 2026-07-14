@@ -10,17 +10,13 @@ PolicyProof provides one focused, bilingual workspace to review controls, run a 
 
 ## Current status
 
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, policy and case-file folios, dense control and result registers, a split evidence inspector, and a formal decision receipt. The optional judge checklist can be dismissed and reopened, while English and French switch immediately without resetting review or guide state.
+The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, policy and case-file folios, dense control and result registers, a split evidence inspector, review-intelligence panels, a prioritized human-decision queue, and a formal decision receipt. The optional judge checklist can be dismissed and reopened, while English and French switch immediately without resetting review state.
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
 ## Screenshots
 
-Local Playwright runs generate ignored English and French screenshots at desktop and mobile widths. The Proofroom integration was inspected across three complete nine-screen comparison passes, followed by empty, threshold-change, print, loading, and safely mocked provider-error captures. Selected production screenshots will be added here before publication.
-
-- TODO: Desktop evidence workbench with the EUR/USD contradiction selected
-- TODO: Human decision and receipt workspace
-- TODO: Mobile deterministic policy workflow
+Local Playwright runs generate ignored English and French screenshots at desktop and mobile widths. The Proofroom integration and review-intelligence workspace were inspected through repeated desktop, tablet, mobile, component, decision, receipt, threshold-change, run-comparison, print, loading, and safely mocked provider-error captures. The builder will select production captures for the public repository after deployment so the README does not publish development-only images or local paths.
 
 Mocked provider-error captures remain local-only and are not public product screenshots.
 
@@ -29,10 +25,25 @@ Mocked provider-error captures remain local-only and are not public product scre
 1. Review the policy.
 2. Review, edit, enable, or disable controls.
 3. Load the bundled demo case or select fictional local text documents.
-4. Run the deterministic review and filter its outcomes.
-5. Inspect evidence, record a human decision, and read the decision receipt.
+4. Run the deterministic review; use outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and filters to direct attention.
+5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, and read or export the decision receipt.
 
-The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
+The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. The previous run is stored as one minimal, versioned local snapshot when browser storage is available; blocked storage never prevents the current review. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
+
+## Review intelligence
+
+PolicyProof derives its review intelligence from the same structured controls, results, evidence, and documents used by the deterministic engine. It does not create a composite risk score or a second source of truth.
+
+- **Case Overview** summarizes the current case, method, document set, and unresolved attention.
+- **Outcome Composition** filters the result register through a semantic stacked bar.
+- **Evidence Coverage Map** distinguishes supporting, contradictory, missing, and not-applicable evidence and opens the selected control.
+- **Chronology** orders actual case dates from the fictional documents.
+- **Threshold Sensitivity** explains the purchase amount against the current approval threshold.
+- **Run Comparison** shows the current run beside one previous local snapshot and identifies changed controls.
+- **Evidence Integrity** replaces an unsupported confidence percentage with exact-source, explicit-missing, or needs-review states.
+- **Reviewer Queue** prioritizes unresolved failures, missing items, warnings, and remaining passes without changing their original results.
+
+See `docs/FEATURE_GUIDE.md`, `docs/USER_GUIDE.md`, and `docs/ARCHITECTURE.md` for the complete product and technical guide.
 
 ## Proofroom design direction
 
@@ -89,7 +100,7 @@ Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows depende
    - Segregation of duties: WARNING
 5. Filter to FAIL and inspect **Currency consistency**. Confirm that the purchase order excerpt uses EUR and the invoice excerpt uses USD.
 6. Enter a reviewer comment and select **Reject**. Confirm that the decision receipt preserves the original result and records the human decision.
-   The receipt can be printed, downloaded as structured JSON, or summarized through browser-native copy actions.
+   The receipt can be printed, downloaded as structured JSON or Markdown, or summarized through browser-native copy actions.
 7. Change the approval threshold to `15000`, select **Run review**, and confirm that **Approval threshold** changes to PASS. A rerun intentionally resets prior reviewer decisions.
 8. Open **Controls**, select **Reset controls**, and confirm that results are cleared and all seven controls return to their defaults.
 
@@ -136,7 +147,8 @@ flowchart LR
     D --> E["Deterministic TypeScript engine"]
     Z --> X["Source excerpt verification"]
     X --> E
-    E --> R["Evidence matrix and receipt"]
+    E --> I["Review intelligence and evidence ledger"]
+    I --> R["Reviewer queue and receipt"]
     R --> H["Human confirm or override"]
 ```
 
@@ -147,7 +159,7 @@ The browser never calls OpenAI directly. The deterministic judging path stops at
 - `src/domain/` contains Zod schemas and shared domain types.
 - `src/fixtures/` contains the deterministic case plus mocked policy and document evaluation contracts.
 - `src/i18n/` contains the typed English/French presentation dictionary and hydration-safe locale context.
-- `src/lib/` contains deterministic review, receipt, summary, and local-document logic.
+- `src/lib/` contains deterministic review, review-intelligence, optional run-history, receipt, summary, and local-document logic.
 - `src/openai/` contains server-only client configuration, prompts, mappers, validation, and safe route handlers.
 - `tests/` contains unit, integration, component, and browser tests.
 
@@ -210,7 +222,7 @@ See `docs/DEPLOYMENT.md` for the supervised Vercel configuration, environment bo
 ## Known limitations
 
 - The prototype covers one procurement and vendor-change case only.
-- Browser state is temporary and is lost on refresh.
+- Most browser review state is temporary and is lost on refresh. At most one minimal previous-run snapshot is kept locally when browser storage is available.
 - Live GPT-5.6 passed one paid controlled evaluation with the fictional Northstar case; broader policies, documents, and repeated-run accuracy remain unvalidated.
 - Semantic controls that cannot be computed deterministically are not converted into a final automated approval.
 - Only `.txt`, `.md`, and `.json` local files are supported; there is no PDF or OCR workflow.

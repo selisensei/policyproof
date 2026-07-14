@@ -32,6 +32,19 @@ The final review also includes a local production HTTP smoke test, secret-patter
 - Receipt identifiers are reproducible for the same timestamp and timestamps are schema-valid
 - Receipt policy/mode/language/control metadata, outcome summary, concise copy text, and JSON serialization
 
+### Review intelligence
+
+- Outcome composition is derived from all current results and remains filterable
+- Evidence coverage distinguishes supporting, contradictory, missing, and not-applicable relations
+- Chronology uses valid dates extracted from the fictional case documents and preserves source links
+- Threshold sensitivity compares the actual purchase amount with the active approval threshold
+- Evidence integrity reports exact-source, explicit-missing, or needs-review states without inventing a confidence percentage
+- Reviewer queue order prioritizes unresolved FAIL, MISSING, WARNING, and PASS results, then severity and stable source order
+- Local search covers controls, explanations, sources, locators, and exact excerpts without a server request
+- Run comparison retains only one minimal versioned snapshot and identifies changed controls
+- Missing, malformed, blocked, or cleared browser storage falls back safely without changing the current review
+- Markdown receipt serialization uses the same validated state as JSON and print output
+
 ### Mocked GPT-5.6 integration
 
 - Official SDK `responses.parse` request shape, `gpt-5.6`, Zod Structured Outputs, and `output_parsed`
@@ -83,7 +96,7 @@ These are contract tests, not evidence that a live model will always produce the
 
 ### Browser and responsive behavior
 
-Playwright covers the complete deterministic path, exact currency evidence, override validation, receipt, threshold recalculation, decision reset notice, keyboard result navigation, persisted French locale, concise mobile inline evidence, reduced motion, print media, safe mocked provider failure, and absence of main-page horizontal overflow.
+Playwright covers the complete deterministic path, case overview, filterable outcome composition, evidence coverage selection, chronology, threshold sensitivity, local search and empty results, reviewer queue navigation, exact currency evidence, override validation, JSON and Markdown receipt export, threshold recalculation, previous-run comparison and reset, decision reset notice, keyboard result navigation, persisted French locale, concise mobile inline evidence, reduced motion, print media, safe mocked provider failure, and absence of main-page horizontal overflow.
 
 Ignored screenshots are generated for:
 
@@ -94,6 +107,22 @@ Ignored screenshots are generated for:
 - API unavailable and safely mocked provider-error states.
 
 The Proofroom visual harness creates a consistent nine-screen matrix for Policy, Controls, Documents, Review, Decision, receipt, French Review, English mobile Review, and French mobile Review. Its final pass also captures empty Review, threshold change, print-only receipt, compilation loading, and a safely mocked provider error. All files remain ignored under `test-results/proofroom-integration/`.
+
+The review-intelligence harness adds exact-size 1440 × 900, 1280 × 720, 1024 × 768, and 390 × 844 workspace captures plus focused Case Overview, Outcome Composition, Evidence Coverage, Chronology, Threshold Sensitivity, Decision, receipt, run-comparison, and English/French responsive states. These captures remain ignored under `test-results/review-intelligence/`.
+
+## Review-intelligence checkpoint — 2026-07-14
+
+- `pnpm test`: PASS — 14 files, 88 tests
+- `pnpm typecheck`: PASS — no TypeScript errors
+- `pnpm lint`: PASS — no ESLint errors or warnings
+- `pnpm build`: PASS — optimized production build and expected route classification
+- `pnpm test:e2e`: PASS — 10 Chromium tests, including three review-intelligence journeys
+- Focused blocked-storage tests: PASS — malformed, unavailable, write-blocked, and remove-blocked storage paths fail safely
+- Visual pass 1: PASS with issues identified — guide obstruction and initial hierarchy were corrected
+- Visual pass 2: PASS with issue identified — mobile threshold overlap was corrected
+- Visual pass 3: PASS — desktop, tablet, mobile, English, French, decision, receipt, threshold change, and run comparison inspected
+
+These are implementation checkpoints. The final release-gate results are recorded only after documentation, the fourth visual pass, and the production smoke test are complete.
 
 ## Latest recorded results — 2026-07-14
 
