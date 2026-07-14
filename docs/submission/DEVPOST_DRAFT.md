@@ -76,7 +76,7 @@ The primary Codex task is the core build history. Codex inspected the environmen
 
 The deterministic workflow and mocked GPT contracts are locally tested. One supervised live Northstar validation subsequently succeeded: seven human-reviewed controls and 14 evidence items passed schema, source, excerpt, locator, mapper, and deterministic-result checks. This single fictional case does not establish general model accuracy. See `docs/evaluation/LIVE_GPT56_VALIDATION.md` and the final Devpost draft.
 
-The prototype supports one fictional case and `.txt`, `.md`, and `.json` files only. State is temporary. There is no PDF/OCR workflow, persistence, authentication, collaboration, ERP integration, or deployed URL yet.
+The prototype supports one fictional procurement policy with three controlled case profiles and `.txt`, `.md`, and `.json` files only. Northstar alone has real GPT-5.6 validation; Meridian and Atlas are deterministic and mocked. State is temporary. There is no PDF/OCR workflow, durable persistence, authentication, collaboration, ERP integration, or deployed URL yet.
 
 ## Future potential
 

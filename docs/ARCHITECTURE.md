@@ -68,3 +68,17 @@ Visualizations use semantic HTML and CSS; no chart library is installed. Buttons
 ## Build and deployment shape
 
 The root page is statically prerendered. `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze` remain dynamic server routes. Vercel is the planned host, but deployment is a supervised manual step.
+
+## Scenario boundary
+
+`ReviewScenarioSchema` is the strict fixture boundary. It validates localized case context, the shared policy and controls, exact documents and facts, expected test assertions, evidence relationships, thresholds, guided highlights, assumptions, limitations, and fictional provenance. `loadScenario()` returns a defensive clone. `createScenarioResetState()` preserves locale while producing fresh policy, control, document, threshold, selection, and filter state.
+
+The React workspace remains the single state owner. Switching scenarios clears results, evidence selection, filters, decisions, receipt, and current comparison. Minimal run-history keys include the scenario ID, preventing snapshots from crossing cases. Malformed fixtures fail closed before render.
+
+## Competition surfaces
+
+`CompetitionTools` receives actual current-session summaries, audit events, and scenario metadata from the workspace. It contains no review logic. Judge Mode stores only a step index. Scenario comparison stores no arbitrary score. The architecture diagram is semantic HTML/CSS. The audit contract is strict Zod data held in React state and capped at 100 events. CSV serialization is a pure TypeScript function over `ControlResult` data.
+
+## Shared evaluation path
+
+Northstar, Meridian, and Atlas all call `runDeterministicReview()` with the same seven control kinds. Fixture `expectedOutcomes` are used only by automated validation and never by the application rendering path. The optional GPT-5.6 routes and exact-excerpt validation are unchanged.

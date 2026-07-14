@@ -57,4 +57,14 @@ PolicyProof reduces the effort required to organize a first review, find excepti
 
 ## Honest scope
 
-This is a hackathon prototype, not production compliance software. It supports one fictional case and text-based documents only. Browser state is temporary, run comparison is a local convenience rather than durable audit storage, and broader policy accuracy has not been evaluated. Authentication, databases, collaboration, ERP integration, PDF parsing, OCR, and production governance are intentionally absent.
+This is a hackathon prototype, not production compliance software. It supports one fictional procurement policy and three controlled fictional case profiles with text-based documents only. Northstar is mixed-risk, Meridian is compliant, and Atlas is evidence-deficient. The same strict scenario contract, engine, evidence ledger, visualizations, and human-decision workflow process all three; displayed outcomes are never read from the fixture expectations.
+
+Northstar alone has been validated with a real GPT-5.6 request. Meridian and Atlas prove deterministic reuse and mocked contracts, not broader model accuracy. Browser state is temporary, run comparison and the audit trail are local conveniences rather than durable records, and cross-industry policy accuracy has not been evaluated. Authentication, databases, collaboration, ERP integration, PDF parsing, OCR, and production governance are intentionally absent.
+
+## Three controlled profiles
+
+- **Northstar:** all four statuses, exact EUR/USD contradiction, missing bank verification, and threshold sensitivity.
+- **Meridian:** seven evidence-backed passes for a complete EUR 8,750 below-threshold purchase.
+- **Atlas:** one approval failure and two explicit missing-evidence outcomes without fabricated sources.
+
+This controlled diversity is the answer to the strongest demo objection: PolicyProof is not replaying one Northstar screen. It is still deliberately bounded to one work domain so the evidence can be explained and tested end to end.

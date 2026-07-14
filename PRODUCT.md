@@ -2,7 +2,7 @@
 
 ## One-sentence description
 
-PolicyProof turns a written business policy into human-reviewed controls, applies those controls to a fictional document-based business case, and shows the evidence behind every review result.
+PolicyProof turns a written business policy into human-reviewed controls, applies those controls to controlled fictional document-based cases, and shows the evidence behind every review result.
 
 ## Problem
 
@@ -14,14 +14,14 @@ The initial user is a finance, accounting, procurement, or internal-control prof
 
 ## Prototype scope
 
-The first working version supports one fictional procurement and vendor-change scenario. It is a demonstration of a reliable review workflow, not a general compliance platform.
+The first working version supports one fictional procurement and vendor-change policy with three controlled case profiles: Northstar mixed-risk, Meridian compliant, and Atlas evidence-deficient. They share one engine and interface. This demonstrates a reusable review workflow inside one domain, not a general compliance platform.
 
 ## Core journey
 
 1. Use the guaranteed deterministic demo or select Live GPT-5.6 mode when it is configured.
 2. Review a short fictional procurement policy.
 3. Review, edit, enable, and explicitly approve the applicable controls.
-4. Load the bundled fictional case or select fictional `.txt`, `.md`, or `.json` documents.
+4. Select one bundled fictional case from the Case Library or select fictional `.txt`, `.md`, or `.json` documents in Live mode.
 5. Use GPT-5.6 for policy interpretation and evidence extraction in Live mode.
 6. Use deterministic TypeScript logic for supported calculations and comparisons.
 7. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
@@ -30,7 +30,7 @@ The first working version supports one fictional procurement and vendor-change s
 10. Let the user confirm, reject, or accept an exception while preserving the original result.
 11. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
 12. Switch the complete application presentation between English and French without resetting the review.
-13. Follow an optional state-based judge checklist and export the current structured receipt through print, JSON, Markdown, or copy actions.
+13. Follow optional manual Judge Mode guidance and export the current structured receipt through print, JSON, Markdown, CSV, or copy actions.
 
 ## Status definitions
 

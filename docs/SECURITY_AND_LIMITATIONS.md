@@ -41,3 +41,15 @@ A production system would require secure identity, role-based authorization, ten
 ## Reporting a problem
 
 During the hackathon, record reproducible issues in the primary Codex task and include the mode, workflow step, fictional input, visible safe error category, and correlation/reference ID when available. Never include an API key or confidential document.
+
+## Competition-hardening boundaries
+
+- All three scenario fixtures are fictional and explicitly declare that they contain no real organization data.
+- Northstar has one sanitized real GPT-5.6 validation; Meridian and Atlas were not sent to the provider.
+- Scenario expectations validate fixtures in tests but are not a source for displayed results.
+- Scenario comparison and the audit trail are current-session state, not durable records or compliance logs.
+- Audit events contain timestamps, action types, scenario/control identifiers, and short safe descriptions only.
+- JSON receipts may include the safe audit trail. CSV includes only structured review and exact fictional evidence fields.
+- Judge Mode is guidance only and cannot perform user actions or invoke GPT-5.6.
+
+The prototype remains limited to one policy domain, three controlled profiles, seven supported control types, and text documents. It does not establish cross-industry generalization, complete model accuracy, or WCAG conformance. Manual screen-reader and production-host security checks remain required.

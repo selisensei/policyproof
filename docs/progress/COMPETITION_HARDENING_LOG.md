@@ -27,7 +27,7 @@
 - **Files changed:** Meridian and Atlas fixtures, scenario catalog/reset helper, workspace state owner, Case Library, scenario-aware Review/Documents/Decision/navigation panels, review intelligence, styles, tests, decision log, and this log.
 - **Tests run:** Scenario and workspace component tests; full unit/component suite; TypeScript typecheck; lint; production build; Playwright suite plus focused rerun after presentation regression fixes; `git diff --check`.
 - **Results:** PASS — all three fixtures validate and produce their declared outcomes through the shared engine; 15 files / 102 tests; typecheck, lint, and build pass; 7 of 11 Playwright tests initially passed, four presentation assertions failed, all four passed after restoring the stable Case Overview and threshold-change labels. Full Playwright is rerun at the release gate.
-- **Commit:** Pending second checkpoint.
+- **Commit:** `fd16f96` — `feat: add multi-case review library`.
 - **Blockers:** None.
 
 ## Phases 7–17 — Scenario-aware trust and judge workflow
@@ -37,5 +37,15 @@
 - **Files changed:** Competition toolbar, workspace orchestration, audit contract, receipt/CSV exports, evidence trust, styles, unit/component/browser tests, decision log, and this log.
 - **Tests run:** Full unit/component suite, typecheck, lint, production build, full 16-path Playwright suite, focused regression reruns, and screenshot capture/inspection.
 - **Results:** PASS — 16 files / 107 tests; typecheck, lint, and build pass; 16 Playwright tests pass. The first full browser run found one 768 px overflow caused by a closed comparison panel retaining its minimum width; a closed-panel rule and tablet layout fixed it. Eleven ignored screenshots were generated and inspected; apparent black bands in the visualizer were confirmed by direct PNG pixel inspection to be preview artifacts over white pixels, not application output.
-- **Commit:** Pending third checkpoint.
+- **Commit:** `4654e6d` — `feat: strengthen judge demonstration workflow`.
 - **Blockers:** None.
+
+## Phases 18–22 — Evaluation, narrative, video, visual review, and accessibility
+
+- **Objective:** Document scenario validity honestly, answer the hard-coding objection, and create a sub-2:50 judge-ready recording path.
+- **Decisions:** Distinguish deterministic, mocked, and real GPT-5.6 validation; keep Northstar as the detailed video path; show Meridian and Atlas briefly; treat screen-reader and deployed-host checks as manual blockers.
+- **Files changed:** Scenario validation matrix, README, product narrative, feature guide, architecture, security/limitations, Devpost, video script, demo runbook, judge Q&A, screenshot plan, testing strategy, decision log, and this log.
+- **Tests run:** Documentation consistency and timing review; Markdown whitespace check at checkpoint; full release gates are recorded in the final test commit.
+- **Results:** Scenario matrix complete; hard-coding objection answered without cross-industry claims; exact video script ends at 2:50; four screenshot passes documented; remaining manual accessibility checks are explicit.
+- **Commit:** Pending documentation checkpoint.
+- **Blockers:** Public deployment captures, assistive-technology review, video recording, and owner validation remain external submission tasks.

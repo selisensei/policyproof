@@ -1,6 +1,6 @@
 # PolicyProof
 
-PolicyProof is an OpenAI Build Week 2026 project for the Work & Productivity track. It turns a written business policy into reviewable controls, evaluates a fictional document-based business case, and keeps every result connected to supporting, contradictory, or missing evidence.
+PolicyProof is an OpenAI Build Week 2026 project for the Work & Productivity track. It turns a written business policy into reviewable controls, evaluates controlled fictional document-based cases, and keeps every result connected to supporting, contradictory, or missing evidence.
 
 ## Problem and solution
 
@@ -10,7 +10,9 @@ PolicyProof provides one focused, bilingual workspace to review controls, run a 
 
 ## Current status
 
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, policy and case-file folios, dense control and result registers, a split evidence inspector, review-intelligence panels, a prioritized human-decision queue, and a formal decision receipt. The optional judge checklist can be dismissed and reopened, while English and French switch immediately without resetting review state.
+The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A strict scenario contract now drives three profiles through the same procurement policy, seven controls, deterministic engine, evidence surfaces, and human-decision workflow: Northstar mixed-risk, Meridian compliant, and Atlas evidence-deficient. Results are calculated at runtime from scenario documents; expected fixture outcomes are test assertions and are never rendered as precomputed results.
+
+The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, a bilingual Case Library, policy and case-file folios, dense control and result registers, a split evidence inspector, review-intelligence panels, a prioritized human-decision queue, and a formal decision receipt. Optional Judge Mode guides real actions without performing them. Current-session case comparison, architecture, evidence-trust, and audit surfaces remain secondary and expose no score or ranking.
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
@@ -22,11 +24,11 @@ Mocked provider-error captures remain local-only and are not public product scre
 
 ## Product workflow
 
-1. Review the policy.
+1. Select one of three controlled fictional cases and review the shared policy.
 2. Review, edit, enable, or disable controls.
 3. Load the bundled demo case or select fictional local text documents.
 4. Run the deterministic review; use outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and filters to direct attention.
-5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, and read or export the decision receipt.
+5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, and print or export the decision receipt as JSON, Markdown, or a UTF-8 CSV evidence matrix.
 
 The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. The previous run is stored as one minimal, versioned local snapshot when browser storage is available; blocked storage never prevents the current review. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
 
@@ -219,14 +221,20 @@ See `docs/DEPLOYMENT.md` for the supervised Vercel configuration, environment bo
 - Selected local files remain in browser memory until an explicit Live analysis request.
 - Dependency build scripts are restricted and the production dependency audit currently reports no known vulnerabilities.
 
+## Is PolicyProof hard-coded for one demo?
+
+No display result is hard-coded for Northstar. Three strict scenario fixtures provide different suppliers, amounts, dates, approvers, document contents, bank-change states, and result profiles. One shared engine produces Northstar 3/2/1/1, Meridian 7/0/0/0, and Atlas 4/1/2/0 from their structured facts. Switching cases clears volatile results and decisions, preserves language, and isolates run-history keys by scenario.
+
+The scope is still intentionally narrow: one fictional procurement policy, three controlled case profiles, five text documents per case, and seven supported rule types. Northstar alone has a sanitized real GPT-5.6 validation; Meridian and Atlas are deterministic and mocked only. See `docs/evaluation/SCENARIO_VALIDATION_MATRIX.md`.
+
 ## Known limitations
 
-- The prototype covers one procurement and vendor-change case only.
-- Most browser review state is temporary and is lost on refresh. At most one minimal previous-run snapshot is kept locally when browser storage is available.
+- The prototype covers one procurement and vendor-change policy domain with three controlled fictional case profiles; it does not prove cross-industry generalization.
+- Most browser review state, completed-case comparison, and the safe audit trail are temporary and lost on refresh. At most one minimal previous-run snapshot per scenario is kept locally when browser storage is available.
 - Live GPT-5.6 passed one paid controlled evaluation with the fictional Northstar case; broader policies, documents, and repeated-run accuracy remain unvalidated.
 - Semantic controls that cannot be computed deterministically are not converted into a final automated approval.
 - Only `.txt`, `.md`, and `.json` local files are supported; there is no PDF or OCR workflow.
-- There is no deployed URL, persistence, authentication, collaboration, or external business-system integration.
+- There is no durable persistence, authentication, collaboration, or external business-system integration.
 - Automated keyboard, accessible-name, responsive overflow, and document-language checks pass; a final assistive-technology review remains before submission.
 - A strict Content Security Policy is deferred until it can be verified against the deployed Next.js runtime.
 

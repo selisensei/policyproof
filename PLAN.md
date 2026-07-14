@@ -4,13 +4,13 @@
 
 Preserve one dependable end-to-end workflow before adding breadth. The deterministic case is the guaranteed judging path; GPT-5.6 adds policy interpretation and evidence extraction behind human review and strict validation.
 
-## Current status — 2026-07-14
+## Current status — 2026-07-15
 
 Completed and locally verified:
 
 - Approved Proofroom evidence-led interface with compact header, horizontal workflow ledger, policy folio, control and document registers, split Review workbench, human-decision paper, and formal receipt
 - Immediate English/French switching with state preservation and document-language updates
-- Seven deterministic controls, five fictional case records, all four result statuses, evidence inspection, filtering, reruns, human decisions, and a receipt
+- Strict scenario architecture with Northstar, Meridian, and Atlas; five fictional records per case; one shared seven-control engine; all four result statuses; evidence inspection; reruns; human decisions; and receipts
 - Hardened local `.txt`, `.md`, and `.json` selection
 - Server-only GPT-5.6 Responses API integration with Structured Outputs and safe diagnostics
 - Mocked coverage for success, malformed data, missing parsed output, refusals, incomplete output, provider status classes, timeouts, connections, duplicate submission, and redaction
@@ -25,6 +25,7 @@ Completed and locally verified:
 - Evidence-led review intelligence: case overview, filterable outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison
 - Reviewer attention queue, evidence-integrity language, keyboard-operable visual controls, and dependency-free Markdown receipts
 - Complete product narrative, feature guide, architecture, data dictionary, user guide, security/limitations guide, final Devpost draft, video script, and demo runbook
+- Bilingual Case Library, current-session comparison, manual Judge Mode, architecture and evidence-trust explanations, safe session audit trail, and dependency-free CSV evidence matrix
 
 Still pending and requiring builder supervision:
 
@@ -38,13 +39,13 @@ Still pending and requiring builder supervision:
 | Phase | Goal | Status | Exit evidence |
 | --- | --- | --- | --- |
 | Foundation | Safe, understandable application baseline | Complete | Setup, strict types, lint, tests, lockfile, ignored secrets |
-| Fictional case | Stable review inputs and expected results | Complete | 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING tested |
+| Controlled scenarios | Three stable review profiles through one strict contract and shared engine | Complete | Northstar 3/2/1/1, Meridian 7/0/0/0, Atlas 4/1/2/0 tested |
 | Policy to controls | GPT-5.6 proposes structured human-reviewable controls | Live validated for Northstar | Seven controls returned and explicitly approved |
 | Evidence review | Extract evidence, validate excerpts, calculate supported checks | Live validated for Northstar | 14 exact excerpts and seven expected results pass |
 | Human decision | Preserve original outcome and reviewer judgment | Complete | Comment rules, rerun reset, and receipt tests pass |
 | Proofroom integration | Apply the approved evidence-led design without changing validated logic | Complete | Separate handoff commit, implementation mapping, three visual passes, responsive/motion tests, and final quality gates |
 | Review intelligence | Turn structured evidence into reviewer attention, causality, and local run comparison | Complete | Pure TypeScript derivations, semantic visuals, prioritized queue, responsive browser tests, and no new dependency |
-| Judge readiness | Polished, accessible, documented public demo | In progress | Proofroom integration and supervised live validation complete; manual assistive-technology review, deployment, and video pending |
+| Judge readiness | Polished, accessible, documented public demo | In progress | Case Library, Judge Mode, scenario matrix, Proofroom, and supervised Northstar validation complete; manual assistive-technology review, deployment, and video pending |
 
 ## Next supervised sequence
 

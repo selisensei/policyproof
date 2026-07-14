@@ -87,3 +87,32 @@ Return browser zoom to 100%. At narrow widths, use the horizontal step strip and
 2. Confirm the recording contains no credential, personal path, private tab, or provider request reference.
 3. Check the final video duration and public playback in a private browser window.
 4. Complete the public URL, repository URL, YouTube URL, and primary `/feedback` Session ID fields in the submission checklist.
+
+## Competition-hardened path
+
+1. Start with the Case Library and explain the three controlled profiles without quoting expected counts.
+2. Enter Judge Mode. Confirm that it is guidance only and that Exit Judge Mode remains visible.
+3. Run Northstar at EUR 10,000 and verify 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING.
+4. Open Currency consistency and verify the exact `12,480 EUR` and `12,480 USD` excerpts.
+5. Record one human decision and show the formal receipt plus JSON, Markdown, and CSV actions.
+6. Rerun at EUR 15,000 and verify Approval changes from FAIL to PASS in Run Comparison.
+7. Open completed-case comparison. Label it as current-session results with no score or ranking.
+8. Briefly show Meridian's seven passes and Atlas's one failure plus two missing items.
+9. Open the architecture explanation: GPT-5.6 → TypeScript → Human.
+10. Exit Judge Mode and confirm normal state remains valid.
+
+## Exact controlled profiles
+
+- **Northstar:** five documents; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING at EUR 10,000; Approval becomes PASS at EUR 15,000.
+- **Meridian:** five documents; 7 PASS; amount EUR 8,750; no bank change; complete delivery evidence.
+- **Atlas:** five documents; 4 PASS, 1 FAIL, 2 MISSING; amount EUR 18,400; missing delivery and independent bank verification.
+
+Northstar has deterministic, mocked, and real GPT-5.6 validation. Meridian and Atlas have deterministic and mocked validation only.
+
+## Competition recovery
+
+- If Judge Mode is on the wrong case, exit it, resolve or discard any pending decision with the normal confirmation, then re-enter.
+- If comparison is empty, run a scenario once. Do not describe fixture expectations as session results.
+- If a scenario switch confirmation appears, explain that human decisions are protected from accidental loss.
+- If a popup feels dense, close it with its summary and continue through the normal Review surface.
+- If live mode is unavailable, stay in deterministic mode; no live call is required for the public path.

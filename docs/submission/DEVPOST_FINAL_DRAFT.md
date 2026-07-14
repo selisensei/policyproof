@@ -10,15 +10,19 @@ Finance, procurement, audit, and internal-control professionals routinely compar
 
 ## What it does
 
-PolicyProof provides one focused five-step workspace for a fictional Northstar procurement and vendor-change case:
+PolicyProof provides one focused five-step workspace for one fictional procurement policy and three controlled case profiles:
 
 1. read the procurement policy;
 2. review and approve seven structured controls;
-3. inspect five fictional case documents;
+3. select Northstar mixed-risk, Meridian compliant, or Atlas evidence-deficient and inspect five fictional case documents;
 4. run the review and investigate PASS, FAIL, MISSING, and WARNING outcomes;
 5. record human decisions and export a decision receipt.
 
 The Review workspace adds evidence-led intelligence without becoming a generic dashboard. It shows case outcome composition, evidence coverage, an event chronology, threshold sensitivity, a prioritized reviewer queue, and a comparison with the previous local run. Search and filters narrow the same underlying results. Selecting a visual always leads back to a control or its exact evidence.
+
+The three profiles use the same strict scenario schema, policy, seven control kinds, deterministic engine, evidence inspector, and human-decision receipt. Northstar produces a mixed 3/2/1/1 profile, Meridian produces seven supported passes, and Atlas produces one approval failure plus two explicit missing-evidence outcomes. These results are calculated at runtime from each case's documents. Fixture expectations exist only as regression assertions.
+
+An optional Judge Mode guides the real demonstration without automating actions. Current-session scenario comparison, the GPT-5.6 → TypeScript → Human architecture view, evidence-trust explanations, and a safe local audit trail make the system inspectable. There is no compliance score, AI confidence percentage, or ranking.
 
 At the default EUR 10,000 threshold, the deterministic demonstration produces 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. Raising the threshold to EUR 15,000 changes only the approval control from FAIL to PASS. That visible causal change proves the review is recalculated rather than replayed from a fixed screen.
 
@@ -57,8 +61,10 @@ The hardest challenge was preserving trust while combining model interpretation 
 - A complete evidence-first workflow covering all four review statuses.
 - Exact-source validation and safe model-error classification.
 - A bilingual English/French interface that preserves review state.
-- Accessible keyboard navigation, reduced-motion behavior, print output, JSON and Markdown exports.
+- Accessible keyboard navigation, reduced-motion behavior, print output, JSON, Markdown, and UTF-8 CSV exports.
 - A meaningful threshold rerun and previous-run comparison derived from real state.
+- Three controlled case profiles processed by one shared engine and interface.
+- Manual Judge Mode, current-session comparison, architecture, evidence-trust, and safe audit surfaces.
 - A deterministic fallback that makes no OpenAI request.
 - Automated unit, contract, component, browser, security, and production-build checks.
 
@@ -68,7 +74,9 @@ A useful AI review product does not need to hide uncertainty. Separating semanti
 
 ## Limitations
 
-PolicyProof is a hackathon prototype and review aid, not a compliance certification or autonomous approval system. It supports one fictional case and text-based `.txt`, `.md`, and `.json` files only. It has no PDF/OCR ingestion, durable collaboration, identity, authorization, external integrations, or production audit store. Browser storage retains at most one minimal local comparison snapshot and may be unavailable. The deterministic demo is the reliable judging path; live behavior still depends on valid model access, quota, and provider availability.
+PolicyProof is a hackathon prototype and review aid, not a compliance certification or autonomous approval system. It supports one fictional procurement policy, three controlled case profiles, seven rule types, and text-based `.txt`, `.md`, and `.json` files only. Northstar alone has real GPT-5.6 validation; Meridian and Atlas are deterministic and mocked. This does not prove cross-industry generalization or broader model accuracy.
+
+It has no PDF/OCR ingestion, durable collaboration, identity, authorization, external integrations, or production audit store. Current-session comparison and audit events disappear on refresh. Browser storage retains at most one minimal comparison snapshot per scenario and may be unavailable. The deterministic demo is the reliable judging path; live behavior still depends on valid model access, quota, and provider availability.
 
 ## What's next
 

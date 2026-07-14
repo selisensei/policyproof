@@ -258,3 +258,29 @@ Do not claim full WCAG compliance.
 7. Change the threshold to EUR 15,000 and rerun.
 8. Verify Approval threshold is PASS and prior decisions were visibly reset.
 9. Reset controls and verify defaults and empty review state.
+
+## Competition-hardening coverage — 2026-07-15
+
+The scenario release adds strict automated coverage for:
+
+- valid Northstar, Meridian, and Atlas fixtures;
+- duplicate IDs, unknown references, non-verbatim excerpts, and stale-state reset;
+- exact runtime outcome profiles, evidence coverage, chronology, reviewer queue, and receipts;
+- Case Library selection, destructive-switch confirmation, language preservation, and semantic buttons;
+- current-session comparison with no score or ranking;
+- manual Judge Mode entry, exit, steps, no auto-decision, and no GPT request;
+- GPT-5.6/TypeScript/Human architecture text equivalent;
+- verified, missing, and rejected evidence-trust explanations;
+- bounded schema-validated safe audit events and clear action;
+- UTF-8 CSV headers, commas, quotes, line breaks, Unicode, decisions, and comments;
+- Meridian, Atlas, scenario switching, 390 px mobile, keyboard, reduced motion, 768 px tablet, and effective 200% zoom in Playwright.
+
+`tests/e2e/competition-hardening.spec.ts` writes only to ignored `test-results/competition-hardening/`. These captures are development review artifacts and must not be committed.
+
+Manual checks still required before public submission:
+
+1. real screen-reader pass on the deployed site;
+2. real browser 200% zoom and mobile-device pass;
+3. deployed print preview and downloaded JSON/Markdown/CSV inspection;
+4. production-host headers and deterministic smoke test;
+5. public video and screenshot review for credentials, paths, or private tabs.

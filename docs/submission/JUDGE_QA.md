@@ -55,3 +55,35 @@ Current review state is temporary. When available, browser storage keeps only th
 ## What would a production version require?
 
 Validated ingestion for real formats, organization-specific control governance, secure identity and authorization, durable audit storage, privacy and retention controls, monitoring, model evaluations, broader security review, and legal/compliance validation. Those systems are intentionally outside this hackathon prototype.
+
+## Is PolicyProof hard-coded for Northstar?
+
+No displayed result comes from a Northstar result array. Northstar, Meridian, and Atlas are strict scenario fixtures with different suppliers, amounts, dates, approvers, evidence, bank-change states, and controlled profiles. The same `runDeterministicReview()` function produces all results at runtime. Expected fixture outcomes are used only by tests. The honest remaining boundary is one procurement policy domain and seven supported control types.
+
+## Why use three controlled cases instead of arbitrary uploads in the demo?
+
+Controlled fictional cases make exact evidence and expected behavior reproducible for judges. They demonstrate reuse without introducing confidential data or pretending the prototype supports every policy and format. The existing Live path still supports selected local text documents after human-approved GPT-5.6 controls.
+
+## Which cases were validated with real GPT-5.6?
+
+Northstar only. Its sanitized live report records seven reviewed controls and 14 exact-source evidence items. Meridian and Atlas were not sent to the provider; they are deterministic and mocked validations. We do not claim broader live accuracy.
+
+## Does Judge Mode fake or automate the demo?
+
+No. It is a bilingual 12-point guide rendered over the production components. It cannot run a review, change a threshold, call GPT-5.6, or record a human decision. Exit Judge Mode restores the unchanged normal workspace.
+
+## What is the scenario comparison?
+
+It is an optional current-session view of cases actually run in the browser. It shows counts, unresolved decisions, and exact-source coverage. It contains no compliance score, risk ranking, or AI accuracy metric, and it disappears on refresh.
+
+## Why is the evidence trusted?
+
+The source document ID must be known, the excerpt must occur verbatim in the submitted text, and the locator and relationship must validate. Missing evidence has no fabricated source. Rejected references remain rejected. Deterministic rules and human judgment—not the trust label—produce the final conclusion.
+
+## Is the audit trail production-grade?
+
+No. It is a transparent, optional, bounded session trail for the prototype. It stores timestamp, action, scenario ID, optional control ID, and a short safe description. It excludes document bodies, credentials, prompts, and provider payloads. Production would require durable, access-controlled audit storage.
+
+## What can be exported?
+
+The receipt can be printed or exported as JSON and Markdown. A UTF-8 CSV evidence matrix contains structured control, evidence, and reviewer fields with correct escaping. JSON includes the concise safe audit trail; no credential or provider payload is exported.

@@ -28,3 +28,16 @@ Keep API-unavailable and safely mocked provider-error screenshots in ignored `te
 Confirm exact excerpts are unchanged, counts match the tested fixture, status meaning is visible without color alone, French copy fits, focus rings are absent unless intentionally demonstrating keyboard use, and no unverified Live success claim appears.
 
 The local comparison source is `docs/design/proofroom-ui/codex-refs/`. Three ignored implementation passes use the same nine filenames under `test-results/proofroom-integration/pass-1/`, `pass-2/`, and `pass-3/`. Recreate public images from the production build; do not publish local diagnostic captures.
+
+## Competition-hardening passes
+
+All development captures below remain ignored under `test-results/competition-hardening/`:
+
+1. **Case Library:** `case-library-desktop-en.png` and `case-library-mobile-fr.png` verify the compact register, bilingual copy, provenance, assumptions, and mobile reflow.
+2. **Scenario diversity:** `northstar-review-1280x720.png`, `meridian-review.png`, and `atlas-review.png` verify distinct runtime profiles, evidence, decisions, and receipts.
+3. **Judge workflow:** `judge-mode-desktop-1280x720.png` and `judge-mode-mobile-fr.png` verify manual guidance, visible exit, above-the-fold composition, French copy, keyboard targets, and no business-result change.
+4. **Trust and comparison:** `scenario-comparison.png`, `architecture-explanation.png`, `audit-trail.png`, and `northstar-receipt.png` verify current-session labeling, responsibility boundaries, safe metadata, exports, and human oversight.
+
+Direct PNG inspection confirmed that two transient black bands shown by the local image preview were preview artifacts over opaque white pixels, not application output. Production candidates must still be recaptured from the deployed build and inspected independently.
+
+Add these public candidates only after deployment: Case Library, Northstar, Meridian, Atlas, completed-case comparison, Judge Mode, architecture, Decision, Receipt, and mobile. Do not publish `test-results` paths or development screenshots.

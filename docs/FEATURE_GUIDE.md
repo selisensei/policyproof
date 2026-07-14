@@ -72,3 +72,23 @@ The reviewer can confirm, reject, or accept an exception. Overrides require a co
 ## Safe feedback
 
 Empty, validation, loading, missing-configuration, provider authentication, permission, quota, rate-limit, timeout, connection, refusal, malformed-output, and schema failures have safe user-facing handling. Provider details and credentials remain server-side.
+
+## Case Library
+
+The compact bilingual register selects Northstar, Meridian, or Atlas. It shows purpose, policy version, document count, profile, fictional-data provenance, assumptions, simplifications, and intentional gaps without revealing result counts before a run. Switching after a human decision requires confirmation and clears volatile review state while preserving language.
+
+## Scenario comparison
+
+The optional comparison includes only cases run during the current browser session. It shows the four outcome counts, open human decisions, and exact-source verification coverage. It has no score, ranking, or precomputed fixture row. Selecting the current case returns to its Review surface; selecting another case applies the normal safe reset.
+
+## Judge Mode and architecture
+
+Judge Mode is a 12-point bilingual manual guide over the production workspace. It cannot call GPT-5.6, run a review, change a threshold, or record a decision. The architecture explanation describes the validated split: GPT-5.6 interprets and extracts, TypeScript checks objective rules, and a human confirms, rejects, or accepts an exception.
+
+## Evidence trust and audit trail
+
+The evidence inspector explains why an exact reference is trusted, why a required source is missing, or why a reference is rejected. The optional session audit trail records safe timestamps, actions, scenario IDs, optional control IDs, and short descriptions—never document bodies or provider payloads. It can be cleared and is included in JSON receipts.
+
+## CSV evidence matrix
+
+The decision toolbar exports a dependency-free UTF-8 CSV with case, control, status, severity, evidence type, document, locator, exact excerpt, reviewer decision, and reviewer comment. Headers follow the receipt language; source excerpts remain verbatim.
