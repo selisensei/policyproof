@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   buildScenarioControls,
   buildScenarioDocuments,
+  createScenarioResetState,
   deriveScenarioContext,
   loadScenario,
   safeValidateScenario,
   validateScenario,
 } from "@/src/domain/scenario-schema";
-import { northstarScenario, reviewScenarios } from "@/src/fixtures/scenarios";
+import { atlasScenario, meridianScenario, northstarScenario, reviewScenarios } from "@/src/fixtures/scenarios";
+import { createDecisionReceipt } from "@/src/lib/decision-receipt";
+import { buildEvidenceCoverage, buildReviewerQueue, extractChronology } from "@/src/lib/review-intelligence";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 import { summarizeResults } from "@/src/lib/review-summary";
 
@@ -58,5 +61,51 @@ describe("review scenario architecture", () => {
       "Purchase order amount: 12,480 EUR.",
       "Invoice amount: 12,480 USD.",
     ]);
+  });
+
+  it.each([northstarScenario, meridianScenario, atlasScenario])("validates and evaluates $id with the shared engine", (scenario) => {
+    const validated = validateScenario(scenario);
+    const results = runDeterministicReview(buildScenarioControls(validated), buildScenarioDocuments(validated));
+    expect(results.map(({ controlId, status }) => ({ controlId, status }))).toEqual(scenario.expectedOutcomes);
+    expect(summarizeResults(results)).toMatchObject(scenario.expectedOutcomeCounts);
+    expect(buildEvidenceCoverage(results, scenario.documents)).toHaveLength(7);
+    expect(extractChronology(scenario.documents).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("resets stale state while preserving the selected language", () => {
+    const reset = createScenarioResetState(atlasScenario, "fr");
+    expect(reset.locale).toBe("fr");
+    expect(reset.scenario.id).toBe("atlas-incomplete-evidence");
+    expect(reset.selectedControlId).toBeNull();
+    expect(reset.filter).toBe("ALL");
+    expect(reset.threshold).toBe("10000");
+    expect(reset.controls).not.toBe(atlasScenario.controls);
+    expect(reset.documents).not.toBe(atlasScenario.documents);
+  });
+
+  it("keeps Meridian evidence complete and Atlas missing evidence explicit", () => {
+    const meridianResults = runDeterministicReview(buildScenarioControls(meridianScenario), buildScenarioDocuments(meridianScenario));
+    expect(meridianResults.every((result) => result.status === "PASS" && result.missingEvidence.length === 0)).toBe(true);
+
+    const atlasResults = runDeterministicReview(buildScenarioControls(atlasScenario), buildScenarioDocuments(atlasScenario));
+    expect(atlasResults.find((result) => result.controlId === "CTRL-DELIVERY")?.missingEvidence).toHaveLength(1);
+    expect(atlasResults.find((result) => result.controlId === "CTRL-BANK")?.missingEvidence).toHaveLength(1);
+    expect(buildReviewerQueue(atlasResults).slice(0, 3).map((item) => item.controlId)).toEqual(expect.arrayContaining(["CTRL-APPROVAL", "CTRL-DELIVERY", "CTRL-BANK"]));
+  });
+
+  it.each([meridianScenario, atlasScenario])("creates a scenario-specific receipt for $id", (scenario) => {
+    const results = runDeterministicReview(buildScenarioControls(scenario), buildScenarioDocuments(scenario));
+    const receipt = createDecisionReceipt({
+      results,
+      policyName: scenario.policy.title,
+      policyVersion: scenario.policy.version,
+      caseName: scenario.caseName.en,
+      selectedLanguage: "en",
+      runMode: "DETERMINISTIC_DEMO",
+      generatedAt: "2026-07-14T08:00:00.000Z",
+      enabledControlCount: scenario.controls.length,
+    });
+    expect(receipt.caseName).toBe(scenario.caseName.en);
+    expect(receipt.summary).toMatchObject(scenario.expectedOutcomeCounts);
   });
 });

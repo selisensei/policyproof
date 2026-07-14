@@ -327,3 +327,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Define a strict Zod `ReviewScenario` containing localized case context, one policy, shared supported controls, exact fixture documents and facts, expected validation outcomes, evidence relationships, thresholds, guided highlights, assumptions, limitations, and fictional-data provenance. Expected outcomes are test assertions only; the shared deterministic engine remains the sole source of displayed results. Isolate minimal run-history keys by scenario ID.
 - **Rationale:** One validated scenario boundary proves reuse without duplicating the engine, adding a database, or broadening the policy domain.
 - **Consequences:** Northstar remains the default and only live-GPT-5.6-validated case. Additional scenarios may reuse the same procurement policy and seven control types, but each must pass schema, exact-excerpt, engine-result, visualization, reset, and browser tests. Malformed fixtures fail closed before reaching the UI.
+
+## D036 - Prove reuse with three controlled procurement profiles
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** A reusable scenario contract alone does not let a judge verify that the engine and evidence surfaces behave differently for distinct files.
+- **Decision:** Keep Northstar as the default mixed-risk case and add Meridian as a complete below-threshold case plus Atlas as an incomplete above-threshold case. Present them in a compact bilingual case register with fictional-data provenance and assumptions. Do not expose expected outcome counts before a review runs. Reset volatile review state on switching, require confirmation when human decisions would be lost, and preserve the interface language.
+- **Rationale:** Three deliberately controlled profiles provide strong, testable evidence of reuse while staying inside one procurement policy, seven existing control types, one shared engine, and one client-side workspace.
+- **Consequences:** Northstar remains the only scenario validated by a real GPT-5.6 run. Meridian and Atlas are deterministic and mocked fixtures only. Their displayed results must always be calculated at runtime; schema expectations remain test assertions and never feed the UI.

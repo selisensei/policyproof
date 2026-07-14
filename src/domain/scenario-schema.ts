@@ -147,6 +147,17 @@ export type ScenarioContext = {
   defaultThreshold: number;
 };
 
+export type ScenarioResetState = {
+  scenario: ReviewScenario;
+  locale: "en" | "fr";
+  policyText: string;
+  controls: ControlDefinition[];
+  documents: CaseDocument[];
+  threshold: string;
+  selectedControlId: null;
+  filter: "ALL";
+};
+
 export function validateScenario(input: unknown): ReviewScenario {
   return ReviewScenarioSchema.parse(input);
 }
@@ -180,4 +191,18 @@ export function buildScenarioDocuments(scenario: ReviewScenario): CaseDocument[]
 
 export function buildScenarioControls(scenario: ReviewScenario): ControlDefinition[] {
   return structuredClone(scenario.controls);
+}
+
+export function createScenarioResetState(scenario: ReviewScenario, locale: "en" | "fr"): ScenarioResetState {
+  const validated = ReviewScenarioSchema.parse(structuredClone(scenario));
+  return {
+    scenario: validated,
+    locale,
+    policyText: validated.policy.text,
+    controls: buildScenarioControls(validated),
+    documents: buildScenarioDocuments(validated),
+    threshold: String(validated.thresholdParameters.defaultAmount),
+    selectedControlId: null,
+    filter: "ALL",
+  };
 }

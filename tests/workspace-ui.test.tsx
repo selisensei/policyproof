@@ -251,6 +251,46 @@ describe("PolicyProof workspace interactions", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:receipt");
   });
 
+  it("runs Meridian and Atlas through the same case library and review surface", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    await user.click(screen.getByRole("button", { name: /Meridian Office Services/ }));
+    expect(screen.getByText(/same engine · distinct evidence profiles/i)).toBeTruthy();
+    await runReviewFromControls(user);
+    expect(screen.getByRole("button", { name: "Show 7 PASS results" })).toBeTruthy();
+    expect(screen.queryByText(/Northstar Facilities vendor change/, { selector: "h3" })).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Policy" }));
+    await user.click(screen.getByRole("button", { name: /Atlas Workplace Supply/ }));
+    await runReviewFromControls(user);
+    expect(screen.getByRole("button", { name: "Show 4 PASS results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 1 FAIL results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 2 MISSING results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Inspect Independent bank verification" })).toBeTruthy();
+  });
+
+  it("confirms destructive scenario changes and preserves the interface language", async () => {
+    const user = userEvent.setup();
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+    renderWorkspace();
+
+    await runReviewFromControls(user);
+    await user.click(screen.getByRole("button", { name: "Decision" }));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Français" }));
+    await user.click(screen.getByRole("button", { name: "Politique" }));
+    const meridian = screen.getByRole("button", { name: /Meridian Office Services/ });
+    await user.click(meridian);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: /Northstar Facilities/ }).getAttribute("aria-pressed")).toBe("true");
+    await user.click(meridian);
+    expect(confirm).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("button", { name: /Meridian Office Services/ }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Français" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Revue" })).toBeTruthy();
+  });
+
   it("keeps mocked GPT-5.6 proposals unapproved until human review", async () => {
     const proposal = {
       id: "CTRL-MOCK",

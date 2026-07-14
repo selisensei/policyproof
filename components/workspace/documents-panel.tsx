@@ -11,7 +11,7 @@ function documentDate(document: CaseDocument): string {
 
 function documentParty(document: CaseDocument): string {
   const fact = document.facts.find((candidate) => candidate.key === "supplierName");
-  return typeof fact?.value === "string" ? fact.value : document.type === "WORKFLOW" ? "Internal" : "Northstar Facilities Ltd.";
+  return typeof fact?.value === "string" ? fact.value : document.type === "WORKFLOW" ? "Internal" : "—";
 }
 
 export function DocumentsPanel({
@@ -24,6 +24,7 @@ export function DocumentsPanel({
   onUpdateLabel,
   onLoadDemo,
   onResetDemo,
+  caseName,
 }: {
   mode: AppMode;
   demoDocuments: CaseDocument[];
@@ -34,6 +35,7 @@ export function DocumentsPanel({
   onUpdateLabel: (id: string, label: string) => void;
   onLoadDemo: () => void;
   onResetDemo: () => void;
+  caseName: string;
 }) {
   const { locale, t } = useLocale();
   const isLive = mode === "LIVE_GPT_5_6";
@@ -43,7 +45,7 @@ export function DocumentsPanel({
     <SectionShell
       id="documents"
       step={t("step.label", { number: 3 })}
-      title={locale === "fr" ? "Dossier — changement de fournisseur Northstar Facilities" : "Case file — Northstar Facilities vendor change"}
+      title={`${locale === "fr" ? "Dossier" : "Case file"} — ${caseName}`}
       description={isLive ? t("documents.help.live") : `${demoDocuments.length} ${locale === "fr" ? "documents fictifs" : "fixture documents"} · ${factCount} ${locale === "fr" ? "faits extraits" : "extracted facts"}`}
       action={<div className="heading-actions">{isLive && <button type="button" onClick={onLoadDemo} className="primary-button">{t("action.loadDemo")}</button>}{!isLive && <button type="button" onClick={onResetDemo} className="secondary-button">{t("action.resetDemo")}</button>}</div>}
     >

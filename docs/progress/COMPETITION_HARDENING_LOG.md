@@ -17,5 +17,15 @@
 - **Files changed:** Scenario schema and catalog, Northstar scenario contract, engine generalization, scenario-aware run snapshots, tests, decision log, data dictionary, and this log.
 - **Tests run:** Focused scenario, deterministic-engine, and review-intelligence tests; TypeScript typecheck.
 - **Results:** PASS — 3 files / 22 tests and typecheck.
-- **Commit:** Pending first checkpoint.
+- **Commit:** `7dee913` — `refactor: generalize PolicyProof scenario architecture`.
+- **Blockers:** None.
+
+## Phases 2–6 — Northstar migration, additional cases, library, and provenance
+
+- **Objective:** Prove the shared workflow with mixed-risk, compliant, and evidence-deficient fictional files.
+- **Decisions:** Preserve Northstar behavior; add Meridian and Atlas with exact excerpts; keep expected counts validation-only; use a compact bilingual register; preserve language and confirm destructive switches.
+- **Files changed:** Meridian and Atlas fixtures, scenario catalog/reset helper, workspace state owner, Case Library, scenario-aware Review/Documents/Decision/navigation panels, review intelligence, styles, tests, decision log, and this log.
+- **Tests run:** Scenario and workspace component tests; full unit/component suite; TypeScript typecheck; lint; production build; Playwright suite plus focused rerun after presentation regression fixes; `git diff --check`.
+- **Results:** PASS — all three fixtures validate and produce their declared outcomes through the shared engine; 15 files / 102 tests; typecheck, lint, and build pass; 7 of 11 Playwright tests initially passed, four presentation assertions failed, all four passed after restoring the stable Case Overview and threshold-change labels. Full Playwright is rerun at the release gate.
+- **Commit:** Pending second checkpoint.
 - **Blockers:** None.

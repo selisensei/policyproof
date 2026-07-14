@@ -10,12 +10,15 @@ const steps: Array<{ id: WorkflowStep; number: number; key: "step.policy" | "ste
   { id: "decision", number: 5, key: "step.decision" },
 ];
 
-export function StepNavigation({ current, onChange, enabledControls, documentCount, summary }: {
+export function StepNavigation({ current, onChange, enabledControls, documentCount, summary, caseReference, policyReference, policyVersion }: {
   current: WorkflowStep;
   onChange: (step: WorkflowStep) => void;
   enabledControls: number;
   documentCount: number;
   summary: ResultSummary;
+  caseReference: string;
+  policyReference: string;
+  policyVersion: string;
 }) {
   const { t } = useLocale();
   const currentIndex = steps.findIndex((step) => step.id === current);
@@ -45,7 +48,7 @@ export function StepNavigation({ current, onChange, enabledControls, documentCou
           })}
         </ol>
         <p className="context-summary" aria-label={t("a11y.summary")}>
-          NORTHSTAR <span>·</span> POL-2026-004 v1.0 <span>·</span> CTRL {enabledControls} <span>·</span> DOC {documentCount}
+          {caseReference} <span>·</span> {policyReference} {policyVersion} <span>·</span> CTRL {enabledControls} <span>·</span> DOC {documentCount}
           {summary.total > 0 && <> <span>·</span> <b data-status="PASS">{summary.PASS}✓</b> <b data-status="FAIL">{summary.FAIL}×</b> <b data-status="MISSING">{summary.MISSING}⌀</b> <b data-status="WARNING">{summary.WARNING}!</b> <span>·</span> DEC {summary.reviewed}/{summary.total}</>}
         </p>
       </div>

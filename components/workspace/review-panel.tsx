@@ -1,11 +1,10 @@
 import { useSyncExternalStore, useState, type KeyboardEvent } from "react";
-import type { CaseDocument, ControlResult, EvidenceReference } from "@/src/domain/schemas";
+import type { CaseDocument, ControlDefinition, ControlResult, EvidenceReference } from "@/src/domain/schemas";
 import type { AppMode } from "@/components/workspace/types";
 import type { ResultFilter, ResultSummary } from "@/src/lib/review-summary";
 import { controlRef, decisionRef, evidenceCount, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
 import { StatusBadge } from "@/components/workspace/status-badge";
-import { demoPolicy } from "@/src/fixtures/demo-case";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedMissingEvidence, localizedResultExplanation } from "@/src/i18n/translations";
 import { ReviewIntelligencePanels } from "@/components/workspace/review-intelligence-panels";
@@ -28,7 +27,7 @@ function useMobileReview() {
   return useSyncExternalStore(subscribeMobile, getMobileSnapshot, () => false);
 }
 
-export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documents, documentTypes, changedControlId, currentRun, previousRun, onFilterChange, onSelectResult, onClearHistory, onGoDecision }: {
+export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documents, controls, policyText, caseName, caseReference, documentTypes, changedControlId, currentRun, previousRun, onFilterChange, onSelectResult, onClearHistory, onGoDecision }: {
   results: ControlResult[];
   visibleResults: ControlResult[];
   summary: ResultSummary;
@@ -37,6 +36,10 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
   threshold: string;
   mode: AppMode;
   documents: CaseDocument[];
+  controls: ControlDefinition[];
+  policyText: string;
+  caseName: string;
+  caseReference: string;
   documentTypes: Record<string, string>;
   changedControlId: string | null;
   currentRun: RunSnapshot | null;
@@ -88,6 +91,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
       threshold={threshold}
       mode={mode}
       documents={documents}
+      policyText={policyText}
       documentTypes={documentTypes}
       changed={changedControlId === selectedResult.controlId}
       onGoDecision={onGoDecision}
@@ -103,9 +107,12 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
           <ReviewIntelligencePanels
             results={results}
             documents={documents}
+            controls={controls}
             summary={summary}
             threshold={Number(threshold)}
             mode={mode}
+            caseName={caseName}
+            caseReference={caseReference}
             currentRun={currentRun}
             previousRun={previousRun}
             onFilterChange={onFilterChange}
@@ -155,12 +162,12 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
   );
 }
 
-function EvidenceDetails({ result, threshold, mode, documents, documentTypes, changed, onGoDecision }: { result: ControlResult; threshold: string; mode: AppMode; documents: CaseDocument[]; documentTypes: Record<string, string>; changed: boolean; onGoDecision: () => void }) {
+function EvidenceDetails({ result, threshold, mode, documents, policyText, documentTypes, changed, onGoDecision }: { result: ControlResult; threshold: string; mode: AppMode; documents: CaseDocument[]; policyText: string; documentTypes: Record<string, string>; changed: boolean; onGoDecision: () => void }) {
   const { locale, t } = useLocale();
   const [copied, setCopied] = useState<string | null>(null);
   const title = localizedControl(result.controlId, locale, result.title).title;
   const sequence = Number(requirementRef(result.controlId).replace("R-", ""));
-  const requirement = Number.isFinite(sequence) ? demoPolicy.text.split("\n")[sequence - 1]?.replace(/^\d+\.\s*/, "") : null;
+  const requirement = Number.isFinite(sequence) ? policyText.split("\n")[sequence - 1]?.replace(/^\d+\.\s*/, "") : null;
   const integrity = assessEvidenceIntegrity(result, documents);
 
   async function copy(key: string, value: string) {
@@ -178,7 +185,7 @@ function EvidenceDetails({ result, threshold, mode, documents, documentTypes, ch
     <aside aria-label={t("a11y.evidence")} className="evidence-canvas">
       <div className="evidence-chain"><span>{requirementRef(result.controlId)}</span><i /><span>{controlRef(result.controlId)}</span><i /><StatusBadge status={result.status} /><small>{locale === "fr" ? "DOSSIER DE PREUVES" : "EVIDENCE CASE FILE"}</small></div>
       <div className="evidence-heading"><div><h3>{title}</h3><p>{localizedResultExplanation(result.controlId, result.status, result.explanation, locale, threshold)}</p></div></div>
-      {changed && <div className="conclusion-changed" role="status"><strong>{locale === "fr" ? "Conclusion modifiée — CTRL-01 ÉCHEC → CONFORME" : "Conclusion changed — CTRL-01 FAIL → PASS"}</strong><p>{locale === "fr" ? "12 480 EUR ne dépasse plus le seuil de 15 000 EUR. Tous les autres résultats sont inchangés et les décisions précédentes ont été réinitialisées." : "12,480 EUR no longer exceeds the 15,000 EUR threshold. All other results are unchanged and previous reviewer decisions were reset."}</p></div>}
+      {changed && <div className="conclusion-changed" role="status"><strong>{locale === "fr" ? `Conclusion modifiée — ${controlRef(result.controlId)} ÉCHEC → ${t(`status.${result.status}`).toLocaleUpperCase("fr-FR")}` : `Conclusion changed — ${controlRef(result.controlId)} FAIL → ${result.status}`}</strong><p>{locale === "fr" ? `La conclusion reflète maintenant le seuil actif de ${Number(threshold).toLocaleString("fr-FR")} EUR. Les décisions humaines précédentes ont été réinitialisées avant cette nouvelle exécution.` : `The conclusion now reflects the active ${Number(threshold).toLocaleString("en-US")} EUR threshold. Previous human decisions were reset before this new run.`}</p></div>}
       {requirement && <blockquote className="requirement-quote"><span>{locale === "fr" ? "EXTRAIT SOURCE (EN)" : "SOURCE REQUIREMENT"}</span>“{requirement}”</blockquote>}
       <div className="evidence-integrity" data-state={integrity.state} aria-label={locale === "fr" ? "Intégrité des preuves" : "Evidence integrity"}>
         <strong>{integrity.state === "VERIFIED" ? (locale === "fr" ? "✓ Sources exactes vérifiées" : "✓ Exact sources verified") : integrity.state === "MISSING" ? (locale === "fr" ? "○ Preuve exigée manquante" : "○ Required evidence missing") : (locale === "fr" ? "× Référence de preuve rejetée" : "× Evidence reference rejected")}</strong>

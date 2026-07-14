@@ -42,7 +42,7 @@ export const northstarScenario = validateScenario({
   ],
   thresholdParameters: { defaultAmount: 10_000, comparisonAmount: 15_000, currency: "EUR" },
   guidedDemo: {
-    defaultSelectedControlId: "CTRL-CURRENCY",
+    defaultSelectedControlId: "CTRL-APPROVAL",
     highlights: [
       { id: "outcomes", controlId: null, copy: { en: "Inspect the mixed 3/2/1/1 outcome profile.", fr: "Examiner le profil mixte 3/2/1/1." } },
       { id: "currency", controlId: "CTRL-CURRENCY", copy: { en: "Compare the exact EUR and USD excerpts.", fr: "Comparer les extraits exacts en EUR et USD." } },

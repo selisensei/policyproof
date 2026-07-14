@@ -1,4 +1,4 @@
-import type { CaseDocument, ControlResult } from "@/src/domain/schemas";
+import type { CaseDocument, ControlDefinition, ControlResult } from "@/src/domain/schemas";
 import type { ResultSummary } from "@/src/lib/review-summary";
 
 export const outcomeOrder = ["PASS", "FAIL", "MISSING", "WARNING"] as const;
@@ -134,18 +134,19 @@ export function extractChronology(documents: CaseDocument[]): ChronologyEvent[] 
     .sort((left, right) => left.date.localeCompare(right.date));
 }
 
-export function buildThresholdSensitivity(documents: CaseDocument[], threshold: number, results: ControlResult[]): ThresholdSensitivity | null {
+export function buildThresholdSensitivity(documents: CaseDocument[], threshold: number, results: ControlResult[], controls: ControlDefinition[] = []): ThresholdSensitivity | null {
   const facts = documents.flatMap((document) => document.facts);
   const amount = facts.find((fact) => fact.key === "purchaseOrderAmount")?.value;
   const approvers = facts.find((fact) => fact.key === "approvers")?.value;
   if (typeof amount !== "number" || !Array.isArray(approvers) || !Number.isFinite(threshold)) return null;
-  const requiredApprovers = 2;
+  const approvalControl = controls.find((control) => control.kind === "APPROVAL_THRESHOLD");
+  const requiredApprovers = approvalControl?.kind === "APPROVAL_THRESHOLD" ? approvalControl.parameters.requiredApprovers : 2;
   const exceedsThreshold = amount > threshold;
   const recordedApprovers = approvers.length;
   return {
     amount,
     threshold,
-    currency: "EUR",
+    currency: approvalControl?.kind === "APPROVAL_THRESHOLD" ? approvalControl.parameters.currency : "EUR",
     requiredApprovers,
     recordedApprovers,
     exceedsThreshold,

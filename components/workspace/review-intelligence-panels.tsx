@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { CaseDocument, ControlResult } from "@/src/domain/schemas";
+import type { CaseDocument, ControlDefinition, ControlResult } from "@/src/domain/schemas";
 import { controlRef, statusGlyph } from "@/components/workspace/presentation";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl } from "@/src/i18n/translations";
@@ -27,12 +27,15 @@ function methodName(mode: "DETERMINISTIC_DEMO" | "LIVE_GPT_5_6", locale: "en" | 
   return locale === "fr" ? "Contrôle déterministe" : "Deterministic check";
 }
 
-export function ReviewIntelligencePanels({ results, documents, summary, threshold, mode, currentRun, previousRun, onFilterChange, onInspectControl, onClearHistory }: {
+export function ReviewIntelligencePanels({ results, documents, controls, summary, threshold, mode, caseName, caseReference, currentRun, previousRun, onFilterChange, onInspectControl, onClearHistory }: {
   results: ControlResult[];
   documents: CaseDocument[];
+  controls: ControlDefinition[];
   summary: ResultSummary;
   threshold: number;
   mode: "DETERMINISTIC_DEMO" | "LIVE_GPT_5_6";
+  caseName: string;
+  caseReference: string;
   currentRun: RunSnapshot | null;
   previousRun: RunSnapshot | null;
   onFilterChange: (filter: ResultFilter) => void;
@@ -43,7 +46,7 @@ export function ReviewIntelligencePanels({ results, documents, summary, threshol
   const outcomes = useMemo(() => buildOutcomeComposition(results), [results]);
   const coverage = useMemo(() => buildEvidenceCoverage(results, documents), [documents, results]);
   const chronology = useMemo(() => extractChronology(documents), [documents]);
-  const sensitivity = useMemo(() => buildThresholdSensitivity(documents, threshold, results), [documents, results, threshold]);
+  const sensitivity = useMemo(() => buildThresholdSensitivity(documents, threshold, results, controls), [controls, documents, results, threshold]);
   const localizedTitles = useMemo(() => Object.fromEntries(results.map((result) => [result.controlId, localizedControl(result.controlId, locale, result.title).title])), [locale, results]);
   const [query, setQuery] = useState("");
   const matches = useMemo(() => searchReviewWorkspace(query, results, documents, localizedTitles), [documents, localizedTitles, query, results]);
@@ -58,7 +61,7 @@ export function ReviewIntelligencePanels({ results, documents, summary, threshol
     <div className="review-intelligence" aria-label={locale === "fr" ? "Vue d’ensemble du cas" : "Case overview"}>
       <section className="case-overview" aria-labelledby="case-overview-title">
         <div className="intelligence-heading">
-          <div><p className="eyebrow">{locale === "fr" ? "DOSSIER NORTHSTAR" : "NORTHSTAR CASE"}</p><h3 id="case-overview-title">{locale === "fr" ? "Vue d’ensemble du cas" : "Case overview"}</h3></div>
+          <div><p className="eyebrow">{caseReference}</p><h3 id="case-overview-title">{locale === "fr" ? "Vue d’ensemble du cas" : "Case overview"}</h3><p>{caseName}</p></div>
           <div className="review-search">
             <label htmlFor="review-search">{locale === "fr" ? "Rechercher dans la revue" : "Search this review"}</label>
             <input id="review-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={locale === "fr" ? "Contrôle, document ou preuve" : "Control, document, or evidence"} />
@@ -93,7 +96,7 @@ export function ReviewIntelligencePanels({ results, documents, summary, threshol
         <section className="intelligence-panel threshold-sensitivity" aria-labelledby="threshold-title">
           <header><div><p className="eyebrow">{locale === "fr" ? "RÈGLE D’APPROBATION" : "APPROVAL RULE"}</p><h3 id="threshold-title">{locale === "fr" ? "Sensibilité au seuil" : "Threshold sensitivity"}</h3></div>{sensitivity?.status && <span data-status={sensitivity.status}>{statusGlyph(sensitivity.status)} {t(`status.${sensitivity.status}`)}</span>}</header>
           {sensitivity ? <>
-            <div className="threshold-visual" role="img" aria-label={locale === "fr" ? `Montant 12 480 euros, seuil ${sensitivity.threshold} euros, ${sensitivity.recordedApprovers} approbateur enregistré sur ${sensitivity.requiredApprovers} requis` : `Amount 12,480 euros, threshold ${sensitivity.threshold} euros, ${sensitivity.recordedApprovers} recorded approver of ${sensitivity.requiredApprovers} required`}>
+            <div className="threshold-visual" role="img" aria-label={locale === "fr" ? `Montant ${sensitivity.amount} ${sensitivity.currency}, seuil ${sensitivity.threshold} ${sensitivity.currency}, ${sensitivity.recordedApprovers} approbateur enregistré sur ${sensitivity.requiredApprovers} requis` : `Amount ${sensitivity.amount} ${sensitivity.currency}, threshold ${sensitivity.threshold} ${sensitivity.currency}, ${sensitivity.recordedApprovers} recorded approver of ${sensitivity.requiredApprovers} required`}>
               <div className="threshold-track"><span className="threshold-origin">0</span><span className="amount-marker" style={{ left: `${Math.min(90, sensitivity.amount / Math.max(sensitivity.amount, sensitivity.threshold) * 82)}%` }}><b>{sensitivity.amount.toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} EUR</b><small>{locale === "fr" ? "montant" : "amount"}</small></span><span className="threshold-marker" style={{ left: `${Math.min(94, sensitivity.threshold / Math.max(sensitivity.amount, sensitivity.threshold) * 82)}%` }}><b>{sensitivity.threshold.toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} EUR</b><small>{locale === "fr" ? "seuil" : "threshold"}</small></span></div>
             </div>
             <p className="threshold-explanation">{sensitivity.exceedsThreshold
@@ -118,7 +121,7 @@ export function ReviewIntelligencePanels({ results, documents, summary, threshol
         <section className="intelligence-panel chronology" aria-labelledby="chronology-title">
           <header><div><p className="eyebrow">{locale === "fr" ? "SÉQUENCE DU CAS" : "CASE SEQUENCE"}</p><h3 id="chronology-title">{locale === "fr" ? "Chronologie" : "Chronology"}</h3></div></header>
           {chronology.length ? <ol>{chronology.map((event, index) => <li key={event.factKey}><button type="button" onClick={() => inspect("CTRL-TIMING")} aria-label={`${event.documentTitle}, ${event.date}`}><span>{String(index + 1).padStart(2, "0")}</span><time dateTime={event.date}>{new Date(`${event.date}T00:00:00Z`).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })}</time><strong>{event.factKey === "purchaseOrderDate" ? (locale === "fr" ? "Bon de commande" : "Purchase order") : event.factKey === "deliveryDate" ? (locale === "fr" ? "Livraison" : "Delivery") : (locale === "fr" ? "Facture" : "Invoice")}</strong><small>{event.documentId}</small></button></li>)}</ol> : <p className="intelligence-empty">{locale === "fr" ? "Aucune date structurée disponible." : "No structured dates are available."}</p>}
-          <p className="chronology-conclusion"><span aria-hidden="true">✓</span>{locale === "fr" ? "Le bon de commande précède la livraison et la facture." : "The purchase order precedes delivery and invoice."}</p>
+          <p className="chronology-conclusion"><span aria-hidden="true">✓</span>{chronology.some((event) => event.factKey === "deliveryDate") ? (locale === "fr" ? "Le bon de commande précède la livraison et la facture." : "The purchase order precedes delivery and invoice.") : (locale === "fr" ? "Le bon de commande précède la facture ; aucune date de livraison n’est disponible." : "The purchase order precedes the invoice; no delivery date is available.")}</p>
         </section>
       </div>
 

@@ -10,7 +10,18 @@ import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
 import { assessEvidenceIntegrity, buildReviewerQueue } from "@/src/lib/review-intelligence";
 
-export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
+export function formatDecisionEvidenceRecap(result: ControlResult, locale: "en" | "fr"): string {
+  if (result.controlId === "CTRL-CURRENCY") {
+    const monetaryValues = [...result.supportingEvidence, ...result.contradictoryEvidence]
+      .map((evidence) => evidence.excerpt.match(/([0-9][0-9, .]*)\s+(EUR|USD)\b/i)?.[0])
+      .filter((value): value is string => Boolean(value));
+    if (monetaryValues.length >= 2) return monetaryValues.slice(0, 2).join(result.status === "FAIL" ? " ≠ " : " = ");
+  }
+  const count = result.supportingEvidence.length + result.contradictoryEvidence.length + result.missingEvidence.length;
+  return `${count} ${locale === "fr" ? "éléments probants" : "evidence items"}`;
+}
+
+export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, policyReference, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
   results: ControlResult[];
   documents: CaseDocument[];
   selectedResult: ControlResult | null;
@@ -18,6 +29,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
   receipt: DecisionReceipt | null;
   reviewError: string;
   threshold: string;
+  policyReference: string;
   onSelectResult: (controlId: string) => void;
   onCommentChange: (comment: string) => void;
   onDecision: (state: ReviewDecision["state"]) => void;
@@ -117,7 +129,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
                 <div className="decision-chain"><span>{requirementRef(selectedResult.controlId)}</span><i /><span>{controlRef(selectedResult.controlId)}</span><i /><StatusBadge status={selectedResult.status} /><i /><span>{decisionRef(selectedResult.controlId)}</span></div>
                 <header><div><p className="eyebrow">{locale === "fr" ? "JUGEMENT HUMAIN" : "HUMAN JUDGMENT"}</p><h3>{selectedTitle}</h3></div><span>{decisionRef(selectedResult.controlId)}</span></header>
                 <p className="automated-conclusion">{locale === "fr" ? "Conclusion automatisée" : "Automated conclusion"}: <StatusBadge status={selectedResult.status} /> — {localizedResultExplanation(selectedResult.controlId, selectedResult.status, selectedResult.explanation, locale, threshold)} <strong>{locale === "fr" ? "La conclusion est conservée quelle que soit votre décision." : "The conclusion is preserved whatever you decide."}</strong></p>
-                <div className="decision-evidence-recap"><span>{selectedResult.controlId === "CTRL-CURRENCY" ? "12,480 EUR ≠ 12,480 USD" : `${selectedResult.supportingEvidence.length + selectedResult.contradictoryEvidence.length + selectedResult.missingEvidence.length} ${locale === "fr" ? "éléments probants" : "evidence items"}`}</span><button type="button" onClick={onReopenEvidence}>← {locale === "fr" ? "Rouvrir les preuves" : "Reopen evidence"}</button></div>
+                <div className="decision-evidence-recap"><span>{formatDecisionEvidenceRecap(selectedResult, locale)}</span><button type="button" onClick={onReopenEvidence}>← {locale === "fr" ? "Rouvrir les preuves" : "Reopen evidence"}</button></div>
                 {integrity && <div className="decision-integrity" data-state={integrity.state}><strong>{integrity.state === "VERIFIED" ? (locale === "fr" ? "✓ Sources exactes vérifiées" : "✓ Exact sources verified") : integrity.state === "MISSING" ? (locale === "fr" ? "○ Preuve requise manquante" : "○ Required evidence missing") : (locale === "fr" ? "× Référence rejetée" : "× Reference rejected")}</strong><span>{integrity.verifiedReferences} {locale === "fr" ? "extraits exacts" : "exact excerpts"}</span></div>}
                 <div className="decision-form-grid">
                   <div className="decision-actions">
@@ -149,7 +161,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
               <span>{receipt.reviewId}.json</span>
             </div>
             <p aria-live="polite" className="receipt-export-notice">{exportNotice}</p>
-            <DecisionReceiptSheet receipt={receipt} results={results} summary={summary} decisionCounts={decisionCounts} />
+            <DecisionReceiptSheet receipt={receipt} results={results} summary={summary} decisionCounts={decisionCounts} policyReference={policyReference} />
           </section>}
         </>
       )}
@@ -157,7 +169,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
   );
 }
 
-function DecisionReceiptSheet({ receipt, results, summary, decisionCounts }: { receipt: DecisionReceipt; results: ControlResult[]; summary: ResultSummary; decisionCounts: { confirmed: number; rejected: number; exceptions: number } }) {
+function DecisionReceiptSheet({ receipt, results, summary, decisionCounts, policyReference }: { receipt: DecisionReceipt; results: ControlResult[]; summary: ResultSummary; decisionCounts: { confirmed: number; rejected: number; exceptions: number }; policyReference: string }) {
   const { locale, t } = useLocale();
   const exceptions = receipt.outcomes.filter((outcome) => outcome.reviewerDecision === "ACCEPTED_EXCEPTION");
   const unresolved = receipt.outcomes.filter((outcome) => outcome.reviewerDecision === "PENDING");
@@ -165,7 +177,7 @@ function DecisionReceiptSheet({ receipt, results, summary, decisionCounts }: { r
     <article aria-label={t("a11y.receipt")} className="decision-receipt">
       <header className="receipt-masthead"><div className="receipt-brand"><span aria-hidden="true" className="brand-mark">P</span><div><strong>PolicyProof — {t("receipt.title")}</strong><p>{locale === "fr" ? "Preuves automatisées et décisions humaines consignées ensemble" : "Automated evidence and human decisions recorded together"}</p></div></div><div><strong>{receipt.reviewId}</strong><span>{t("receipt.generated", { date: new Date(receipt.generatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) })}</span></div></header>
       <dl className="receipt-meta">
-        <div><dt>{t("receipt.policy")}</dt><dd>{receipt.policyName}</dd></div><div><dt>{t("receipt.policyVersion")}</dt><dd>{receipt.policyVersion} · POL-2026-004</dd></div><div><dt>{t("receipt.case")}</dt><dd>{receipt.caseName === "Northstar Facilities vendor change" ? t("receipt.caseDemo") : receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName}</dd></div><div><dt>{t("receipt.mode")} · {t("receipt.language")}</dt><dd>{receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} · {receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")}</dd></div>
+        <div><dt>{t("receipt.policy")}</dt><dd>{receipt.policyName}</dd></div><div><dt>{t("receipt.policyVersion")}</dt><dd>{receipt.policyVersion} · {policyReference}</dd></div><div><dt>{t("receipt.case")}</dt><dd>{receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName}</dd></div><div><dt>{t("receipt.mode")} · {t("receipt.language")}</dt><dd>{receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} · {receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")}</dd></div>
       </dl>
       <div className="receipt-summary"><p><span data-status="PASS">✓ {receipt.summary.PASS} {t("status.PASS")}</span><span data-status="FAIL">× {receipt.summary.FAIL} {t("status.FAIL")}</span><span data-status="MISSING">⌀ {receipt.summary.MISSING} {t("status.MISSING")}</span><span data-status="WARNING">! {receipt.summary.WARNING} {t("status.WARNING")}</span></p><strong>{t("receipt.decisionSummary", { ...decisionCounts, pending: receipt.summary.pending })}</strong></div>
       <div className="receipt-outcomes" role="table" aria-label={t("receipt.summary")}>
