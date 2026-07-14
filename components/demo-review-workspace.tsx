@@ -398,7 +398,7 @@ export function DemoReviewWorkspace() {
   ) : currentStep === "review" ? (
     <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
   ) : (
-    <DecisionPanel results={results} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} />
+    <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} />
   );
 
   const primaryLabel = currentStep === "policy"

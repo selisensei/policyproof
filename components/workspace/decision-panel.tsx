@@ -1,16 +1,18 @@
 import { useRef, useState } from "react";
-import type { ControlResult, ReviewDecision } from "@/src/domain/schemas";
+import type { CaseDocument, ControlResult, ReviewDecision } from "@/src/domain/schemas";
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
-import { createConciseReviewSummary, serializeDecisionReceipt } from "@/src/lib/receipt-export";
+import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown } from "@/src/lib/receipt-export";
 import type { ResultSummary } from "@/src/lib/review-summary";
 import { controlRef, decisionGlyph, decisionRef, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
 import { StatusBadge } from "@/components/workspace/status-badge";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
+import { assessEvidenceIntegrity, buildReviewerQueue } from "@/src/lib/review-intelligence";
 
-export function DecisionPanel({ results, selectedResult, summary, receipt, reviewError, threshold, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
+export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
   results: ControlResult[];
+  documents: CaseDocument[];
   selectedResult: ControlResult | null;
   summary: ResultSummary;
   receipt: DecisionReceipt | null;
@@ -25,6 +27,9 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
   const [exportNotice, setExportNotice] = useState("");
   const commentRef = useRef<HTMLTextAreaElement>(null);
   const selectedTitle = selectedResult ? localizedControl(selectedResult.controlId, locale, selectedResult.title).title : "";
+  const queue = buildReviewerQueue(results).map((item) => results.find((result) => result.controlId === item.controlId)!).filter(Boolean);
+  const selectedQueueIndex = queue.findIndex((result) => result.controlId === selectedResult?.controlId);
+  const integrity = selectedResult ? assessEvidenceIntegrity(selectedResult, documents) : null;
   const decisionCounts = receipt?.outcomes.reduce((counts, outcome) => {
     if (outcome.reviewerDecision === "CONFIRMED") counts.confirmed += 1;
     if (outcome.reviewerDecision === "REJECTED") counts.rejected += 1;
@@ -54,6 +59,26 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
     setExportNotice(t("receipt.downloadSuccess"));
   }
 
+  function downloadMarkdownReceipt() {
+    if (!receipt) return;
+    const url = URL.createObjectURL(new Blob([serializeDecisionReceiptMarkdown(receipt)], { type: "text/markdown" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${receipt.reviewId}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportNotice(locale === "fr" ? "Reçu Markdown téléchargé." : "Markdown receipt downloaded.");
+  }
+
+  function moveInQueue(direction: -1 | 1, unresolvedOnly = false) {
+    if (!queue.length) return;
+    const candidates = unresolvedOnly ? queue.filter((result) => result.reviewerDecision.state === "PENDING") : queue;
+    if (!candidates.length) return;
+    const index = candidates.findIndex((result) => result.controlId === selectedResult?.controlId);
+    const nextIndex = index === -1 ? 0 : (index + direction + candidates.length) % candidates.length;
+    onSelectResult(candidates[nextIndex].controlId);
+  }
+
   function applyDecision(state: ReviewDecision["state"]) {
     onDecision(state);
     if ((state === "REJECTED" || state === "ACCEPTED_EXCEPTION") && !selectedResult?.reviewerDecision.comment.trim()) {
@@ -71,23 +96,29 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
             <aside className="decision-queue" aria-label={t("review.human")}>
               <header><span>{locale === "fr" ? "DÉCISIONS" : "DECISIONS"}</span><b>{summary.pending}/7</b></header>
               <div>
-                {results.map((result) => {
+                {queue.map((result) => {
                   const title = localizedControl(result.controlId, locale, result.title).title;
                   const selected = selectedResult?.controlId === result.controlId;
                   return <button key={result.controlId} type="button" onClick={() => onSelectResult(result.controlId)} aria-label={t("review.inspect", { title })} aria-pressed={selected} className={selected ? "is-selected" : ""}>
-                    <span>{decisionRef(result.controlId)}</span><strong>{title}</strong><small data-state={result.reviewerDecision.state}>{decisionGlyph(result.reviewerDecision.state)} {t(`decision.${result.reviewerDecision.state}`)}</small>
+                    <span>{decisionRef(result.controlId)}</span><strong>{title}</strong><small><StatusBadge status={result.status} /> · <span data-state={result.reviewerDecision.state}>{decisionGlyph(result.reviewerDecision.state)} {t(`decision.${result.reviewerDecision.state}`)}</span></small>
                   </button>;
                 })}
               </div>
-              <footer>{summary.pending} {locale === "fr" ? "ouvertes" : "open"}</footer>
+              <footer><span>{summary.pending} {locale === "fr" ? "ouvertes" : "open"}</span><button type="button" onClick={() => moveInQueue(1, true)} disabled={!summary.pending}>{locale === "fr" ? "Prochaine non résolue" : "Next unresolved"} →</button></footer>
             </aside>
 
             {selectedResult ? (
               <article className="decision-paper">
+                <nav className="decision-navigation" aria-label={locale === "fr" ? "Navigation dans la file de revue" : "Reviewer queue navigation"}>
+                  <button type="button" onClick={() => moveInQueue(-1)}>← {locale === "fr" ? "Précédente" : "Previous"}</button>
+                  <span>{selectedQueueIndex + 1} / {queue.length} · {summary.pending} {locale === "fr" ? "ouvertes" : "open"}</span>
+                  <button type="button" onClick={() => moveInQueue(1, true)} disabled={!summary.pending}>{locale === "fr" ? "Prochaine non résolue" : "Next unresolved"} →</button>
+                </nav>
                 <div className="decision-chain"><span>{requirementRef(selectedResult.controlId)}</span><i /><span>{controlRef(selectedResult.controlId)}</span><i /><StatusBadge status={selectedResult.status} /><i /><span>{decisionRef(selectedResult.controlId)}</span></div>
                 <header><div><p className="eyebrow">{locale === "fr" ? "JUGEMENT HUMAIN" : "HUMAN JUDGMENT"}</p><h3>{selectedTitle}</h3></div><span>{decisionRef(selectedResult.controlId)}</span></header>
                 <p className="automated-conclusion">{locale === "fr" ? "Conclusion automatisée" : "Automated conclusion"}: <StatusBadge status={selectedResult.status} /> — {localizedResultExplanation(selectedResult.controlId, selectedResult.status, selectedResult.explanation, locale, threshold)} <strong>{locale === "fr" ? "La conclusion est conservée quelle que soit votre décision." : "The conclusion is preserved whatever you decide."}</strong></p>
                 <div className="decision-evidence-recap"><span>{selectedResult.controlId === "CTRL-CURRENCY" ? "12,480 EUR ≠ 12,480 USD" : `${selectedResult.supportingEvidence.length + selectedResult.contradictoryEvidence.length + selectedResult.missingEvidence.length} ${locale === "fr" ? "éléments probants" : "evidence items"}`}</span><button type="button" onClick={onReopenEvidence}>← {locale === "fr" ? "Rouvrir les preuves" : "Reopen evidence"}</button></div>
+                {integrity && <div className="decision-integrity" data-state={integrity.state}><strong>{integrity.state === "VERIFIED" ? (locale === "fr" ? "✓ Sources exactes vérifiées" : "✓ Exact sources verified") : integrity.state === "MISSING" ? (locale === "fr" ? "○ Preuve requise manquante" : "○ Required evidence missing") : (locale === "fr" ? "× Référence rejetée" : "× Reference rejected")}</strong><span>{integrity.verifiedReferences} {locale === "fr" ? "extraits exacts" : "exact excerpts"}</span></div>}
                 <div className="decision-form-grid">
                   <div className="decision-actions">
                     <button type="button" onClick={() => applyDecision("CONFIRMED")} aria-label={t("decision.confirm")} className="confirm-decision">{locale === "fr" ? `Confirmer la conclusion ${t(`status.${selectedResult.status}`)}` : `Confirm ${selectedResult.status} conclusion`}</button>
@@ -112,6 +143,7 @@ export function DecisionPanel({ results, selectedResult, summary, receipt, revie
             <div className="receipt-toolbar">
               <button type="button" onClick={() => window.print()} className="receipt-primary-action">{t("action.print")}</button>
               <button type="button" onClick={downloadReceipt}>{t("action.downloadJson")}</button>
+              <button type="button" onClick={downloadMarkdownReceipt}>{locale === "fr" ? "Télécharger Markdown" : "Download Markdown"}</button>
               <button type="button" onClick={() => copyReceiptContent(receipt.reviewId)}>{t("action.copyReceiptId")}</button>
               <button type="button" onClick={() => copyReceiptContent(createConciseReviewSummary(receipt))}>{t("action.copySummary")}</button>
               <span>{receipt.reviewId}.json</span>

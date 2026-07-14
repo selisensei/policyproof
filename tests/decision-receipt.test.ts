@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { demoControls, demoDocuments, demoPolicy } from "@/src/fixtures/demo-case";
 import { createDecisionReceipt, DecisionReceiptSchema, REVIEW_DISCLAIMER } from "@/src/lib/decision-receipt";
-import { createConciseReviewSummary, serializeDecisionReceipt } from "@/src/lib/receipt-export";
+import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown } from "@/src/lib/receipt-export";
 import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 
@@ -32,6 +32,9 @@ describe("decision receipt", () => {
     expect(first.disclaimer).toBe(REVIEW_DISCLAIMER);
     expect(() => DecisionReceiptSchema.parse(first)).not.toThrow();
     expect(serializeDecisionReceipt(first)).toContain('"reviewId": "PP-20260713T200000000Z"');
+    expect(serializeDecisionReceiptMarkdown(first)).toContain("# PolicyProof — Decision receipt");
+    expect(serializeDecisionReceiptMarkdown(first)).toContain("| Approval threshold (CTRL-APPROVAL) | FAIL | CONFIRMED | Evidence checked. |");
+    expect(serializeDecisionReceiptMarkdown(first)).toContain(REVIEW_DISCLAIMER);
     expect(createConciseReviewSummary(first)).toContain("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING");
   });
 });

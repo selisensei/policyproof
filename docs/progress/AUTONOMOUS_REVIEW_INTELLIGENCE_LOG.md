@@ -37,5 +37,15 @@
 - **Files changed:** `components/demo-review-workspace.tsx`, `components/workspace/review-panel.tsx`, `components/workspace/review-intelligence-panels.tsx`, `src/lib/review-intelligence.ts`, `src/lib/review-run-history.ts`, `app/globals.css`, unit/component/Playwright tests, audit and decision logs.
 - **Tests run:** `pnpm test` (14 files / 88 tests), `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test:e2e` (7 tests), first English desktop/mobile visual pass.
 - **Result:** PASS after updating the intentional collapsed-guide test and removing an ambiguous live-region role from static evidence integrity.
+- **Commit hash:** `7a5c121adf1368c2d645ccc40c5315ab549f41d4`.
+- **Blockers:** None.
+
+## Phase 4 — Evidence-led case visualizations and reviewer workflow
+
+- **Objective:** Complete the evidence-led visuals, responsive transformations, attention queue, decision context, and structured exports.
+- **Decisions:** Keep all visuals deterministic and filterable; use a mobile fact layout for threshold sensitivity; order the reviewer queue by unresolved status, outcome, and severity; add Markdown as a dependency-free secondary export.
+- **Files changed:** `app/globals.css`, `components/workspace/decision-panel.tsx`, `components/demo-review-workspace.tsx`, `src/lib/receipt-export.ts`, unit/component tests, `tests/e2e/review-intelligence.spec.ts`, progress log.
+- **Tests run:** `pnpm test` (14 files / 88 tests), `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test:e2e` (10 tests), focused Playwright passes 2 and 3.
+- **Result:** PASS. Mobile threshold marker overlap was found in pass 2 and corrected in pass 3. Complete component screenshots now target full sections.
 - **Commit hash:** Pending.
 - **Blockers:** None.

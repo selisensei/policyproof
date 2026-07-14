@@ -223,7 +223,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(screen.getByText("Charger le cas fictif Northstar.").closest("li")?.className).toContain("text-slate-600");
   });
 
-  it("offers receipt copy and JSON export actions from current structured state", async () => {
+  it("offers reviewer queue navigation and structured receipt exports", async () => {
     const user = userEvent.setup();
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
@@ -234,12 +234,16 @@ describe("PolicyProof workspace interactions", () => {
 
     await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Decision" }));
+    expect(screen.getByText(/Exact sources verified/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getAllByRole("button", { name: /^Next unresolved/ })[0]);
+    expect(screen.getByRole("heading", { name: "Currency consistency" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Copy receipt ID" }));
     expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/^PP-/));
     await user.click(screen.getByRole("button", { name: "Copy summary" }));
     expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING"));
     await user.click(screen.getByRole("button", { name: "Download JSON" }));
+    await user.click(screen.getByRole("button", { name: "Download Markdown" }));
     expect(createObjectURL).toHaveBeenCalled();
     expect(anchorClick).toHaveBeenCalled();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:receipt");

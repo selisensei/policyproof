@@ -579,6 +579,23 @@ body { font-size: 14.5px; }
 .evidence-heading p, .result-copy strong { font-size: 14px; }
 .result-row { min-height: 64px; }
 .method-label { font-size: 11.5px; line-height: 1.25; }
+.decision-navigation { display: grid; min-height: 42px; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--pp-hairline); background: var(--pp-sunken); }
+.decision-navigation button { min-height: 42px; padding: 7px 12px; color: var(--pp-petrol); font-size: 12.5px; font-weight: 600; }
+.decision-navigation button:last-child { text-align: right; }
+.decision-navigation span { color: var(--pp-grey); font-family: var(--pp-font-data); font-size: 11.5px; }
+.decision-integrity { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--pp-pass-border); border-left: 2px solid var(--pp-pass); background: var(--pp-pass-tint); padding: 8px 12px; }
+.decision-integrity[data-state="MISSING"] { border-color: var(--pp-miss-border); border-left-color: var(--pp-miss); background: var(--pp-miss-tint); }
+.decision-integrity[data-state="REJECTED"] { border-color: var(--pp-fail-border); border-left-color: var(--pp-fail); background: var(--pp-fail-tint); }
+.decision-integrity strong { font-size: 12.5px; }
+.decision-integrity span { color: var(--pp-grey); font-size: 11.5px; }
+.decision-queue footer { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 8px; }
+.decision-queue footer button { color: var(--pp-petrol); font-size: 11.5px; font-weight: 600; }
+.decision-queue small .status-badge { font-size: 10.5px; }
+.receipt-toolbar button { min-height: 36px; font-size: 12.5px; }
+.receipt-masthead strong, .receipt-brand strong { font-size: 14px; }
+.receipt-brand p, .receipt-meta dd, .receipt-summary strong, .receipt-outcome-row, .receipt-outcome-row > p { font-size: 11.5px; }
+.receipt-meta dt, .receipt-outcome-head, .receipt-followup strong, .decision-receipt > footer span { font-size: 10.5px; }
+.decision-receipt > footer p { font-size: 11.5px; }
 
 @media (max-width: 1279px) {
   .brand-tagline { display: none; }
@@ -644,6 +661,15 @@ body { font-size: 14.5px; }
   .outcome-composition ul { grid-template-columns: repeat(2, 1fr); }
   .outcome-bar { min-height: 54px; }
   .threshold-visual { padding-inline: 28px; }
+  .threshold-visual { padding: 12px 14px; }
+  .threshold-track { display: grid; height: auto; grid-template-columns: 1fr; gap: 7px; border: 0; background: transparent; }
+  .threshold-origin { display: none; }
+  .amount-marker, .threshold-marker { position: static; display: grid; width: 100%; grid-template-columns: 1fr auto; align-items: center; border-left: 2px solid var(--pp-petrol); background: var(--pp-petrol-tint); padding: 8px 10px; }
+  .threshold-marker { border-left-color: var(--pp-ink); background: var(--pp-sunken); }
+  .amount-marker::after, .threshold-marker::after { display: none; }
+  .amount-marker b, .threshold-marker b, .amount-marker small, .threshold-marker small { position: static; }
+  .amount-marker b, .threshold-marker b { grid-column: 2; grid-row: 1; }
+  .amount-marker small, .threshold-marker small { grid-column: 1; grid-row: 1; font-size: 12px; }
   .coverage-table { padding-inline: 10px; }
   .coverage-head, .coverage-row { grid-template-columns: repeat(5, minmax(44px, 1fr)); }
   .coverage-head span:first-child { display: none; }
@@ -709,6 +735,10 @@ body { font-size: 14.5px; }
   .decision-queue > div { display: flex; overflow-x: auto; }
   .decision-queue > div button { min-width: 210px; border-left: 0 !important; }
   .decision-form-grid { grid-template-columns: 1fr; }
+  .decision-navigation { grid-template-columns: 1fr 1fr; }
+  .decision-navigation span { grid-column: 1 / -1; grid-row: 1; padding: 7px; text-align: center; }
+  .decision-navigation button { grid-row: 2; }
+  .decision-integrity { align-items: flex-start; flex-direction: column; }
   .confirm-decision, .override-decision { min-height: 44px; }
   .receipt-meta { grid-template-columns: repeat(2, 1fr); }
   .receipt-meta > div:nth-child(3) { border-left: 0; border-top: 1px solid var(--pp-hairline); }
