@@ -2,7 +2,13 @@ import { z } from "zod";
 import { ControlStatusSchema } from "@/src/domain/schemas";
 import type { RunSnapshot } from "@/src/lib/review-intelligence";
 
-export const REVIEW_RUN_HISTORY_KEY = "policyproof.review-run-history.v1";
+const DEFAULT_SCENARIO_ID = "northstar-mixed-risk";
+
+export function reviewRunHistoryKey(scenarioId: string): string {
+  return `policyproof.review-run-history.v2.${scenarioId}`;
+}
+
+export const REVIEW_RUN_HISTORY_KEY = reviewRunHistoryKey(DEFAULT_SCENARIO_ID);
 
 const summarySchema = z.object({
   PASS: z.number().int().nonnegative(),
@@ -15,6 +21,7 @@ const summarySchema = z.object({
 });
 
 export const RunSnapshotSchema = z.object({
+  scenarioId: z.string().min(1),
   id: z.string().min(1),
   generatedAt: z.iso.datetime(),
   threshold: z.number().nonnegative(),
@@ -42,33 +49,36 @@ export function parseRunHistory(value: string | null): RunHistory {
 }
 
 export function advanceRunHistory(history: RunHistory, latest: RunSnapshot): RunHistory {
-  return RunHistorySchema.parse({ version: 1, previous: history.latest, latest });
+  const previous = history.latest?.scenarioId === latest.scenarioId ? history.latest : null;
+  return RunHistorySchema.parse({ version: 1, previous, latest });
 }
 
 export function serializeRunHistory(history: RunHistory): string {
   return JSON.stringify(RunHistorySchema.parse(history));
 }
 
-export function loadRunHistory(storage: RunHistoryStorage): RunHistory {
+export function loadRunHistory(storage: RunHistoryStorage, scenarioId = DEFAULT_SCENARIO_ID): RunHistory {
   try {
-    return parseRunHistory(storage.getItem(REVIEW_RUN_HISTORY_KEY));
+    const history = parseRunHistory(storage.getItem(reviewRunHistoryKey(scenarioId)));
+    if (history.latest && history.latest.scenarioId !== scenarioId) return { version: 1, previous: null, latest: null };
+    return history;
   } catch {
     return { version: 1, previous: null, latest: null };
   }
 }
 
-export function persistRunHistory(storage: RunHistoryStorage, history: RunHistory): boolean {
+export function persistRunHistory(storage: RunHistoryStorage, history: RunHistory, scenarioId = history.latest?.scenarioId ?? DEFAULT_SCENARIO_ID): boolean {
   try {
-    storage.setItem(REVIEW_RUN_HISTORY_KEY, serializeRunHistory(history));
+    storage.setItem(reviewRunHistoryKey(scenarioId), serializeRunHistory(history));
     return true;
   } catch {
     return false;
   }
 }
 
-export function removeRunHistory(storage: RunHistoryStorage): boolean {
+export function removeRunHistory(storage: RunHistoryStorage, scenarioId = DEFAULT_SCENARIO_ID): boolean {
   try {
-    storage.removeItem(REVIEW_RUN_HISTORY_KEY);
+    storage.removeItem(reviewRunHistoryKey(scenarioId));
     return true;
   } catch {
     return false;

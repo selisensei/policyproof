@@ -318,3 +318,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** When the header action is hidden, render the same primary action in the workflow footer and hide the secondary Continue shortcut.
 - **Rationale:** Reusing the existing action handler and disabled conditions restores the complete workflow without creating a second behavior or adding permanent header density.
 - **Consequences:** Desktop retains the compact header action and secondary step navigation. Mobile and high-zoom layouts expose one clear primary action for opening controls, running review, entering decisions, or printing the receipt.
+
+## D035 - Generalize controlled cases through a strict scenario contract
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Northstar proved the complete review path, but case identity, fixture selection, guided highlights, expected validation, and local run history were not represented by one explicit reusable contract.
+- **Decision:** Define a strict Zod `ReviewScenario` containing localized case context, one policy, shared supported controls, exact fixture documents and facts, expected validation outcomes, evidence relationships, thresholds, guided highlights, assumptions, limitations, and fictional-data provenance. Expected outcomes are test assertions only; the shared deterministic engine remains the sole source of displayed results. Isolate minimal run-history keys by scenario ID.
+- **Rationale:** One validated scenario boundary proves reuse without duplicating the engine, adding a database, or broadening the policy domain.
+- **Consequences:** Northstar remains the default and only live-GPT-5.6-validated case. Additional scenarios may reuse the same procurement policy and seven control types, but each must pass schema, exact-excerpt, engine-result, visualization, reset, and browser tests. Malformed fixtures fail closed before reaching the UI.

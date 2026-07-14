@@ -2,6 +2,26 @@
 
 ## Core entities
 
+### ReviewScenario
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `id` | slug string | Stable scenario and local-history namespace. |
+| `caseName` / `caseDescription` / `purpose` | localized text | English/French controlled-case context. |
+| `profile` | enum | Mixed-risk, mostly compliant, or evidence-deficient test profile. |
+| `caseReference` / `policyReference` | string | Stable presentation references. |
+| `policy` | PolicyDefinition | Policy shared by the scenario controls. |
+| `controls` | ControlDefinition[] | Inputs to the single deterministic engine. |
+| `documents` | CaseDocument[] | Fictional exact-source fixture records. |
+| `expectedOutcomes` / `expectedOutcomeCounts` | validation-only values | Regression assertions; never used as displayed review results. |
+| `evidenceRelationships` | relationship[] | Expected control-to-document traceability for fixture validation. |
+| `thresholdParameters` | object | Default and optional comparison threshold. |
+| `guidedDemo` | object | Default finding and scenario-specific proof moments. |
+| `assumptions` / `limitations` | localized text | Transparent controlled-test design boundaries. |
+| `provenance` | object | Confirms deterministic fictional data and no real organization data. |
+
+Scenario validation enforces unique control, document, and fact identifiers; matching policy/control references; known evidence relationships; complete expected validation outcomes; internally consistent counts; and verbatim fact excerpts. Expected values validate fixtures but do not participate in review calculation.
+
 ### PolicyDefinition
 
 | Field | Type | Purpose |
@@ -50,7 +70,7 @@ States are PENDING, CONFIRMED, REJECTED, and ACCEPTED_EXCEPTION. Rejecting or ac
 
 ### RunSnapshot
 
-The local comparison snapshot contains `id`, `generatedAt`, `threshold`, `summary`, and a control-ID-to-status map. It deliberately excludes source content and human comments.
+The local comparison snapshot contains `scenarioId`, `id`, `generatedAt`, `threshold`, `summary`, and a control-ID-to-status map. Storage keys are isolated by scenario ID. The snapshot deliberately excludes source content and human comments.
 
 ## Status meanings
 

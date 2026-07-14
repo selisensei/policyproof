@@ -115,8 +115,8 @@ function evaluateControl(control: ControlDefinition, documents: CaseDocument[]):
       return result(control, {
         status: valid ? "PASS" : "FAIL",
         explanation: valid
-          ? "The purchase order and invoice amounts both equal 12,480."
-          : "The purchase order and invoice amounts do not match.",
+          ? `The purchase order and invoice amounts both equal ${numberValue(purchaseOrderAmount).toLocaleString("en-US")}.`
+          : `The purchase order amount ${numberValue(purchaseOrderAmount).toLocaleString("en-US")} does not match the invoice amount ${numberValue(invoiceAmount).toLocaleString("en-US")}.`,
         supportingEvidence: valid ? [evidence(purchaseOrderAmount), evidence(invoiceAmount)] : [],
         contradictoryEvidence: valid ? [] : [evidence(purchaseOrderAmount), evidence(invoiceAmount)],
         missingEvidence: [],
@@ -132,7 +132,7 @@ function evaluateControl(control: ControlDefinition, documents: CaseDocument[]):
         explanation: valid
           ? `Both documents use ${stringValue(purchaseOrderCurrency)}.`
           : `The purchase order uses ${stringValue(purchaseOrderCurrency)}, while the invoice uses ${stringValue(invoiceCurrency)}.`,
-        supportingEvidence: [],
+        supportingEvidence: valid ? [evidence(purchaseOrderCurrency), evidence(invoiceCurrency)] : [],
         contradictoryEvidence: valid
           ? []
           : [evidence(purchaseOrderCurrency), evidence(invoiceCurrency)],

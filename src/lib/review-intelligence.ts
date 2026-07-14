@@ -64,6 +64,7 @@ export type ReviewSearchMatch = {
 };
 
 export type RunSnapshot = {
+  scenarioId: string;
   id: string;
   generatedAt: string;
   threshold: number;
@@ -207,8 +208,15 @@ export function searchReviewWorkspace(query: string, results: ControlResult[], d
   ];
 }
 
-export function createRunSnapshot(generatedAt: string, threshold: number, results: ControlResult[], summary: ResultSummary): RunSnapshot {
+export function createRunSnapshot(
+  generatedAt: string,
+  threshold: number,
+  results: ControlResult[],
+  summary: ResultSummary,
+  scenarioId = "northstar-mixed-risk",
+): RunSnapshot {
   return {
+    scenarioId,
     id: `RUN-${generatedAt.replace(/[-:.]/g, "")}`,
     generatedAt,
     threshold,
