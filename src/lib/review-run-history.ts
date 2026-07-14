@@ -30,6 +30,8 @@ export const RunHistorySchema = z.object({
 
 export type RunHistory = z.infer<typeof RunHistorySchema>;
 
+export type RunHistoryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
 export function parseRunHistory(value: string | null): RunHistory {
   if (!value) return { version: 1, previous: null, latest: null };
   try {
@@ -45,4 +47,30 @@ export function advanceRunHistory(history: RunHistory, latest: RunSnapshot): Run
 
 export function serializeRunHistory(history: RunHistory): string {
   return JSON.stringify(RunHistorySchema.parse(history));
+}
+
+export function loadRunHistory(storage: RunHistoryStorage): RunHistory {
+  try {
+    return parseRunHistory(storage.getItem(REVIEW_RUN_HISTORY_KEY));
+  } catch {
+    return { version: 1, previous: null, latest: null };
+  }
+}
+
+export function persistRunHistory(storage: RunHistoryStorage, history: RunHistory): boolean {
+  try {
+    storage.setItem(REVIEW_RUN_HISTORY_KEY, serializeRunHistory(history));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function removeRunHistory(storage: RunHistoryStorage): boolean {
+  try {
+    storage.removeItem(REVIEW_RUN_HISTORY_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 }

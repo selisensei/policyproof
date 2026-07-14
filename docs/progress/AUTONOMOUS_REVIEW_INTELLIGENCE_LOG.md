@@ -47,5 +47,15 @@
 - **Files changed:** `app/globals.css`, `components/workspace/decision-panel.tsx`, `components/demo-review-workspace.tsx`, `src/lib/receipt-export.ts`, unit/component tests, `tests/e2e/review-intelligence.spec.ts`, progress log.
 - **Tests run:** `pnpm test` (14 files / 88 tests), `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test:e2e` (10 tests), focused Playwright passes 2 and 3.
 - **Result:** PASS. Mobile threshold marker overlap was found in pass 2 and corrected in pass 3. Complete component screenshots now target full sections.
+- **Commit hash:** `fab656eec1322327d458630d6b2e884fdeb48c1e`.
+- **Blockers:** None.
+
+## Phase 5 — Reviewer workflow and run-comparison hardening
+
+- **Objective:** Make local comparison and reviewer prioritization fail safely in constrained browsers.
+- **Decisions:** Treat local storage as optional; fall back to an empty history if read/write/remove is blocked; derive queue totals from actual result count.
+- **Files changed:** `src/lib/review-run-history.ts`, `components/demo-review-workspace.tsx`, `components/workspace/decision-panel.tsx`, `tests/review-intelligence.test.ts`, progress log.
+- **Tests run:** Focused review-intelligence and workspace tests (2 files / 20 tests), `pnpm typecheck`, `pnpm lint`.
+- **Result:** PASS, including blocked-storage behavior.
 - **Commit hash:** Pending.
 - **Blockers:** None.

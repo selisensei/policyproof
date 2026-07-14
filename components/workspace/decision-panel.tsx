@@ -94,7 +94,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
         <>
           <div className="decision-workspace">
             <aside className="decision-queue" aria-label={t("review.human")}>
-              <header><span>{locale === "fr" ? "DÉCISIONS" : "DECISIONS"}</span><b>{summary.pending}/7</b></header>
+              <header><span>{locale === "fr" ? "DÉCISIONS" : "DECISIONS"}</span><b>{summary.pending}/{summary.total}</b></header>
               <div>
                 {queue.map((result) => {
                   const title = localizedControl(result.controlId, locale, result.title).title;

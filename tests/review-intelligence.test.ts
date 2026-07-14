@@ -13,7 +13,7 @@ import {
   extractChronology,
   searchReviewWorkspace,
 } from "@/src/lib/review-intelligence";
-import { advanceRunHistory, parseRunHistory, serializeRunHistory } from "@/src/lib/review-run-history";
+import { advanceRunHistory, loadRunHistory, parseRunHistory, persistRunHistory, removeRunHistory, serializeRunHistory } from "@/src/lib/review-run-history";
 
 const resultsAt = (threshold: number) => runDeterministicReview(
   demoControls.map((control) => control.kind === "APPROVAL_THRESHOLD" ? { ...control, parameters: { ...control.parameters, thresholdAmount: threshold } } : control),
@@ -82,5 +82,16 @@ describe("review intelligence", () => {
     expect(changedControls(secondHistory.previous, secondHistory.latest)).toEqual(["CTRL-APPROVAL"]);
     expect(parseRunHistory(serializeRunHistory(secondHistory))).toEqual(secondHistory);
     expect(parseRunHistory("not-json")).toEqual({ version: 1, previous: null, latest: null });
+  });
+
+  it("fails closed when browser storage is unavailable", () => {
+    const unavailable = {
+      getItem: () => { throw new Error("blocked"); },
+      setItem: () => { throw new Error("blocked"); },
+      removeItem: () => { throw new Error("blocked"); },
+    };
+    expect(loadRunHistory(unavailable)).toEqual({ version: 1, previous: null, latest: null });
+    expect(persistRunHistory(unavailable, { version: 1, previous: null, latest: null })).toBe(false);
+    expect(removeRunHistory(unavailable)).toBe(false);
   });
 });

@@ -23,7 +23,7 @@ import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/review-summary";
 import { createRunSnapshot } from "@/src/lib/review-intelligence";
-import { advanceRunHistory, parseRunHistory, REVIEW_RUN_HISTORY_KEY, serializeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
+import { advanceRunHistory, loadRunHistory, persistRunHistory, removeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 
 const CASE_NAME = "Northstar Facilities vendor change";
@@ -108,7 +108,7 @@ export function DemoReviewWorkspace() {
 
   useEffect(() => {
     const loadHistory = window.setTimeout(() => {
-      setRunHistory(parseRunHistory(window.localStorage.getItem(REVIEW_RUN_HISTORY_KEY)));
+      setRunHistory(loadRunHistory(window.localStorage));
     }, 0);
     return () => window.clearTimeout(loadHistory);
   }, []);
@@ -347,7 +347,7 @@ export function DemoReviewWorkspace() {
       const snapshot = createRunSnapshot(generatedAt, Number(threshold), nextResults, nextSummary);
       setRunHistory((current) => {
         const next = advanceRunHistory(current, snapshot);
-        window.localStorage.setItem(REVIEW_RUN_HISTORY_KEY, serializeRunHistory(next));
+        persistRunHistory(window.localStorage, next);
         return next;
       });
       if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === 10_000 && nextSummary.PASS === 3 && nextSummary.FAIL === 2 && nextSummary.MISSING === 1 && nextSummary.WARNING === 1) completeGuide("INITIAL_REVIEW_RUN");
@@ -385,7 +385,7 @@ export function DemoReviewWorkspace() {
   }
 
   function clearRunHistory() {
-    window.localStorage.removeItem(REVIEW_RUN_HISTORY_KEY);
+    removeRunHistory(window.localStorage);
     setRunHistory(emptyRunHistory);
   }
 
