@@ -35,7 +35,7 @@ export function DocumentsPanel({
       description={t(isLive ? "documents.help.live" : "documents.help.demo")}
       action={
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={onLoadDemo} className="primary-button">{t("action.loadDemo")}</button>
+          {isLive && <button type="button" onClick={onLoadDemo} className="primary-button">{t("action.loadDemo")}</button>}
           {!isLive && <button type="button" onClick={onResetDemo} className="secondary-button">{t("action.resetDemo")}</button>}
         </div>
       }
@@ -66,20 +66,20 @@ export function DocumentsPanel({
           ) : <p className="mt-4 text-sm text-slate-500">{t("documents.none")}</p>}
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="document-register">
           {demoDocuments.map((document) => (
-            <details key={document.id} className="group rounded-xl border border-slate-200 bg-white p-4 open:md:col-span-2">
-              <summary className="list-none">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-teal-700">{document.type.replaceAll("_", " ")}</p>
-                    <h3 className="mt-1 font-semibold text-slate-950">{document.title}</h3>
-                    <p className="mt-2 text-xs text-slate-500">{t("documents.facts", { count: document.facts.length })}</p>
-                  </div>
-                  <span aria-hidden="true" className="text-slate-400 transition group-open:rotate-45">+</span>
+            <details key={document.id} className="document-row group">
+              <summary>
+                <span className="document-type-icon" aria-hidden="true">{document.type.split("_").map((part) => part[0]).join("").slice(0, 2)}</span>
+                <div className="document-copy">
+                  <p>{document.type.replaceAll("_", " ")}</p>
+                  <h3>{document.title}</h3>
                 </div>
+                <span className="document-id">{document.id}</span>
+                <span className="document-facts">{t("documents.facts", { count: document.facts.length })}</span>
+                <span aria-hidden="true" className="document-expand">+</span>
               </summary>
-              <p className="mt-4 whitespace-pre-line rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700">{document.content}</p>
+              <div className="document-source"><p className="eyebrow">{t("policy.fictional")}</p><pre>{document.content}</pre></div>
             </details>
           ))}
         </div>

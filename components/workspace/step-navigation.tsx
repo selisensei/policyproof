@@ -14,35 +14,40 @@ export function StepNavigation({ current, onChange }: { current: WorkflowStep; o
   const currentIndex = steps.findIndex((step) => step.id === current);
 
   return (
-    <nav aria-label={t("a11y.progress")} className="border-b border-slate-200 bg-white">
-      <ol className="mx-auto grid max-w-[1600px] grid-cols-5 px-2 sm:px-6 xl:px-8">
-        {steps.map((step, index) => {
-          const isCurrent = current === step.id;
-          const isPast = index < currentIndex;
-          return (
-            <li key={step.id} className="min-w-0">
-              <button
-                type="button"
-                onClick={() => onChange(step.id)}
-                aria-current={isCurrent ? "step" : undefined}
-                aria-label={t(step.key)}
-                className={`group flex min-h-16 w-full flex-col items-center justify-center gap-1 border-b-2 px-0.5 text-xs font-bold transition sm:flex-row sm:gap-2 sm:px-3 sm:text-sm ${
-                  isCurrent
-                    ? "border-teal-700 text-teal-900"
-                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-900"
-                }`}
-              >
-                <span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs ${
-                  isCurrent ? "bg-teal-800 text-white" : isPast ? "bg-teal-50 text-teal-800" : "bg-slate-100 text-slate-500"
-                }`}>
-                  {isPast ? "✓" : step.number}
-                </span>
-                <span className="block w-full truncate text-center text-[9px] leading-tight sm:w-auto sm:text-sm">{t(step.key)}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+    <nav aria-label={t("a11y.progress")} className="workflow-nav">
+      <div className="workflow-nav-inner">
+        <p className="workflow-nav-title">{t("a11y.progress")}</p>
+        <ol>
+          {steps.map((step, index) => {
+            const isCurrent = current === step.id;
+            const isPast = index < currentIndex;
+            return (
+              <li key={step.id}>
+                <button
+                  type="button"
+                  onClick={() => onChange(step.id)}
+                  aria-current={isCurrent ? "step" : undefined}
+                  aria-label={t(step.key)}
+                  className={isCurrent ? "is-current" : isPast ? "is-complete" : ""}
+                >
+                  <span className="step-number" aria-hidden="true">{isPast ? "✓" : String(step.number).padStart(2, "0")}</span>
+                  <span className="step-copy">
+                    <span>{t(step.key)}</span>
+                    <small>{t("step.label", { number: step.number })}</small>
+                  </span>
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="step-arrow" fill="none">
+                    <path d="m8 5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <div className="workflow-boundary">
+          <span aria-hidden="true">◎</span>
+          <p>{t("intro.responsibility")}</p>
+        </div>
+      </div>
     </nav>
   );
 }

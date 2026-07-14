@@ -273,3 +273,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Continue rendering document content only as escaped React text; reject nulls, invalid UTF-8 replacement markers, and lines over 20,000 characters; retain exact-excerpt/source validation; and send conservative content-type, framing, referrer, and browser-permission headers.
 - **Rationale:** These checks extend existing validation boundaries without a security framework, parser, or content transformation.
 - **Consequences:** A document containing a literal replacement character or an extremely long single line is rejected. Content Security Policy remains a supervised deployment decision because Next.js script requirements must be tested against the production host.
+
+## D030 - Use a task-first review shell with evidence as the focal surface
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** The release-candidate interface was functional but repeated the same header, progress, mode, notice, case summary, action, and walkthrough information around every task. The permanent right rail reduced the width available to evidence and made mobile sessions unnecessarily long.
+- **Decision:** Keep the existing one-page state architecture and five-step workflow, but present it through a compact utility header, vertical desktop workflow rail, adaptive tablet/mobile step switcher, one case-context strip, and one wide task canvas. Show the product introduction only on the Policy step, collapse the optional judge guide, use register-style rows for controls and documents, make exact evidence the strongest Review surface, and add a result queue beside the human decision and receipt.
+- **Rationale:** A task-first shell improves hierarchy and demo speed without changing the deterministic engine, OpenAI contracts, fixtures, temporary state model, or dependency set.
+- **Consequences:** The generic readiness rail is removed. Supporting context remains available in the case strip and optional guide, while desktop width is reserved for the active review task.

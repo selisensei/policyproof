@@ -10,7 +10,7 @@ Finance, procurement, audit, and internal-control professionals routinely compar
 
 ## The solution
 
-PolicyProof provides a focused five-step workspace with an optional judge checklist: review a policy, confirm controls, select case documents, inspect an evidence matrix, and record a human decision. Every PASS, FAIL, MISSING, or WARNING links to supporting or contradictory excerpts, or explicitly states what evidence is missing.
+PolicyProof provides a focused five-step workspace with adaptive navigation and an optional judge checklist: review a policy, confirm controls, select case documents, inspect an evidence workbench, and record a human decision. Every PASS, FAIL, MISSING, or WARNING links to supporting or contradictory excerpts, or explicitly states what evidence is missing.
 
 The prototype covers one fictional procurement and vendor-change case. At a EUR 10,000 threshold it produces 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. Changing the threshold to EUR 15,000 immediately proves that the approval result is recalculated rather than displayed from a precomputed result list.
 

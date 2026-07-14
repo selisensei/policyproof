@@ -10,17 +10,19 @@ PolicyProof provides one focused, bilingual workspace to review controls, run a 
 
 ## Current status
 
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A compact judge-first introduction and optional guided checklist explain the value within the workspace, while the five focused steps switch immediately between English and French without resetting review or guide state.
+The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A task-first shell combines a compact utility header, adaptive five-step navigation, one case-context strip, and a wide review canvas. The optional judge checklist stays collapsed until needed, while English and French switch immediately without resetting review or guide state.
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. All automated AI tests use mocks; no paid model request was made during this phase, so a controlled live evaluation is still required before deployment.
 
 ## Screenshots
 
-Local Playwright runs generate ignored English and French screenshots at desktop, laptop, tablet, and mobile widths. Selected public screenshots will be added here before publication.
+Local Playwright runs generate ignored English and French screenshots at desktop, laptop, tablet, and mobile widths. The redesign was inspected across three complete capture iterations. Selected production screenshots will be added here before publication.
 
-- TODO: Desktop evidence-review workspace
-- TODO: Mobile deterministic workflow
-- TODO: Live GPT-5.6 policy compilation with fictional content
+- TODO: Desktop evidence workbench with the EUR/USD contradiction selected
+- TODO: Human decision and receipt workspace
+- TODO: Mobile deterministic policy workflow
+
+Mocked provider-error captures remain local-only and are not public product screenshots.
 
 ## Product workflow
 
@@ -30,7 +32,7 @@ Local Playwright runs generate ignored English and French screenshots at desktop
 4. Run the deterministic review and filter its outcomes.
 5. Inspect evidence, record a human decision, and read the decision receipt.
 
-The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun.
+The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. On desktop the workflow sits in a persistent left rail; tablet and mobile widths use a compact horizontal step switcher.
 
 ## Technical stack
 

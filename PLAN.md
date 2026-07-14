@@ -17,6 +17,8 @@ Completed and locally verified:
 - Version-controlled fictional evaluation contracts for policy compilation and document analysis
 - Submission draft, demo script, shot list, and checklist
 - Judge-first introduction, optional bilingual guided demo, stronger evidence provenance, and browser-native receipt exports
+- Judge-ready task-first shell with adaptive workflow navigation, compact case context, register-style controls and documents, evidence workbench, decision queue, and polished receipt
+- Three complete screenshot-based redesign iterations across desktop, laptop, tablet, and mobile widths
 - Secret-free core CI plus repository, license, screenshot, judge-Q&A, and Vercel deployment preparation
 - Unit, contract, component, and Playwright coverage
 
@@ -38,7 +40,7 @@ Still pending and requiring builder supervision:
 | Policy to controls | GPT-5.6 proposes structured human-reviewable controls | Mock-complete; live pending | Strict mocked contracts pass; supervised retry required |
 | Evidence review | Extract evidence, validate excerpts, calculate supported checks | Mock-complete; live pending | Exact-excerpt and deterministic-engine tests pass |
 | Human decision | Preserve original outcome and reviewer judgment | Complete | Comment rules, rerun reset, and receipt tests pass |
-| Judge readiness | Polished, accessible, documented public demo | In progress | Local release-candidate UI/docs ready; supervised live validation, deployment, and video pending |
+| Judge readiness | Polished, accessible, documented public demo | In progress | Three redesign iterations and local automated checks complete; manual assistive-technology review, supervised live validation, deployment, and video pending |
 
 ## Next supervised sequence
 

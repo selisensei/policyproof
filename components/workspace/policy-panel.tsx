@@ -37,17 +37,16 @@ export function PolicyPanel({
         </button>
       }
     >
-      <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-        <span className="metadata-pill">{t("policy.version")}</span>
-        <span className="metadata-pill">{t("policy.fictional")}</span>
-        <span className={`metadata-pill ${isLive ? "bg-indigo-50 text-indigo-700" : "bg-teal-50 text-teal-800"}`}>
-          {t(isLive ? "policy.aiRequested" : "policy.confirmed")}
-        </span>
+      <div className="source-meta">
+        <div><span>01</span><p>{t("policy.version")}</p></div>
+        <div><span>02</span><p>{t("policy.fictional")}</p></div>
+        <div className={isLive ? "is-live" : "is-confirmed"}><span>{isLive ? "AI" : "✓"}</span><p>{t(isLive ? "policy.aiRequested" : "policy.confirmed")}</p></div>
       </div>
 
       {!expanded && (
-        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
-          <p className="line-clamp-3 whitespace-pre-line text-sm leading-6 text-slate-700">{policyText}</p>
+        <div className="policy-preview">
+          <div className="policy-preview-gutter" aria-hidden="true"><span>01</span><span>02</span><span>03</span></div>
+          <p className="line-clamp-3 whitespace-pre-line">{policyText}</p>
         </div>
       )}
 
@@ -67,10 +66,10 @@ export function PolicyPanel({
               {compilationError && <p role="alert" className="error-callout mt-4">{compilationError}</p>}
             </>
           ) : (
-            <ol className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200">
+            <ol className="policy-rules">
               {policyText.split("\n").map((rule, index) => (
-                <li key={`${index}-${rule}`} className="flex gap-3 bg-white px-4 py-3 text-sm leading-6 text-slate-700">
-                  <span aria-hidden="true" className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-teal-50 text-xs font-bold text-teal-800">{index + 1}</span>
+                <li key={`${index}-${rule}`}>
+                  <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                   <span>{rule.replace(/^\d+\.\s*/, "")}</span>
                 </li>
               ))}

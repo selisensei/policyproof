@@ -371,43 +371,43 @@ export function DemoReviewWorkspace() {
   ) : currentStep === "review" ? (
     <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documentTypes={documentTypes} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} />
   ) : (
-    <DecisionPanel selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} onCommentChange={updateComment} onDecision={applyDecision} />
+    <DecisionPanel results={results} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} />
   );
 
   return (
-    <main className="min-h-screen bg-[#f3f5f3] pb-12" aria-busy={isCompiling || isRunning}>
+    <main className="min-h-screen bg-[var(--page)]" aria-busy={isCompiling || isRunning}>
       <a href="#workspace" className="sr-only z-50 rounded bg-white p-3 font-semibold text-slate-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3">{t("a11y.skip")}</a>
       <AppHeader mode={mode} ai={ai} onModeChange={changeMode} onRun={runReview} isRunning={isRunning} />
-      <StepNavigation current={currentStep} onChange={navigate} />
-      <div id="workspace" className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
-        <IntroPanel onStartDemo={loadDemo} compact={currentStep !== "policy"} />
-        <div className={`mode-banner ${mode === "DETERMINISTIC_DEMO" ? "border-teal-200 bg-teal-50/70 text-teal-950" : "border-indigo-200 bg-indigo-50 text-indigo-950"}`}>
-          <span className="font-bold">{t(mode === "DETERMINISTIC_DEMO" ? "mode.demo" : "mode.live")}</span>
-          <span className="hidden sm:inline"> — </span><span className="block sm:inline">{t(mode === "DETERMINISTIC_DEMO" ? "mode.demo.description" : "mode.live.description")}</span>
-          {!ai.checking && !ai.available && <span className="mt-1 block text-xs">{t("mode.live.disabled")}</span>}
-        </div>
-        <div aria-live="polite" role="status" className="notice-bar">
-          {t(
-            notice.key,
-            notice.controlId && notice.decisionState
-              ? {
-                  title: localizedControl(notice.controlId, locale, notice.fallbackTitle ?? notice.controlId).title,
-                  decision: t(`decision.${notice.decisionState}`).toLocaleLowerCase(locale === "fr" ? "fr-FR" : "en-US"),
-                }
-              : notice.values,
-          )}
-        </div>
-        {workspaceError && <p role="alert" className="error-callout mt-3">{workspaceError}</p>}
+      <div className="workspace-frame">
+        <StepNavigation current={currentStep} onChange={navigate} />
+        <div id="workspace" className="min-w-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+          {currentStep === "policy" && <IntroPanel onStartDemo={loadDemo} />}
+          <WorkspaceSummary enabledControlCount={enabledControlCount} documentCount={documentCount} summary={summary} results={results} currentStep={currentStep} onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} mode={mode} aiAvailable={ai.available} isCompiling={isCompiling} compilationError={compilationError} proposals={proposals} proposalStates={proposalStates} proposalsApproved={proposalsApproved} proposalValidationFailed={proposalValidationFailed} isRunning={isRunning} workspaceError={workspaceError} />
+          <div className="workspace-notice mt-3" data-tone={workspaceError ? "error" : "neutral"}>
+            <span aria-hidden="true" className="workspace-notice-dot" />
+            <div className="min-w-0">
+              <p aria-live="polite" role="status">
+                {t(
+                  notice.key,
+                  notice.controlId && notice.decisionState
+                    ? {
+                        title: localizedControl(notice.controlId, locale, notice.fallbackTitle ?? notice.controlId).title,
+                        decision: t(`decision.${notice.decisionState}`).toLocaleLowerCase(locale === "fr" ? "fr-FR" : "en-US"),
+                      }
+                    : notice.values,
+                )}
+              </p>
+              {workspaceError && <p role="alert" className="mt-1 font-semibold text-red-800">{workspaceError}</p>}
+            </div>
+          </div>
 
-        <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_17rem]">
-          <div className="min-w-0">
+          <div className="mt-4 min-w-0">
             {panel}
-            <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="workflow-actions mt-4 flex items-center justify-between gap-3">
               <button type="button" onClick={() => navigate(steps[Math.max(0, currentStepIndex - 1)])} disabled={currentStepIndex === 0} className="secondary-button disabled:invisible">← {t("action.back")}</button>
               {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button">{t("action.next")} →</button>}
             </div>
           </div>
-          <WorkspaceSummary enabledControlCount={enabledControlCount} documentCount={documentCount} summary={summary} results={results} currentStep={currentStep} onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} mode={mode} isCompiling={isCompiling} compilationError={compilationError} proposals={proposals} proposalStates={proposalStates} proposalsApproved={proposalsApproved} proposalValidationFailed={proposalValidationFailed} isRunning={isRunning} workspaceError={workspaceError} />
         </div>
       </div>
     </main>

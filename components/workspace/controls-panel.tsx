@@ -46,8 +46,8 @@ export function ControlsPanel({
       description={t(isLive ? "controls.help.live" : "controls.help.demo")}
       action={!isLive ? <button type="button" onClick={onResetControls} className="secondary-button">{t("action.resetControls")}</button> : undefined}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 text-sm">
-        <span className="font-semibold text-slate-700">{t("controls.enabled", { count: enabledCount })}</span>
+      <div className="register-toolbar">
+        <span><b>{enabledCount}</b> {t("controls.enabled", { count: enabledCount }).replace(String(enabledCount), "").trim()}</span>
         {isLive && proposals.length > 0 && (
           <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${proposalsApproved ? "bg-teal-50 text-teal-800" : "bg-amber-50 text-amber-900"}`}>
             {t(proposalsApproved ? "controls.approved" : "controls.awaiting")}
@@ -88,32 +88,35 @@ export function ControlsPanel({
           <div className="empty-state"><p className="font-semibold text-slate-800">{t("controls.none")}</p><p className="mt-1 text-sm text-slate-500">{t("controls.noneHelp")}</p></div>
         )
       ) : (
-        <div className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200">
+        <div className="control-register">
           {controls.map((control) => {
             const localized = localizedControl(control.id, locale, control.title, control.description);
             return (
-              <article key={control.id} className={`bg-white px-4 py-4 transition ${control.enabled ? "" : "bg-slate-50 opacity-70"}`}>
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" aria-label={t("controls.enable", { title: localized.title })} checked={control.enabled} onChange={(event) => onToggleControl(control.id, event.target.checked)} className="mt-1 size-5 accent-teal-700" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold text-slate-950">{localized.title}</h3>
-                      <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">{t(`severity.${control.severity}`)}</span>
-                      <span className="font-mono text-[11px] text-slate-400">{control.id}</span>
-                    </div>
-                    <details className="mt-1 group">
-                      <summary className="w-fit text-xs font-semibold text-teal-800 underline-offset-2 hover:underline">{t("controls.details")}</summary>
-                      <p className="mt-2 text-sm leading-5 text-slate-600">{localized.description}</p>
-                    </details>
-                    {control.kind === "APPROVAL_THRESHOLD" && (
-                      <div className="mt-3 max-w-sm rounded-lg border border-teal-100 bg-teal-50/70 p-3">
-                        <label htmlFor="approval-threshold" className="field-label text-teal-950">{t("controls.threshold")}</label>
-                        <input id="approval-threshold" type="number" min="0" max="1000000000" step="500" value={threshold} onChange={(event) => onThresholdChange(event.target.value)} aria-invalid={Boolean(thresholdError)} aria-describedby={thresholdError ? "approval-threshold-error" : undefined} className="field-control mt-1 border-teal-300" />
-                        {thresholdError && <p id="approval-threshold-error" role="alert" className="mt-1 text-xs font-medium text-red-700">{thresholdError}</p>}
-                      </div>
-                    )}
+              <article key={control.id} className={`control-row ${control.enabled ? "" : "is-disabled"}`}>
+                <label className="control-toggle">
+                  <input type="checkbox" aria-label={t("controls.enable", { title: localized.title })} checked={control.enabled} onChange={(event) => onToggleControl(control.id, event.target.checked)} />
+                  <span aria-hidden="true" />
+                </label>
+                <div className="control-copy">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <h3>{localized.title}</h3>
+                    <span className={`severity-chip severity-${control.severity.toLocaleLowerCase()}`}>{t(`severity.${control.severity}`)}</span>
                   </div>
+                  <p className="control-kind">{control.kind.replaceAll("_", " ")} · <span>{control.id}</span></p>
+                  <details>
+                    <summary>{t("controls.details")}</summary>
+                    <p>{localized.description}</p>
+                  </details>
                 </div>
+                <div className="control-parameter">
+                  {control.kind === "APPROVAL_THRESHOLD" ? (
+                    <div>
+                      <label htmlFor="approval-threshold" className="field-label text-teal-950">{t("controls.threshold")}</label>
+                      <div className="threshold-field"><span>€</span><input id="approval-threshold" type="number" min="0" max="1000000000" step="500" value={threshold} onChange={(event) => onThresholdChange(event.target.value)} aria-invalid={Boolean(thresholdError)} aria-describedby={thresholdError ? "approval-threshold-error" : undefined} /></div>
+                      {thresholdError && <p id="approval-threshold-error" role="alert" className="mt-1 text-xs font-medium text-red-700">{thresholdError}</p>}
+                    </div>
+                  ) : <span className="control-method">{t("evidence.method.demo")}</span>}
+                  </div>
               </article>
             );
           })}

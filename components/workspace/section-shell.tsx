@@ -16,18 +16,18 @@ export function SectionShell({
   children: ReactNode;
 }) {
   return (
-    <section id={id} aria-labelledby={`${id}-heading`} className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_14px_40px_-28px_rgba(15,23,42,0.45)]">
-      <div className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50/55 px-5 py-5 sm:flex-row sm:items-start sm:justify-between lg:px-7">
+    <section id={id} aria-labelledby={`${id}-heading`} className="task-canvas">
+      <div className="task-heading">
         <div className="max-w-3xl">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{step}</p>
-          <h2 id={`${id}-heading`} className="mt-1 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+          <p className="eyebrow text-teal-800">{step}</p>
+          <h2 id={`${id}-heading`} className="mt-1 text-[1.55rem] font-bold tracking-[-0.035em] text-slate-950 sm:text-[1.8rem]">
             {title}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>
         </div>
         {action}
       </div>
-      <div className="p-5 lg:p-7">{children}</div>
+      <div className="task-content">{children}</div>
     </section>
   );
 }

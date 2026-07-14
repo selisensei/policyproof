@@ -99,22 +99,28 @@ Pre-change baseline preserved before overnight work:
 - `pnpm build`: PASS
 - `pnpm test:e2e`: PASS — 2 Chromium tests
 
-Current release-candidate checkpoint:
+The pre-redesign release candidate is preserved in checkpoint commit
+`ed5db89d9fcc4b9f1bc5e608950d25b4b795d598`.
+
+Judge-ready redesign verification:
 
 - `pnpm test`: PASS — 11 files, 67 tests
 - `pnpm typecheck`: PASS — no TypeScript errors
 - `pnpm lint`: PASS — no ESLint errors or warnings
 - `pnpm build`: PASS — static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, `/api/ai/analyze`
-- `pnpm test:e2e`: PASS — 4 Chromium tests, including API-unavailable and safely mocked provider-error states
+- `pnpm test:e2e`: PASS — 4 Chromium tests covering the 12-step deterministic judge path, responsive layouts, keyboard navigation, print media, API-unavailable state, and a safely mocked provider error
 - `pnpm audit --prod`: PASS — no known vulnerabilities
 - `git diff --check`: PASS — no whitespace errors (Git reported informational LF-to-CRLF conversion warnings on Windows)
 - Production smoke test: PASS — `GET /` returned 200 and contained PolicyProof; `GET /api/ai/status` returned model `gpt-5.6` and a boolean availability field; `nosniff` and `DENY` headers were present; port 3200 was released
 - Mocked provider-error smoke test: PASS — Playwright displayed only the safe authentication category and mocked request reference
-- Secret-pattern scan: PASS — 84 candidate files scanned, 0 potential secret matches
+- Secret-pattern scan: PASS — 85 candidate files scanned, 0 potential secret matches
 - Dependency review: PASS — no dependency manifest or lockfile change; five existing production packages
-- Ignored-file review: PASS — `.env.local`, `.next/`, `node_modules/`, `test-results/`, and `playwright-report/` remain ignored
+- Ignored-file review: PASS — `.env.local`, `.next/`, `node_modules/`, `test-results/`, `playwright-report/`, `coverage/`, and `.vercel/` remain ignored
 - Public-documentation path review: PASS — no local Windows path or builder username detected
-- English/French screenshot review: PASS — desktop and mobile layouts, evidence matrix, inspector, receipt, API-unavailable state, and mocked error were reviewed; final public captures still require production recapture
+- Screenshot iteration 1: PASS — 16 ignored captures across the five workflow steps and required viewport widths; navigation ambiguity was corrected
+- Screenshot iteration 2: PASS — 16 ignored captures; development indicators, result context, and the mobile guide were refined
+- Screenshot iteration 3: PASS — 16 ignored captures; the compact case strip and explicit 12-step judge path were verified
+- Final English/French screenshot review: PASS — 16 ignored captures covering desktop and mobile layouts, controls, documents, evidence workbench, validation, receipt, API-unavailable state, and mocked error; final public captures still require production recapture
 
 No authenticated or paid OpenAI endpoint was called by these checks.
 

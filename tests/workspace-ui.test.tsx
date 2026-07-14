@@ -251,6 +251,7 @@ describe("PolicyProof workspace interactions", () => {
     await user.type(screen.getByLabelText("Control title CTRL-MOCK"), " edited");
     expect(screen.getByText("Edited — approval required")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Reject proposal" }));
-    expect(screen.getAllByText("Rejected by reviewer")).toHaveLength(2);
+    expect(screen.getByText("Rejected by reviewer")).toBeTruthy();
+    expect(screen.getByText(/Control proposal: Rejected by reviewer/)).toBeTruthy();
   });
 });

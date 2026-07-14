@@ -8,11 +8,13 @@ import { StatusBadge } from "@/components/workspace/status-badge";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl } from "@/src/i18n/translations";
 
-export function DecisionPanel({ selectedResult, summary, receipt, reviewError, onCommentChange, onDecision }: {
+export function DecisionPanel({ results, selectedResult, summary, receipt, reviewError, onSelectResult, onCommentChange, onDecision }: {
+  results: ControlResult[];
   selectedResult: ControlResult | null;
   summary: ResultSummary;
   receipt: DecisionReceipt | null;
   reviewError: string;
+  onSelectResult: (controlId: string) => void;
   onCommentChange: (comment: string) => void;
   onDecision: (state: ReviewDecision["state"]) => void;
 }) {
@@ -51,8 +53,22 @@ export function DecisionPanel({ selectedResult, summary, receipt, reviewError, o
       {!receipt ? (
         <div className="empty-state"><p className="font-semibold text-slate-800">{t("decision.empty")}</p><p className="mt-1 text-sm text-slate-500">{t("decision.emptyHelp")}</p></div>
       ) : (
-        <div className="receipt-layout grid min-w-0 gap-5 xl:grid-cols-[minmax(19rem,0.7fr)_minmax(0,1.3fr)]">
-          <div className="receipt-actions self-start rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="receipt-layout">
+          <aside className="receipt-queue" aria-label={t("review.human")}>
+            <div className="receipt-queue-heading"><div><p className="eyebrow">{t("review.human")}</p><h3>{t("summary.pending")}</h3></div><span>{summary.pending}</span></div>
+            <div className="receipt-queue-list">
+              {results.map((result) => {
+                const title = localizedControl(result.controlId, locale, result.title).title;
+                const selected = selectedResult?.controlId === result.controlId;
+                return <button key={result.controlId} type="button" onClick={() => onSelectResult(result.controlId)} aria-label={t("review.inspect", { title })} aria-pressed={selected} className={selected ? "is-selected" : ""}>
+                  <span className="receipt-queue-status" data-status={result.status} aria-hidden="true" />
+                  <span><b>{title}</b><small>{t(`decision.${result.reviewerDecision.state}`)}</small></span>
+                </button>;
+              })}
+            </div>
+          </aside>
+
+          <div className="receipt-actions decision-form">
             {selectedResult ? (
               <>
                 <div className="flex items-start justify-between gap-3"><div><p className="eyebrow">{t("decision.selected")}</p><h3 className="mt-1 font-semibold text-slate-950">{selectedTitle}</h3></div><StatusBadge status={selectedResult.status} /></div>
@@ -60,7 +76,7 @@ export function DecisionPanel({ selectedResult, summary, receipt, reviewError, o
                 <textarea id="review-comment" rows={4} value={selectedResult.reviewerDecision.comment} onChange={(event) => onCommentChange(event.target.value)} placeholder={t("decision.commentPlaceholder")} aria-invalid={Boolean(reviewError)} aria-describedby="review-comment-help review-comment-error" className="field-control mt-2 resize-y leading-6" />
                 <p id="review-comment-help" className="mt-2 text-xs leading-5 text-slate-500">{t("decision.commentHelp")}</p>
                 {reviewError && <p id="review-comment-error" role="alert" className="error-callout mt-3">{reviewError}</p>}
-                <div className="mt-4 grid gap-2 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+                <div className="mt-4 grid gap-2">
                   <button type="button" onClick={() => onDecision("CONFIRMED")} className="min-h-10 rounded-lg bg-teal-800 px-3 text-sm font-bold text-white hover:bg-teal-700">{t("decision.confirm")}</button>
                   <DecisionButton label={t("decision.reject")} onClick={() => onDecision("REJECTED")} />
                   <DecisionButton label={t("decision.exception")} onClick={() => onDecision("ACCEPTED_EXCEPTION")} />
@@ -71,7 +87,7 @@ export function DecisionPanel({ selectedResult, summary, receipt, reviewError, o
           </div>
 
           <article aria-label={t("a11y.receipt")} className="decision-receipt min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div className="receipt-masthead flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
               <div><p className="text-[11px] font-bold uppercase tracking-wide text-teal-300">PolicyProof</p><h3 className="mt-1 text-lg font-semibold text-white">{t("receipt.title")}</h3><p className="mt-1 break-all font-mono text-xs text-slate-300">{receipt.reviewId}</p></div>
               <div className="text-sm text-slate-300">{t("receipt.progress", { reviewed: summary.reviewed, pending: summary.pending })}</div>
             </div>

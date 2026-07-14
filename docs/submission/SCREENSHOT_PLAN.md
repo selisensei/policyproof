@@ -13,7 +13,7 @@
 | Image | Required state | Intended use |
 | --- | --- | --- |
 | English product overview | Policy step, deterministic mode, guide visible | Devpost introduction |
-| Evidence matrix | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING | README hero and Devpost |
+| Evidence workbench | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING | README hero and Devpost |
 | Evidence inspector | Currency consistency selected; EUR and USD excerpts visible | Main differentiation |
 | Decision receipt | Rejected currency result with fictional comment | Human oversight and export story |
 | French workspace | French Review or Decision step with preserved evidence | Bilingual capability |

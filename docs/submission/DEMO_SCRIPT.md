@@ -22,13 +22,13 @@ Target duration: approximately 2 minutes 45 seconds. Use the deterministic path 
 
 ## 0:50–1:15 — Review matrix
 
-**Action:** Run the review.
+**Action:** Run the review and let the Evidence review workspace open automatically.
 
-**Narration:** “At a ten-thousand-euro threshold, PolicyProof calculates three passes, two failures, one missing item, and one warning. The matrix separates the control outcome from the pending human decision.”
+**Narration:** “At a ten-thousand-euro threshold, PolicyProof calculates three passes, two failures, one missing item, and one warning. The result register separates the control outcome from the pending human decision.”
 
 ## 1:15–1:40 — Exact evidence
 
-**Action:** Select Currency consistency.
+**Action:** Select Currency consistency in the result register.
 
 **Narration:** “Currency consistency fails because the purchase order says EUR while the invoice says USD. Both exact excerpts, document names, and field locators remain visible beside the matrix. Missing controls identify the evidence that should have been present.”
 
