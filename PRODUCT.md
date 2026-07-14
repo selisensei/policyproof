@@ -27,6 +27,8 @@ The first working version supports one fictional procurement and vendor-change s
 7. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
 8. Let the user confirm, reject, or accept an exception while preserving the original result.
 9. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
+10. Switch the complete application presentation between English and French without resetting the review.
+11. Follow an optional state-based judge checklist and export the current structured receipt through print, JSON, or copy actions.
 
 ## Status definitions
 
@@ -77,3 +79,6 @@ A hackathon judge can run the application, complete the full workflow with the i
 - Human decisions apply per control; the receipt summarizes the case without inventing a separate automated case verdict.
 - Evidence uses stable document identifiers, names, section locators, exact excerpts, evidence types, confidence, and relation to a control when available.
 - Local document support is deliberately limited to text-based formats. PDF and OCR remain out of scope.
+- English is the default interface language; French is available immediately from the application header. Stable technical identifiers and original source evidence are not translated.
+- Guided-demo completion is based only on real user actions and remains optional, dismissible, keyboard-accessible, and temporary.
+- Receipt exports are generated from current validated review state; no PDF service, server storage, or invented audit metadata is used.

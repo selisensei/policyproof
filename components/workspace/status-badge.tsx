@@ -1,4 +1,5 @@
 import type { ControlResult } from "@/src/domain/schemas";
+import { useLocale } from "@/src/i18n/locale-context";
 
 const styles: Record<ControlResult["status"], string> = {
   PASS: "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -8,9 +9,11 @@ const styles: Record<ControlResult["status"], string> = {
 };
 
 export function StatusBadge({ status }: { status: ControlResult["status"] }) {
+  const { t } = useLocale();
   return (
-    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold tracking-wide ${styles[status]}`}>
-      {status}
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold tracking-wide ${styles[status]}`}>
+      <span aria-hidden="true" className="text-[10px]">{status === "PASS" ? "✓" : status === "FAIL" ? "×" : status === "MISSING" ? "–" : "!"}</span>
+      {t(`status.${status}`)}
     </span>
   );
 }

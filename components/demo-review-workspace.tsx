@@ -1,71 +1,78 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 import { AppHeader } from "@/components/workspace/app-header";
 import { ControlsPanel } from "@/components/workspace/controls-panel";
 import { DecisionPanel } from "@/components/workspace/decision-panel";
 import { DocumentsPanel } from "@/components/workspace/documents-panel";
+import { IntroPanel } from "@/components/workspace/intro-panel";
 import { PolicyPanel } from "@/components/workspace/policy-panel";
 import { ReviewPanel } from "@/components/workspace/review-panel";
 import { StepNavigation } from "@/components/workspace/step-navigation";
-import type { AiAvailability, AppMode } from "@/components/workspace/types";
-import {
-  AiControlProposalSchema,
-  CaseAnalysisSchema,
-  PolicyCompilationSchema,
-  type AiControlProposal,
-} from "@/src/domain/ai-schemas";
-import {
-  ControlDefinitionSchema,
-  type ControlDefinition,
-  type ControlResult,
-  type ReviewDecision,
-} from "@/src/domain/schemas";
+import { WorkspaceSummary } from "@/components/workspace/workspace-summary";
+import type { AiAvailability, AppMode, GuidedDemoMilestone, ProposalReviewState, WorkflowStep } from "@/components/workspace/types";
+import { AiControlProposalSchema, CaseAnalysisSchema, PolicyCompilationSchema, type AiControlProposal } from "@/src/domain/ai-schemas";
+import { ControlDefinitionSchema, type ControlDefinition, type ControlResult, type ReviewDecision } from "@/src/domain/schemas";
 import { demoControls, demoDocuments, demoPolicy } from "@/src/fixtures/demo-case";
+import { useLocale } from "@/src/i18n/locale-context";
+import { localizedControl, type TranslationKey } from "@/src/i18n/translations";
 import { createDecisionReceipt } from "@/src/lib/decision-receipt";
-import { readLocalDocuments, type LocalDocument } from "@/src/lib/local-documents";
+import { LocalDocumentError, readLocalDocuments, type LocalDocument } from "@/src/lib/local-documents";
 import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/review-summary";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
-import { z } from "zod";
 
 const CASE_NAME = "Northstar Facilities vendor change";
+const steps: WorkflowStep[] = ["policy", "controls", "documents", "review", "decision"];
+
+type Notice = {
+  key: TranslationKey;
+  values?: Record<string, string | number>;
+  controlId?: string;
+  fallbackTitle?: string;
+  decisionState?: ReviewDecision["state"];
+};
+type Translator = (key: TranslationKey, values?: Record<string, string | number>) => string;
 
 function freshDemoControls(): ControlDefinition[] {
   return structuredClone(demoControls);
 }
 
-function getApiError(body: unknown, fallback: string): string {
-  if (
-    body &&
-    typeof body === "object" &&
-    "error" in body &&
-    body.error &&
-    typeof body.error === "object" &&
-    "message" in body.error &&
-    typeof body.error.message === "string"
-  ) {
-    return body.error.message;
+function getApiError(body: unknown, fallbackKey: TranslationKey, t: Translator, useProviderMessage: boolean): string {
+  if (body && typeof body === "object" && "error" in body && body.error && typeof body.error === "object") {
+    const apiError = body.error as Record<string, unknown>;
+    const text: string[] = [];
+    text.push(useProviderMessage && typeof apiError.message === "string" ? apiError.message : t(fallbackKey));
+    if (typeof apiError.category === "string") text.push(t("error.category", { category: apiError.category.replaceAll("_", " ") }));
+    const reference = typeof apiError.requestId === "string" ? apiError.requestId : typeof apiError.correlationId === "string" ? apiError.correlationId : null;
+    if (reference) text.push(t("error.reference", { reference }));
+    return text.join(" ");
   }
-  return fallback;
+  return t(fallbackKey);
 }
 
 export function DemoReviewWorkspace() {
+  const { locale, t } = useLocale();
+  const policyCompilationInFlight = useRef(false);
+  const [currentStep, setCurrentStep] = useState<WorkflowStep>("policy");
   const [mode, setMode] = useState<AppMode>("DETERMINISTIC_DEMO");
   const [ai, setAi] = useState<AiAvailability>({ available: false, model: "gpt-5.6", checking: true });
   const [policyText, setPolicyText] = useState(demoPolicy.text);
   const [policyExpanded, setPolicyExpanded] = useState(false);
   const [controls, setControls] = useState<ControlDefinition[]>(freshDemoControls);
   const [threshold, setThreshold] = useState("10000");
-  const [thresholdError, setThresholdError] = useState("");
+  const [thresholdInvalid, setThresholdInvalid] = useState(false);
   const [proposals, setProposals] = useState<AiControlProposal[]>([]);
   const [proposalsApproved, setProposalsApproved] = useState(false);
+  const [proposalValidationFailed, setProposalValidationFailed] = useState(false);
+  const [proposalStates, setProposalStates] = useState<Record<string, ProposalReviewState>>({});
   const [localDocuments, setLocalDocuments] = useState<LocalDocument[]>([]);
   const [documentError, setDocumentError] = useState("");
   const [compilationError, setCompilationError] = useState("");
   const [workspaceError, setWorkspaceError] = useState("");
-  const [notice, setNotice] = useState("Demo case ready. Run the review when controls are confirmed.");
+  const [notice, setNotice] = useState<Notice>({ key: "notice.ready" });
   const [results, setResults] = useState<ControlResult[]>([]);
   const [selectedControlId, setSelectedControlId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ResultFilter>("ALL");
@@ -73,6 +80,8 @@ export function DemoReviewWorkspace() {
   const [runGeneratedAt, setRunGeneratedAt] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [guideDismissed, setGuideDismissed] = useState(false);
+  const [guideMilestones, setGuideMilestones] = useState<Set<GuidedDemoMilestone>>(() => new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -89,39 +98,45 @@ export function DemoReviewWorkspace() {
       .catch(() => {
         if (!cancelled) setAi({ available: false, model: "gpt-5.6", checking: false });
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  const selectedResult = useMemo(
-    () => results.find((result) => result.controlId === selectedControlId) ?? null,
-    [results, selectedControlId],
-  );
+  const selectedResult = useMemo(() => results.find((result) => result.controlId === selectedControlId) ?? null, [results, selectedControlId]);
   const summary = useMemo(() => summarizeResults(results), [results]);
   const visibleResults = useMemo(() => filterResults(results, filter), [results, filter]);
-  const receipt = useMemo(
-    () =>
-      runGeneratedAt && results.length
-        ? createDecisionReceipt({
-            results,
-            policyVersion: demoPolicy.version,
-            caseName: mode === "DETERMINISTIC_DEMO" ? CASE_NAME : "Local fictional document review",
-            runMode: mode,
-            generatedAt: runGeneratedAt,
-          })
-        : null,
-    [mode, results, runGeneratedAt],
+  const enabledControlCount = mode === "DETERMINISTIC_DEMO" ? controls.filter((control) => control.enabled).length : proposals.filter((control) => control.enabled).length;
+  const receipt = useMemo(() => runGeneratedAt && results.length ? createDecisionReceipt({ results, policyName: demoPolicy.title, policyVersion: demoPolicy.version, caseName: mode === "DETERMINISTIC_DEMO" ? CASE_NAME : "Local fictional document review", selectedLanguage: locale, runMode: mode, generatedAt: runGeneratedAt, enabledControlCount }) : null, [enabledControlCount, locale, mode, results, runGeneratedAt]);
+  const documentCount = mode === "DETERMINISTIC_DEMO" ? demoDocuments.length : localDocuments.length;
+  const documentTypes = useMemo(
+    () => mode === "DETERMINISTIC_DEMO"
+      ? Object.fromEntries(demoDocuments.map((document) => [document.id, document.type]))
+      : Object.fromEntries(localDocuments.map((document) => [document.id, document.inferredType])),
+    [localDocuments, mode],
   );
+  const currentStepIndex = steps.indexOf(currentStep);
 
-  function clearReview(message: string) {
+  function completeGuide(...milestones: GuidedDemoMilestone[]) {
+    setGuideMilestones((current) => {
+      const next = new Set(current);
+      milestones.forEach((milestone) => next.add(milestone));
+      return next;
+    });
+  }
+
+  function navigate(step: WorkflowStep) {
+    setCurrentStep(step);
+    if (step === "controls") completeGuide("CONTROLS_REVIEWED");
+    if (step === "decision" && receipt) completeGuide("RECEIPT_REVIEWED");
+  }
+
+  function clearReview(nextNotice: Notice) {
     setResults([]);
     setSelectedControlId(null);
     setRunGeneratedAt(null);
     setFilter("ALL");
     setReviewError("");
     setWorkspaceError("");
-    setNotice(message);
+    setNotice(nextNotice);
   }
 
   function loadDemo() {
@@ -129,130 +144,155 @@ export function DemoReviewWorkspace() {
     setPolicyText(demoPolicy.text);
     setControls(freshDemoControls());
     setThreshold("10000");
-    setThresholdError("");
+    setThresholdInvalid(false);
     setProposals([]);
     setProposalsApproved(false);
+    setProposalValidationFailed(false);
+    setProposalStates({});
     setLocalDocuments([]);
     setDocumentError("");
     setCompilationError("");
-    clearReview("Demo case loaded. All seven controls are enabled at a EUR 10,000 threshold.");
+    clearReview({ key: "notice.demoLoaded" });
+    completeGuide("CASE_LOADED");
+    setCurrentStep("policy");
   }
 
   function changeMode(nextMode: AppMode) {
     if (nextMode === "LIVE_GPT_5_6" && !ai.available) return;
     setMode(nextMode);
     setPolicyExpanded(nextMode === "LIVE_GPT_5_6");
-    clearReview(
-      nextMode === "LIVE_GPT_5_6"
-        ? "Live mode selected. Compile the policy, approve controls, and select fictional local documents."
-        : "Deterministic demo selected. Fixture data remains ready to review.",
-    );
+    setCurrentStep("policy");
+    clearReview({ key: nextMode === "LIVE_GPT_5_6" ? "notice.liveSelected" : "notice.demoSelected" });
   }
 
   function updateThreshold(value: string) {
     setThreshold(value);
     const amount = Number(value);
-    setThresholdError(
-      value.trim() === "" || !Number.isFinite(amount) || amount < 0
-        ? "Enter a valid threshold of zero or more."
-        : "",
-    );
-    if (results.length) setNotice("Control settings changed. Rerun the review to replace the previous results and reviewer decisions.");
+    setThresholdInvalid(value.trim() === "" || !Number.isFinite(amount) || amount < 0);
+    if (results.length) setNotice({ key: "notice.settingsChanged" });
+    if (Number(value) === 15_000) completeGuide("THRESHOLD_UPDATED");
   }
 
   function toggleControl(id: string, enabled: boolean) {
-    setControls((current) => current.map((control) => (control.id === id ? { ...control, enabled } : control)));
-    if (results.length) setNotice("Control settings changed. Rerun the review to replace the previous results and reviewer decisions.");
+    setControls((current) => current.map((control) => control.id === id ? { ...control, enabled } : control));
+    if (results.length) setNotice({ key: "notice.settingsChanged" });
   }
 
   function resetControls() {
     setControls(freshDemoControls());
     setThreshold("10000");
-    setThresholdError("");
-    clearReview("Demo controls reset to seven enabled controls and a EUR 10,000 threshold.");
+    setThresholdInvalid(false);
+    clearReview({ key: "notice.controlsReset" });
   }
 
   async function compilePolicy() {
+    if (policyCompilationInFlight.current) return;
+    policyCompilationInFlight.current = true;
     setIsCompiling(true);
     setCompilationError("");
     try {
-      const response = await fetch("/api/ai/policy", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ policyText }),
-      });
+      const response = await fetch("/api/ai/policy", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ policyText }) });
       const body = (await response.json()) as unknown;
-      if (!response.ok) throw new Error(getApiError(body, "Policy compilation failed."));
+      if (!response.ok) throw new Error(getApiError(body, "error.policyCompilation", t, locale === "en"));
       const parsed = z.object({ compilation: PolicyCompilationSchema }).parse(body);
       setProposals(parsed.compilation.controls);
+      setProposalStates(Object.fromEntries(parsed.compilation.controls.map((control) => [control.id, "PROPOSED" as const])));
       setProposalsApproved(false);
-      setNotice(`${parsed.compilation.controls.length} GPT-5.6 control proposals are ready for human review.`);
+      setProposalValidationFailed(false);
+      setNotice({ key: "notice.proposalsReady", values: { count: parsed.compilation.controls.length } });
+      setCurrentStep("controls");
     } catch (error) {
-      setCompilationError(error instanceof Error ? error.message : "Policy compilation failed.");
+      setCompilationError(error instanceof Error ? error.message : t("error.policyCompilation"));
     } finally {
+      policyCompilationInFlight.current = false;
       setIsCompiling(false);
     }
   }
 
   function updateProposal(id: string, patch: Partial<AiControlProposal>) {
-    setProposals((current) => current.map((control) => (control.id === id ? { ...control, ...patch } : control)));
+    setProposals((current) => current.map((control) => control.id === id ? { ...control, ...patch } : control));
+    setProposalStates((current) => ({ ...current, [id]: "EDITED" }));
     setProposalsApproved(false);
+    setProposalValidationFailed(false);
+  }
+
+  function rejectProposal(id: string) {
+    setProposals((current) => current.map((control) => control.id === id ? { ...control, enabled: false } : control));
+    setProposalStates((current) => ({ ...current, [id]: "REJECTED" }));
+    setProposalsApproved(false);
+    setProposalValidationFailed(false);
   }
 
   function approveProposals() {
     try {
-      z.array(AiControlProposalSchema).min(1).parse(proposals);
+      const activeProposals = proposals.filter((proposal) => proposalStates[proposal.id] !== "REJECTED" && proposal.enabled);
+      z.array(AiControlProposalSchema).min(1).parse(activeProposals);
       setProposalsApproved(true);
+      setProposalValidationFailed(false);
+      setProposalStates((current) => Object.fromEntries(Object.entries(current).map(([id, state]) => [id, state === "REJECTED" ? state : "APPROVED"])));
       setWorkspaceError("");
-      setNotice("Proposed controls approved by the reviewer. Live case analysis is now available.");
+      setNotice({ key: "notice.proposalsApproved" });
+      setCurrentStep("documents");
     } catch {
-      setWorkspaceError("Complete every control title and description before approval.");
+      setProposalValidationFailed(true);
+      setWorkspaceError(t("error.approveControls"));
     }
   }
 
   async function selectFiles(files: File[]) {
     setDocumentError("");
     if (localDocuments.length + files.length > 10) {
-      setDocumentError("Select no more than 10 local documents in total.");
+      setDocumentError(t("error.maxDocuments"));
+      return;
+    }
+    const existingNames = new Set(localDocuments.map((document) => document.name.toLocaleLowerCase()));
+    const duplicate = files.find((file, index) => existingNames.has(file.name.toLocaleLowerCase()) || files.findIndex((candidate) => candidate.name.toLocaleLowerCase() === file.name.toLocaleLowerCase()) !== index);
+    if (duplicate) {
+      setDocumentError(t("error.document.duplicate", { name: duplicate.name }));
       return;
     }
     try {
       const offset = localDocuments.length;
-      const next = await readLocalDocuments(files, (file, index) =>
-        `LOCAL-${offset + index + 1}-${file.name.replace(/[^a-z0-9]+/gi, "-").toUpperCase()}`,
-      );
+      const next = await readLocalDocuments(files, (file, index) => `LOCAL-${offset + index + 1}-${file.name.replace(/[^a-z0-9]+/gi, "-").toUpperCase()}`);
       setLocalDocuments((current) => [...current, ...next]);
-      setNotice(`${next.length} local document${next.length === 1 ? "" : "s"} selected. Files have not been sent anywhere.`);
+      setNotice({ key: "notice.documentsSelected", values: { count: next.length } });
     } catch (error) {
-      setDocumentError(error instanceof Error ? error.message : "The selected documents could not be read.");
+      if (error instanceof LocalDocumentError) {
+        const keyByCode: Partial<Record<typeof error.code, TranslationKey>> = {
+          TOO_MANY: "error.maxDocuments",
+          DUPLICATE_NAME: "error.document.duplicate",
+          NAME_TOO_LONG: "error.document.name",
+          UNSUPPORTED_EXTENSION: "error.document.extension",
+          TOO_LARGE: "error.document.size",
+          UNSUPPORTED_MIME: "error.document.mime",
+          EMPTY: "error.document.empty",
+          BINARY: "error.document.binary",
+          INVALID_JSON: "error.document.json",
+          UNSUPPORTED_ENCODING: "error.document.encoding",
+          LINE_TOO_LONG: "error.document.line",
+        };
+        const key = keyByCode[error.code] ?? "error.readDocuments";
+        setDocumentError(t(key, { name: error.filename ?? "File" }));
+      } else {
+        setDocumentError(t("error.readDocuments"));
+      }
     }
   }
 
   function removeDocument(id: string) {
     setLocalDocuments((current) => current.filter((document) => document.id !== id));
-    setNotice("Local document removed. No external deletion was required.");
+    setNotice({ key: "notice.documentRemoved" });
   }
 
   function updateDocumentLabel(id: string, label: string) {
-    setLocalDocuments((current) =>
-      current.map((document) => (document.id === id ? { ...document, label } : document)),
-    );
+    setLocalDocuments((current) => current.map((document) => document.id === id ? { ...document, label } : document));
   }
 
   function prepareDemoControls(): ControlDefinition[] {
     const thresholdAmount = Number(threshold);
-    if (!Number.isFinite(thresholdAmount) || thresholdAmount < 0 || threshold.trim() === "") {
-      throw new Error("Enter a valid approval threshold before running the review.");
-    }
-    const next = controls.map((control) =>
-      control.kind === "APPROVAL_THRESHOLD"
-        ? ControlDefinitionSchema.parse({
-            ...control,
-            parameters: { ...control.parameters, thresholdAmount },
-          })
-        : control,
-    );
-    if (!next.some((control) => control.enabled)) throw new Error("Enable at least one control before running the review.");
+    if (!Number.isFinite(thresholdAmount) || thresholdAmount < 0 || threshold.trim() === "") throw new Error(t("error.thresholdBeforeRun"));
+    const next = controls.map((control) => control.kind === "APPROVAL_THRESHOLD" ? ControlDefinitionSchema.parse({ ...control, parameters: { ...control.parameters, thresholdAmount } }) : control);
+    if (!next.some((control) => control.enabled)) throw new Error(t("error.enableControl"));
     return next;
   }
 
@@ -267,36 +307,31 @@ export function DemoReviewWorkspace() {
         setControls(nextControls);
         nextResults = runDeterministicReview(nextControls, demoDocuments);
       } else {
-        if (!ai.available) throw new Error("Live GPT-5.6 mode is not configured.");
-        if (!proposalsApproved) throw new Error("Approve the proposed controls before running Live analysis.");
-        if (!localDocuments.length) throw new Error("Select at least one fictional local document before Live analysis.");
-
-        const response = await fetch("/api/ai/analyze", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ documents: localDocuments, controls: proposals }),
-        });
+        if (!ai.available) throw new Error(t("error.liveUnavailable"));
+        if (!proposalsApproved) throw new Error(t("error.liveApprove"));
+        if (!localDocuments.length) throw new Error(t("error.liveDocuments"));
+        const approvedProposals = proposals.filter((proposal) => proposal.enabled && proposalStates[proposal.id] === "APPROVED");
+        if (!approvedProposals.length) throw new Error(t("error.liveApprove"));
+        const response = await fetch("/api/ai/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ documents: localDocuments, controls: approvedProposals }) });
         const body = (await response.json()) as unknown;
-        if (!response.ok) throw new Error(getApiError(body, "Live case analysis failed."));
+        if (!response.ok) throw new Error(getApiError(body, "error.caseAnalysis", t, locale === "en"));
         const analysis = z.object({ analysis: CaseAnalysisSchema }).parse(body).analysis;
-        const deterministicControls = toDeterministicControls(proposals);
-        if (!deterministicControls.length) throw new Error("No approved deterministic controls are available for calculation.");
+        const deterministicControls = toDeterministicControls(approvedProposals);
+        if (!deterministicControls.length) throw new Error(t("error.noControls"));
         nextResults = runDeterministicReview(deterministicControls, toCaseDocuments(analysis, localDocuments));
       }
-
-      const generatedAt = new Date().toISOString();
       setResults(nextResults);
       setSelectedControlId(nextResults[0]?.controlId ?? null);
       setFilter("ALL");
-      setRunGeneratedAt(generatedAt);
+      setRunGeneratedAt(new Date().toISOString());
       setReviewError("");
-      setNotice(
-        hadReviewerDecisions
-          ? "Review rerun complete. Previous reviewer decisions and comments were reset."
-          : `Review complete. ${nextResults.length} enabled controls were evaluated.`,
-      );
+      setNotice(hadReviewerDecisions ? { key: "notice.reviewRerun" } : { key: "notice.reviewComplete", values: { count: nextResults.length } });
+      setCurrentStep("review");
+      const nextSummary = summarizeResults(nextResults);
+      if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === 10_000 && nextSummary.PASS === 3 && nextSummary.FAIL === 2 && nextSummary.MISSING === 1 && nextSummary.WARNING === 1) completeGuide("INITIAL_REVIEW_RUN");
+      if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === 15_000 && nextResults.find((result) => result.controlId === "CTRL-APPROVAL")?.status === "PASS") completeGuide("THRESHOLD_RERUN");
     } catch (error) {
-      setWorkspaceError(error instanceof Error ? error.message : "The review could not be completed.");
+      setWorkspaceError(error instanceof Error ? error.message : t("error.review"));
     } finally {
       setIsRunning(false);
     }
@@ -304,13 +339,7 @@ export function DemoReviewWorkspace() {
 
   function updateComment(comment: string) {
     if (!selectedControlId) return;
-    setResults((current) =>
-      current.map((result) =>
-        result.controlId === selectedControlId
-          ? { ...result, reviewerDecision: { ...result.reviewerDecision, comment } }
-          : result,
-      ),
-    );
+    setResults((current) => current.map((result) => result.controlId === selectedControlId ? { ...result, reviewerDecision: { ...result.reviewerDecision, comment } } : result));
     setReviewError("");
   }
 
@@ -318,110 +347,67 @@ export function DemoReviewWorkspace() {
     if (!selectedResult) return;
     try {
       const reviewed = recordReviewDecision(selectedResult, state, selectedResult.reviewerDecision.comment);
-      setResults((current) =>
-        current.map((result) => (result.controlId === reviewed.controlId ? reviewed : result)),
-      );
+      setResults((current) => current.map((result) => result.controlId === reviewed.controlId ? reviewed : result));
       setReviewError("");
-      setNotice(`${selectedResult.title}: human decision recorded as ${state.replaceAll("_", " ").toLowerCase()}.`);
-    } catch (error) {
-      setReviewError(error instanceof Error ? error.message : "The reviewer decision could not be recorded.");
+      setNotice({ key: "notice.decisionSaved", controlId: selectedResult.controlId, fallbackTitle: selectedResult.title, decisionState: state });
+      completeGuide("DECISION_RECORDED");
+    } catch {
+      setReviewError(state === "REJECTED" || state === "ACCEPTED_EXCEPTION" ? t("error.overrideComment") : t("error.decision"));
     }
   }
 
   function changeFilter(nextFilter: ResultFilter) {
     setFilter(nextFilter);
     const nextVisible = filterResults(results, nextFilter);
-    if (nextVisible.length && !nextVisible.some((result) => result.controlId === selectedControlId)) {
-      setSelectedControlId(nextVisible[0].controlId);
-    }
+    if (nextVisible.length && !nextVisible.some((result) => result.controlId === selectedControlId)) setSelectedControlId(nextVisible[0].controlId);
   }
 
-  return (
-    <main className="min-h-screen bg-slate-100 pb-16">
-      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} onRun={runReview} isRunning={isRunning} />
-      <StepNavigation />
+  const panel = currentStep === "policy" ? (
+    <PolicyPanel mode={mode} ai={ai} policyText={policyText} expanded={policyExpanded} isCompiling={isCompiling} compilationError={compilationError} onPolicyTextChange={(value) => { setPolicyText(value); setProposalsApproved(false); }} onToggleExpanded={() => { setPolicyExpanded((current) => !current); completeGuide("POLICY_REVIEWED"); }} onCompile={compilePolicy} />
+  ) : currentStep === "controls" ? (
+    <ControlsPanel mode={mode} controls={controls} proposals={proposals} proposalsApproved={proposalsApproved} proposalStates={proposalStates} threshold={threshold} thresholdError={thresholdInvalid ? t("error.threshold") : ""} onThresholdChange={updateThreshold} onToggleControl={toggleControl} onResetControls={resetControls} onProposalChange={updateProposal} onApproveProposals={approveProposals} onRejectProposal={rejectProposal} />
+  ) : currentStep === "documents" ? (
+    <DocumentsPanel mode={mode} demoDocuments={demoDocuments} localDocuments={localDocuments} documentError={documentError} onSelectFiles={selectFiles} onRemoveDocument={removeDocument} onUpdateLabel={updateDocumentLabel} onLoadDemo={loadDemo} onResetDemo={loadDemo} />
+  ) : currentStep === "review" ? (
+    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documentTypes={documentTypes} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} />
+  ) : (
+    <DecisionPanel selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} onCommentChange={updateComment} onDecision={applyDecision} />
+  );
 
-      <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8">
-        <div className={`rounded-xl border px-4 py-3 text-sm leading-6 ${
-          mode === "DETERMINISTIC_DEMO"
-            ? "border-amber-200 bg-amber-50 text-amber-950"
-            : "border-indigo-200 bg-indigo-50 text-indigo-950"
-        }`}>
-          <span className="font-bold">{mode === "DETERMINISTIC_DEMO" ? "Deterministic demo" : "Live GPT-5.6"}:</span>{" "}
-          {mode === "DETERMINISTIC_DEMO"
-            ? "Results use version-controlled fictional fixtures. No AI request is made."
-            : "GPT-5.6 interprets policy and extracts evidence; deterministic TypeScript code calculates supported controls."}
-          {!ai.checking && !ai.available && (
-            <span className="mt-1 block text-xs">
-              Live GPT-5.6 is disabled. Add OPENAI_API_KEY to .env.local and restart the server to enable it.
-            </span>
+  return (
+    <main className="min-h-screen bg-[#f3f5f3] pb-12" aria-busy={isCompiling || isRunning}>
+      <a href="#workspace" className="sr-only z-50 rounded bg-white p-3 font-semibold text-slate-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3">{t("a11y.skip")}</a>
+      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} onRun={runReview} isRunning={isRunning} />
+      <StepNavigation current={currentStep} onChange={navigate} />
+      <div id="workspace" className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
+        <IntroPanel onStartDemo={loadDemo} compact={currentStep !== "policy"} />
+        <div className={`mode-banner ${mode === "DETERMINISTIC_DEMO" ? "border-teal-200 bg-teal-50/70 text-teal-950" : "border-indigo-200 bg-indigo-50 text-indigo-950"}`}>
+          <span className="font-bold">{t(mode === "DETERMINISTIC_DEMO" ? "mode.demo" : "mode.live")}</span>
+          <span className="hidden sm:inline"> — </span><span className="block sm:inline">{t(mode === "DETERMINISTIC_DEMO" ? "mode.demo.description" : "mode.live.description")}</span>
+          {!ai.checking && !ai.available && <span className="mt-1 block text-xs">{t("mode.live.disabled")}</span>}
+        </div>
+        <div aria-live="polite" role="status" className="notice-bar">
+          {t(
+            notice.key,
+            notice.controlId && notice.decisionState
+              ? {
+                  title: localizedControl(notice.controlId, locale, notice.fallbackTitle ?? notice.controlId).title,
+                  decision: t(`decision.${notice.decisionState}`).toLocaleLowerCase(locale === "fr" ? "fr-FR" : "en-US"),
+                }
+              : notice.values,
           )}
         </div>
+        {workspaceError && <p role="alert" className="error-callout mt-3">{workspaceError}</p>}
 
-        <div aria-live="polite" role="status" className="mt-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-          {notice}
-        </div>
-        {workspaceError && <p role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{workspaceError}</p>}
-
-        <div className="mt-5 grid gap-5">
-          <PolicyPanel
-            mode={mode}
-            ai={ai}
-            policyText={policyText}
-            expanded={policyExpanded}
-            isCompiling={isCompiling}
-            compilationError={compilationError}
-            onPolicyTextChange={(value) => {
-              setPolicyText(value);
-              setProposalsApproved(false);
-            }}
-            onToggleExpanded={() => setPolicyExpanded((current) => !current)}
-            onCompile={compilePolicy}
-          />
-          <ControlsPanel
-            mode={mode}
-            controls={controls}
-            proposals={proposals}
-            proposalsApproved={proposalsApproved}
-            threshold={threshold}
-            thresholdError={thresholdError}
-            onThresholdChange={updateThreshold}
-            onToggleControl={toggleControl}
-            onResetControls={resetControls}
-            onProposalChange={updateProposal}
-            onApproveProposals={approveProposals}
-          />
-          <DocumentsPanel
-            mode={mode}
-            demoDocuments={demoDocuments}
-            localDocuments={localDocuments}
-            documentError={documentError}
-            onSelectFiles={selectFiles}
-            onRemoveDocument={removeDocument}
-            onUpdateLabel={updateDocumentLabel}
-            onLoadDemo={loadDemo}
-            onResetDemo={loadDemo}
-          />
-          <ReviewPanel
-            results={results}
-            visibleResults={visibleResults}
-            summary={summary}
-            filter={filter}
-            selectedResult={selectedResult}
-            onFilterChange={changeFilter}
-            onSelectResult={(controlId) => {
-              setSelectedControlId(controlId);
-              setReviewError("");
-            }}
-          />
-          <DecisionPanel
-            selectedResult={selectedResult}
-            summary={summary}
-            receipt={receipt}
-            reviewError={reviewError}
-            onCommentChange={updateComment}
-            onDecision={applyDecision}
-          />
+        <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_17rem]">
+          <div className="min-w-0">
+            {panel}
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <button type="button" onClick={() => navigate(steps[Math.max(0, currentStepIndex - 1)])} disabled={currentStepIndex === 0} className="secondary-button disabled:invisible">← {t("action.back")}</button>
+              {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button">{t("action.next")} →</button>}
+            </div>
+          </div>
+          <WorkspaceSummary enabledControlCount={enabledControlCount} documentCount={documentCount} summary={summary} results={results} currentStep={currentStep} onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} mode={mode} isCompiling={isCompiling} compilationError={compilationError} proposals={proposals} proposalStates={proposalStates} proposalsApproved={proposalsApproved} proposalValidationFailed={proposalValidationFailed} isRunning={isRunning} workspaceError={workspaceError} />
         </div>
       </div>
     </main>

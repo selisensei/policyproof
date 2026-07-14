@@ -1,7 +1,7 @@
 import "server-only";
 
 import OpenAI from "openai";
-import { OPENAI_REQUEST_TIMEOUT_MS } from "@/src/openai/config";
+import { OPENAI_MAX_RETRIES, OPENAI_REQUEST_TIMEOUT_MS } from "@/src/openai/config";
 import { OpenAIConfigurationError } from "@/src/openai/errors";
 
 export function isOpenAIConfigured(): boolean {
@@ -14,7 +14,7 @@ export function getOpenAIClient(): OpenAI {
 
   return new OpenAI({
     apiKey,
-    maxRetries: 1,
+    maxRetries: OPENAI_MAX_RETRIES,
     timeout: OPENAI_REQUEST_TIMEOUT_MS,
   });
 }

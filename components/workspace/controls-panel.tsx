@@ -1,13 +1,16 @@
 import type { AiControlProposal } from "@/src/domain/ai-schemas";
 import type { ControlDefinition } from "@/src/domain/schemas";
-import type { AppMode } from "@/components/workspace/types";
+import type { AppMode, ProposalReviewState } from "@/components/workspace/types";
 import { SectionShell } from "@/components/workspace/section-shell";
+import { useLocale } from "@/src/i18n/locale-context";
+import { localizedControl } from "@/src/i18n/translations";
 
 export function ControlsPanel({
   mode,
   controls,
   proposals,
   proposalsApproved,
+  proposalStates,
   threshold,
   thresholdError,
   onThresholdChange,
@@ -15,11 +18,13 @@ export function ControlsPanel({
   onResetControls,
   onProposalChange,
   onApproveProposals,
+  onRejectProposal,
 }: {
   mode: AppMode;
   controls: ControlDefinition[];
   proposals: AiControlProposal[];
   proposalsApproved: boolean;
+  proposalStates: Record<string, ProposalReviewState>;
   threshold: string;
   thresholdError: string;
   onThresholdChange: (value: string) => void;
@@ -27,35 +32,25 @@ export function ControlsPanel({
   onResetControls: () => void;
   onProposalChange: (id: string, patch: Partial<AiControlProposal>) => void;
   onApproveProposals: () => void;
+  onRejectProposal: (id: string) => void;
 }) {
+  const { locale, t } = useLocale();
   const isLive = mode === "LIVE_GPT_5_6";
-  const enabledCount = isLive
-    ? proposals.filter((control) => control.enabled).length
-    : controls.filter((control) => control.enabled).length;
+  const enabledCount = isLive ? proposals.filter((control) => control.enabled).length : controls.filter((control) => control.enabled).length;
 
   return (
     <SectionShell
       id="controls"
-      step="Step 2"
-      title="Reviewable controls"
-      description={
-        isLive
-          ? "Edit GPT-5.6 proposals and approve them explicitly before analysis."
-          : "Enable only the controls relevant to this review and adjust the approval threshold safely."
-      }
-      action={
-        !isLive ? (
-          <button type="button" onClick={onResetControls} className="min-h-10 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-            Reset controls
-          </button>
-        ) : undefined
-      }
+      step={t("step.label", { number: 2 })}
+      title={t("controls.title")}
+      description={t(isLive ? "controls.help.live" : "controls.help.demo")}
+      action={!isLive ? <button type="button" onClick={onResetControls} className="secondary-button">{t("action.resetControls")}</button> : undefined}
     >
-      <div className="mb-4 flex items-center justify-between text-sm">
-        <span className="text-slate-600">{enabledCount} enabled</span>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 text-sm">
+        <span className="font-semibold text-slate-700">{t("controls.enabled", { count: enabledCount })}</span>
         {isLive && proposals.length > 0 && (
-          <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${proposalsApproved ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>
-            {proposalsApproved ? "Human approved" : "Awaiting human approval"}
+          <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${proposalsApproved ? "bg-teal-50 text-teal-800" : "bg-amber-50 text-amber-900"}`}>
+            {t(proposalsApproved ? "controls.approved" : "controls.awaiting")}
           </span>
         )}
       </div>
@@ -64,105 +59,64 @@ export function ControlsPanel({
         proposals.length ? (
           <div className="space-y-3">
             {proposals.map((control) => (
-              <article key={control.id} className="rounded-xl border border-slate-200 p-4">
+              <article key={control.id} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <span className="font-mono text-[11px] text-slate-400">{control.id}</span>
+                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${proposalStates[control.id] === "APPROVED" ? "bg-teal-50 text-teal-800" : proposalStates[control.id] === "REJECTED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900"}`}>
+                    {t(`controls.state.${proposalStates[control.id] ?? "PROPOSED"}`)}
+                  </span>
+                </div>
                 <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    aria-label={`Enable ${control.title}`}
-                    checked={control.enabled}
-                    onChange={(event) => onProposalChange(control.id, { enabled: event.target.checked })}
-                    className="mt-1 size-5 accent-emerald-800"
-                  />
+                  <input type="checkbox" aria-label={t("controls.enable", { title: control.title })} checked={control.enabled} onChange={(event) => onProposalChange(control.id, { enabled: event.target.checked })} className="mt-1 size-5 accent-teal-700" />
                   <div className="min-w-0 flex-1 space-y-3">
                     <div className="grid gap-3 sm:grid-cols-[1fr_9rem]">
-                      <label className="text-xs font-semibold text-slate-600">
-                        Control title
-                        <input
-                          aria-label={`Title for ${control.id}`}
-                          value={control.title}
-                          onChange={(event) => onProposalChange(control.id, { title: event.target.value })}
-                          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900"
-                        />
-                      </label>
-                      <label className="text-xs font-semibold text-slate-600">
-                        Severity
-                        <select
-                          aria-label={`Severity for ${control.id}`}
-                          value={control.severity}
-                          onChange={(event) => onProposalChange(control.id, { severity: event.target.value as AiControlProposal["severity"] })}
-                          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900"
-                        >
-                          {(["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const).map((severity) => <option key={severity}>{severity}</option>)}
-                        </select>
-                      </label>
+                      <label className="field-label">{t("controls.titleLabel")}<input aria-label={`${t("controls.titleLabel")} ${control.id}`} value={control.title} onChange={(event) => onProposalChange(control.id, { title: event.target.value })} className="field-control mt-1" /></label>
+                      <label className="field-label">{t("controls.severity")}<select aria-label={`${t("controls.severity")} ${control.id}`} value={control.severity} onChange={(event) => onProposalChange(control.id, { severity: event.target.value as AiControlProposal["severity"] })} className="field-control mt-1">
+                        {(["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const).map((severity) => <option key={severity} value={severity}>{t(`severity.${severity}`)}</option>)}
+                      </select></label>
                     </div>
-                    <label className="block text-xs font-semibold text-slate-600">
-                      Description
-                      <textarea
-                        aria-label={`Description for ${control.id}`}
-                        rows={2}
-                        value={control.description}
-                        onChange={(event) => onProposalChange(control.id, { description: event.target.value })}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-5 text-slate-900"
-                      />
-                    </label>
-                    <p className="text-xs text-slate-500">{control.controlType.replaceAll("_", " ")} · {control.requiredEvidence.join(", ")}</p>
+                    <label className="field-label block">{t("controls.description")}<textarea aria-label={`${t("controls.description")} ${control.id}`} rows={2} value={control.description} onChange={(event) => onProposalChange(control.id, { description: event.target.value })} className="field-control mt-1 leading-5" /></label>
+                    <p className="text-xs text-slate-500">{t("controls.type", { type: control.controlType.replaceAll("_", " "), evidence: control.requiredEvidence.join(", ") })}</p>
+                    <button type="button" onClick={() => onRejectProposal(control.id)} className="text-xs font-semibold text-red-700 underline-offset-2 hover:underline">{t("controls.reject")}</button>
                   </div>
                 </div>
               </article>
             ))}
-            <div className="flex justify-end">
-              <button type="button" onClick={onApproveProposals} className="min-h-10 rounded-lg bg-emerald-950 px-4 text-sm font-semibold text-white hover:bg-emerald-900">
-                Approve proposed controls
-              </button>
-            </div>
+            <div className="flex justify-end"><button type="button" onClick={onApproveProposals} className="primary-button">{t("controls.approve")}</button></div>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-            <p className="font-semibold text-slate-800">No live control proposals</p>
-            <p className="mt-1 text-sm text-slate-500">Expand the policy and request GPT-5.6 proposals when Live mode is configured.</p>
-          </div>
+          <div className="empty-state"><p className="font-semibold text-slate-800">{t("controls.none")}</p><p className="mt-1 text-sm text-slate-500">{t("controls.noneHelp")}</p></div>
         )
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {controls.map((control) => (
-            <article key={control.id} className={`rounded-xl border p-4 ${control.enabled ? "border-slate-200" : "border-slate-200 bg-slate-50 opacity-70"}`}>
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  aria-label={`Enable ${control.title}`}
-                  checked={control.enabled}
-                  onChange={(event) => onToggleControl(control.id, event.target.checked)}
-                  className="mt-1 size-5 accent-emerald-800"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-semibold text-slate-950">{control.title}</h3>
-                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-600">{control.severity}</span>
-                  </div>
-                  <p className="mt-1 text-sm leading-5 text-slate-600">{control.description}</p>
-                  <p className="mt-2 text-xs font-medium text-slate-400">{control.id}</p>
-                  {control.kind === "APPROVAL_THRESHOLD" && (
-                    <div className="mt-3 rounded-lg bg-emerald-50 p-3">
-                      <label htmlFor="approval-threshold" className="text-xs font-bold text-emerald-950">Approval threshold (EUR)</label>
-                      <input
-                        id="approval-threshold"
-                        type="number"
-                        min="0"
-                        max="1000000000"
-                        step="500"
-                        value={threshold}
-                        onChange={(event) => onThresholdChange(event.target.value)}
-                        aria-invalid={Boolean(thresholdError)}
-                        className="mt-1 w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm text-slate-950"
-                      />
-                      {thresholdError && <p role="alert" className="mt-1 text-xs font-medium text-red-700">{thresholdError}</p>}
+        <div className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200">
+          {controls.map((control) => {
+            const localized = localizedControl(control.id, locale, control.title, control.description);
+            return (
+              <article key={control.id} className={`bg-white px-4 py-4 transition ${control.enabled ? "" : "bg-slate-50 opacity-70"}`}>
+                <div className="flex items-start gap-3">
+                  <input type="checkbox" aria-label={t("controls.enable", { title: localized.title })} checked={control.enabled} onChange={(event) => onToggleControl(control.id, event.target.checked)} className="mt-1 size-5 accent-teal-700" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold text-slate-950">{localized.title}</h3>
+                      <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">{t(`severity.${control.severity}`)}</span>
+                      <span className="font-mono text-[11px] text-slate-400">{control.id}</span>
                     </div>
-                  )}
+                    <details className="mt-1 group">
+                      <summary className="w-fit text-xs font-semibold text-teal-800 underline-offset-2 hover:underline">{t("controls.details")}</summary>
+                      <p className="mt-2 text-sm leading-5 text-slate-600">{localized.description}</p>
+                    </details>
+                    {control.kind === "APPROVAL_THRESHOLD" && (
+                      <div className="mt-3 max-w-sm rounded-lg border border-teal-100 bg-teal-50/70 p-3">
+                        <label htmlFor="approval-threshold" className="field-label text-teal-950">{t("controls.threshold")}</label>
+                        <input id="approval-threshold" type="number" min="0" max="1000000000" step="500" value={threshold} onChange={(event) => onThresholdChange(event.target.value)} aria-invalid={Boolean(thresholdError)} aria-describedby={thresholdError ? "approval-threshold-error" : undefined} className="field-control mt-1 border-teal-300" />
+                        {thresholdError && <p id="approval-threshold-error" role="alert" className="mt-1 text-xs font-medium text-red-700">{thresholdError}</p>}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </SectionShell>

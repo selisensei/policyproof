@@ -6,17 +6,17 @@ PolicyProof is an OpenAI Build Week 2026 project for the Work & Productivity tra
 
 Finance, procurement, and internal-control reviewers often compare policy text with scattered business documents. Conclusions can become difficult to reproduce because the underlying evidence is separated from the review result.
 
-PolicyProof provides one focused workspace to review controls, run a case, inspect exact excerpts, record human judgment, and produce a local decision receipt. It is a review aid, not an autonomous approval tool or a compliance certification.
+PolicyProof provides one focused, bilingual workspace to review controls, run a case, inspect exact excerpts, record human judgment, and produce a local decision receipt. It is a review aid, not an autonomous approval tool or a compliance certification.
 
 ## Current status
 
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request.
+The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A compact judge-first introduction and optional guided checklist explain the value within the workspace, while the five focused steps switch immediately between English and French without resetting review or guide state.
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. All automated AI tests use mocks; no paid model request was made during this phase, so a controlled live evaluation is still required before deployment.
 
 ## Screenshots
 
-Submission screenshots will be added here after final visual validation and before the repository is published.
+Local Playwright runs generate ignored English and French screenshots at desktop, laptop, tablet, and mobile widths. Selected public screenshots will be added here before publication.
 
 - TODO: Desktop evidence-review workspace
 - TODO: Mobile deterministic workflow
@@ -29,6 +29,8 @@ Submission screenshots will be added here after final visual validation and befo
 3. Load the bundled demo case or select fictional local text documents.
 4. Run the deterministic review and filter its outcomes.
 5. Inspect evidence, record a human decision, and read the decision receipt.
+
+The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun.
 
 ## Technical stack
 
@@ -53,35 +55,21 @@ Docker, Python, and GitHub CLI are not required to run the application.
 
 ## Local setup
 
-From a PowerShell terminal:
+From a terminal opened in the cloned repository:
 
-```powershell
-Set-Location "D:\noxyf\Documents\OpenAI-Build-Week\policyproof"
+```shell
 pnpm install
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Stop the server with `Ctrl+C`.
 
-If Node.js and pnpm are not available in the normal Windows `PATH`, use the Codex runtime:
-
-```powershell
-Set-Location "D:\noxyf\Documents\OpenAI-Build-Week\policyproof"
-
-$nodeBin = "C:\Users\noxyf\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin"
-$env:PATH = "$nodeBin;$env:PATH"
-$pnpm = "C:\Users\noxyf\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd"
-
-& $pnpm install
-& $pnpm dev
-```
-
 Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows dependency build scripts only for `sharp` and `unrs-resolver`.
 
 ## Deterministic demo instructions
 
-1. Confirm that **Deterministic demo** is selected and the amber disclosure says no AI request is made.
-2. Select **Load demo case**.
+1. Confirm that **Deterministic demo** is selected and the disclosure says no AI request is made.
+2. Select **Load demo case**, then use the five-step navigation as needed.
 3. Leave the approval threshold at `10000` and select **Run review**.
 4. Confirm the expected outcomes:
    - Purchase order timing: PASS
@@ -93,8 +81,11 @@ Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows depende
    - Segregation of duties: WARNING
 5. Filter to FAIL and inspect **Currency consistency**. Confirm that the purchase order excerpt uses EUR and the invoice excerpt uses USD.
 6. Enter a reviewer comment and select **Reject**. Confirm that the decision receipt preserves the original result and records the human decision.
+   The receipt can be printed, downloaded as structured JSON, or summarized through browser-native copy actions.
 7. Change the approval threshold to `15000`, select **Run review**, and confirm that **Approval threshold** changes to PASS. A rerun intentionally resets prior reviewer decisions.
-8. Select **Reset demo** and confirm that results are cleared and all seven controls return to their defaults.
+8. Open **Controls**, select **Reset controls**, and confirm that results are cleared and all seven controls return to their defaults.
+
+Use the **English / Français** selector at any point. Navigation, actions, statuses, validation, and the displayed receipt change language immediately. Source documents, exact evidence excerpts, stable control identifiers, and internal enum values remain unchanged.
 
 ## Live GPT-5.6 setup
 
@@ -127,15 +118,32 @@ The server validates that every quoted evidence excerpt exists in the supplied f
 
 ## Architecture overview
 
+```mermaid
+flowchart LR
+    U["Reviewer in browser"] --> W["Five-step React workspace"]
+    W --> D["Deterministic demo fixtures"]
+    W --> A["Next.js server API routes"]
+    A --> G["GPT-5.6 Responses API"]
+    G --> Z["Strict Zod validation"]
+    D --> E["Deterministic TypeScript engine"]
+    Z --> X["Source excerpt verification"]
+    X --> E
+    E --> R["Evidence matrix and receipt"]
+    R --> H["Human confirm or override"]
+```
+
+The browser never calls OpenAI directly. The deterministic judging path stops at local fixtures and the TypeScript engine; the live path crosses the server boundary only after an explicit user action.
+
 - `app/` contains the Next.js page, styles, and server API routes.
 - `components/workspace/` contains focused UI sections; `DemoReviewWorkspace` owns temporary page state.
 - `src/domain/` contains Zod schemas and shared domain types.
-- `src/fixtures/` contains the deterministic fictional policy, controls, documents, and facts.
+- `src/fixtures/` contains the deterministic case plus mocked policy and document evaluation contracts.
+- `src/i18n/` contains the typed English/French presentation dictionary and hydration-safe locale context.
 - `src/lib/` contains deterministic review, receipt, summary, and local-document logic.
 - `src/openai/` contains server-only client configuration, prompts, mappers, validation, and safe route handlers.
 - `tests/` contains unit, integration, component, and browser tests.
 
-The browser never calls OpenAI directly. Live requests pass through server routes, validated structured outputs are mapped into domain objects, and deterministic code calculates supported controls.
+Live requests pass through server routes, validated structured outputs are mapped into domain objects, and deterministic code calculates supported controls. Missing, refused, incomplete, malformed, or source-inconsistent model output fails closed.
 
 ## Testing
 
@@ -171,12 +179,22 @@ pnpm audit --prod
 
 The latest recorded results are in `TESTING.md`.
 
+The secret-free GitHub Actions workflow in `.github/workflows/ci.yml` runs frozen installation, unit/component tests, type checking, linting, and the production build. Playwright remains a required local release gate until public-runner reliability is supervised.
+
+## Deployment preparation
+
+See `docs/DEPLOYMENT.md` for the supervised Vercel configuration, environment boundary, smoke tests, rollback guidance, and Live GPT-5.6 verification. No deployment is performed by the repository itself.
+
 ## Security and privacy
 
 - Never commit `.env.local` or any credential; environment files are ignored except `.env.example`.
 - Use fictional demonstration data only.
 - The OpenAI client is server-only.
 - Model output is schema-validated and evidence excerpts are checked against submitted text.
+- Policy and document text are treated as untrusted source material, not as instructions.
+- Local filenames, declared MIME types, count, size, empty content, binary content, duplicates, and JSON syntax are validated.
+- Invalid UTF-8 replacement markers and single lines over 20,000 characters are rejected; HTML-like text remains escaped plain text.
+- Responses use conservative MIME-sniffing, framing, referrer, camera, microphone, and geolocation headers.
 - Deterministic demo mode does not make external requests.
 - Selected local files remain in browser memory until an explicit Live analysis request.
 - Dependency build scripts are restricted and the production dependency audit currently reports no known vulnerabilities.
@@ -189,7 +207,8 @@ The latest recorded results are in `TESTING.md`.
 - Semantic controls that cannot be computed deterministically are not converted into a final automated approval.
 - Only `.txt`, `.md`, and `.json` local files are supported; there is no PDF or OCR workflow.
 - There is no deployed URL, persistence, authentication, collaboration, or external business-system integration.
-- The current accessibility review is basic; a final assistive-technology review remains before submission.
+- Automated keyboard, accessible-name, responsive overflow, and document-language checks pass; a final assistive-technology review remains before submission.
+- A strict Content Security Policy is deferred until it can be verified against the deployed Next.js runtime.
 
 ## How Codex contributed
 
@@ -215,4 +234,4 @@ This primary Codex task contains the core build history. Codex inspected the bas
 
 ## License
 
-No license has been selected yet.
+No license has been selected yet. `docs/submission/LICENSE_RECOMMENDATION.md` compares MIT and Apache-2.0 without making the decision for the builder.

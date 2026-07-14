@@ -183,3 +183,93 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Pin the transitive PostCSS dependency to 8.5.19 through `pnpm-workspace.yaml`. Record the exact recent release in pnpm's `minimumReleaseAgeExclude` list so the lockfile policy accepts this reviewed security update.
 - **Rationale:** One narrow override removes the known production vulnerability without changing the framework or introducing a new package.
 - **Consequences:** Future Next.js upgrades should be checked to determine whether the override can be removed. Tests, build, and the production audit must be rerun after dependency changes.
+
+## D020 - Classify and correlate OpenAI failures before live evaluation
+
+- **Date:** 2026-07-13
+- **Status:** Accepted
+- **Context:** The first supervised policy compilation returned two generic HTTP 502 responses, hiding whether the cause was authentication, permissions, quota, rate limiting, schema validation, timeout, or connectivity.
+- **Decision:** Keep provider details server-side, log only a fixed redacted diagnostic field set in development, and return a safe category plus correlation and provider request identifiers to the browser. Preserve upstream 401, 403, and 429 semantics; use 503 for connection, 504 for timeout, and 502 for schema/provider failures. Disable automatic SDK retries during diagnosis and reject simultaneous browser compilation requests.
+- **Rationale:** One visible attempt should map to one upstream request and produce enough safe evidence to diagnose the next supervised failure without exposing credentials, headers, request bodies, or policy content.
+- **Consequences:** Retry resilience is temporarily lower on the live-evaluation branch. It can be reconsidered after the root cause is confirmed with a supervised fictional request.
+
+## D021 - Use an internal typed bilingual presentation layer
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** The judging interface must switch immediately between English and French without duplicating the application or changing stable domain data.
+- **Decision:** Use a dependency-free locale context backed by a typed English/French dictionary. Persist only the locale in browser storage, update the document language, and translate presentation labels, validation, statuses, deterministic control copy, explanations, and the displayed receipt. Keep API fields, enum values, control identifiers, source documents, and exact evidence excerpts unchanged.
+- **Rationale:** A small internal layer is understandable, hydration-safe, and sufficient for the two supported languages.
+- **Consequences:** Live GPT-generated control prose remains in the language returned from the submitted policy; PolicyProof does not silently machine-translate model output or source evidence.
+
+## D022 - Focus the workspace on one workflow step at a time
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Rendering all five sections as one long page weakened hierarchy and made the evidence matrix feel secondary.
+- **Decision:** Keep one page and one React state owner, but render one selected workflow step in the main area. Add a compact five-step navigator, persistent mode and language controls, a contextual run action, and a small readiness/results rail. Preserve all business logic and temporary browser state across navigation and locale changes.
+- **Rationale:** The focused shell is easier to scan on laptops and mobile devices without adding routes or a state-management framework.
+- **Consequences:** Users navigate between steps explicitly; the review run automatically opens the evidence step.
+
+## D023 - Treat local text and model output as untrusted inputs
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Local filenames, MIME declarations, text content, and model responses can be malformed or misleading even in a fictional evaluation.
+- **Decision:** Retain the `.txt`, `.md`, and `.json` scope while validating compatible MIME types when present, duplicate names, filename length, count, size, empty/binary content, and JSON syntax. Prompts state that policy and document text are untrusted source material. Missing, refused, incomplete, malformed, or source-inconsistent model output fails closed.
+- **Rationale:** Input hardening protects the narrow workflow without adding parsers, upload services, or dependencies.
+- **Consequences:** Some files with misleading extensions or incompatible declared MIME types are rejected. HTML-like text remains inert text and is never rendered as markup.
+
+## D024 - Maintain a mocked evaluation contract suite
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Live model accuracy cannot be tested unattended and must not be inferred from a few successful examples.
+- **Decision:** Store fictional policy and document evaluation cases plus reusable assertions for schemas, source identifiers, exact excerpts, deterministic parameters, and required evidence. Run these as mocked contracts only; never describe them as proof of live GPT-5.6 accuracy.
+- **Rationale:** Versioned contracts make expected behavior reviewable and regression-testable without cost, credentials, or network variability.
+- **Consequences:** A supervised live evaluation is still required before claiming the GPT path works with the provider.
+
+## D025 - Add state-derived guided demonstration
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** A judge should understand the deterministic workflow quickly without a blocking product tour or external tutorial dependency.
+- **Decision:** Add a dismissible bilingual checklist whose progress is derived from real workspace actions: case loading, policy and control review, the EUR 10,000 run, contradiction inspection, human decision, receipt review, threshold change, and rerun.
+- **Rationale:** A small checklist preserves keyboard access, language switching, normal navigation, and user control while making the intended demonstration reproducible.
+- **Consequences:** The guide does not click buttons, submit requests, or claim completion before the matching application state exists. Progress is intentionally temporary with the rest of the review session.
+
+## D026 - Export the structured decision receipt with browser-native tools
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** The decision receipt needs to be credible in a demo and ready for later sharing without introducing PDF infrastructure.
+- **Decision:** Enrich the receipt schema with policy, language, mode, enabled-control count, outcome summary, human decisions, and comments. Provide print styling, JSON download, receipt-ID copy, and concise-summary copy using browser APIs only.
+- **Rationale:** Every export is generated from current validated application state and requires no runtime dependency, server storage, or invented data.
+- **Consequences:** Browser print output depends on the selected print destination. PDF generation, signatures, persistence, and immutable audit storage remain out of scope.
+
+## D027 - Expose evidence provenance and evaluation responsibility
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Reviewers need to distinguish source metadata, exact excerpts, and the method behind a conclusion at a glance.
+- **Decision:** Show evidence counts, document type, stable field or section locator, relation metadata, distinct supporting and contradictory treatments, and copy actions. Label deterministic demo results as TypeScript evaluation and Live results as GPT-5.6 extraction followed by deterministic evaluation.
+- **Rationale:** This strengthens traceability without changing evidence, inventing page numbers, or overstating semantic automation.
+- **Consequences:** The current prototype uses stable text locators rather than page coordinates. Exact source excerpts remain untranslated.
+
+## D028 - Use a secret-free core CI workflow
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** The future public repository needs repeatable pull-request checks without provider credentials or network-dependent model behavior.
+- **Decision:** Add one GitHub Actions workflow for frozen pnpm installation, unit tests, type checking, linting, and production build on Node.js 24. Exclude OpenAI calls and defer Playwright from CI until public runner reliability is supervised.
+- **Rationale:** The workflow mirrors the stable core commands and contains no secret reference.
+- **Consequences:** Browser tests remain a required local pre-release gate and can be added to CI later after confirming Chromium installation time and stability.
+
+## D029 - Apply narrow browser and document safety boundaries
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** Text documents can contain hostile instructions, malformed decoding, script-like text, or pathological lines, and public deployment should have basic browser protections.
+- **Decision:** Continue rendering document content only as escaped React text; reject nulls, invalid UTF-8 replacement markers, and lines over 20,000 characters; retain exact-excerpt/source validation; and send conservative content-type, framing, referrer, and browser-permission headers.
+- **Rationale:** These checks extend existing validation boundaries without a security framework, parser, or content transformation.
+- **Consequences:** A document containing a literal replacement character or an extremely long single line is rejected. Content Security Policy remains a supervised deployment decision because Next.js script requirements must be tested against the production host.

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "PolicyProof — Evidence-led control review",
-  description: "A deterministic PolicyProof review fixture for OpenAI Build Week 2026.",
+  description: "Turn written policies into reviewable controls and inspect the exact evidence behind every conclusion.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
