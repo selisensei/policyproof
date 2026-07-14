@@ -1,4 +1,5 @@
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
+import type { ControlResult } from "@/src/domain/schemas";
 
 export function serializeDecisionReceipt(receipt: DecisionReceipt): string {
   return `${JSON.stringify(receipt, null, 2)}\n`;
@@ -41,4 +42,25 @@ export function serializeDecisionReceiptMarkdown(receipt: DecisionReceipt): stri
     "",
   ];
   return lines.join("\n");
+}
+
+function csvCell(value: string | number): string {
+  const text = String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+export function serializeEvidenceMatrixCsv(input: { caseName: string; results: ControlResult[]; locale: "en" | "fr" }): string {
+  const french = input.locale === "fr";
+  const headers = french
+    ? ["Cas", "ID du contrôle", "Titre du contrôle", "Statut", "Gravité", "Type de preuve", "Document", "Localisation", "Extrait exact", "Décision du réviseur", "Commentaire du réviseur"]
+    : ["Case", "Control ID", "Control title", "Status", "Severity", "Evidence type", "Document", "Locator", "Exact excerpt", "Reviewer decision", "Reviewer comment"];
+  const rows: Array<Array<string | number>> = [];
+  for (const result of input.results) {
+    const common = [input.caseName, result.controlId, result.title, result.status, result.severity];
+    for (const evidence of result.supportingEvidence) rows.push([...common, "SUPPORTING", `${evidence.documentId} — ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
+    for (const evidence of result.contradictoryEvidence) rows.push([...common, "CONTRADICTORY", `${evidence.documentId} — ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
+    for (const missing of result.missingEvidence) rows.push([...common, "MISSING", missing.expectedSource, "", missing.description, result.reviewerDecision.state, result.reviewerDecision.comment]);
+    if (!result.supportingEvidence.length && !result.contradictoryEvidence.length && !result.missingEvidence.length) rows.push([...common, "NONE", "", "", "", result.reviewerDecision.state, result.reviewerDecision.comment]);
+  }
+  return `\uFEFF${[headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n")}\r\n`;
 }

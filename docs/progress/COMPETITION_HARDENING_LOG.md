@@ -29,3 +29,13 @@
 - **Results:** PASS — all three fixtures validate and produce their declared outcomes through the shared engine; 15 files / 102 tests; typecheck, lint, and build pass; 7 of 11 Playwright tests initially passed, four presentation assertions failed, all four passed after restoring the stable Case Overview and threshold-change labels. Full Playwright is rerun at the release gate.
 - **Commit:** Pending second checkpoint.
 - **Blockers:** None.
+
+## Phases 7–17 — Scenario-aware trust and judge workflow
+
+- **Objective:** Make multi-case behavior, architecture, evidence trust, human oversight, and exports easy for judges to inspect without creating a separate application.
+- **Decisions:** Use current-session comparison only; keep Judge Mode guidance-only; store audit metadata in React state; include it in JSON receipts; implement dependency-free CSV; keep exact-excerpt validation authoritative.
+- **Files changed:** Competition toolbar, workspace orchestration, audit contract, receipt/CSV exports, evidence trust, styles, unit/component/browser tests, decision log, and this log.
+- **Tests run:** Full unit/component suite, typecheck, lint, production build, full 16-path Playwright suite, focused regression reruns, and screenshot capture/inspection.
+- **Results:** PASS — 16 files / 107 tests; typecheck, lint, and build pass; 16 Playwright tests pass. The first full browser run found one 768 px overflow caused by a closed comparison panel retaining its minimum width; a closed-panel rule and tablet layout fixed it. Eleven ignored screenshots were generated and inspected; apparent black bands in the visualizer were confirmed by direct PNG pixel inspection to be preview artifacts over white pixels, not application output.
+- **Commit:** Pending third checkpoint.
+- **Blockers:** None.

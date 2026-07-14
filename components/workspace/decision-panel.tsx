@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { CaseDocument, ControlResult, ReviewDecision } from "@/src/domain/schemas";
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
-import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown } from "@/src/lib/receipt-export";
+import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown, serializeEvidenceMatrixCsv } from "@/src/lib/receipt-export";
 import type { ResultSummary } from "@/src/lib/review-summary";
 import { controlRef, decisionGlyph, decisionRef, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
@@ -21,7 +21,7 @@ export function formatDecisionEvidenceRecap(result: ControlResult, locale: "en" 
   return `${count} ${locale === "fr" ? "éléments probants" : "evidence items"}`;
 }
 
-export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, policyReference, onSelectResult, onCommentChange, onDecision, onReopenEvidence }: {
+export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, policyReference, onSelectResult, onCommentChange, onDecision, onReopenEvidence, onExport }: {
   results: ControlResult[];
   documents: CaseDocument[];
   selectedResult: ControlResult | null;
@@ -34,6 +34,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
   onCommentChange: (comment: string) => void;
   onDecision: (state: ReviewDecision["state"]) => void;
   onReopenEvidence: () => void;
+  onExport: (format: "print" | "json" | "markdown" | "csv" | "clipboard") => void;
 }) {
   const { locale, t } = useLocale();
   const [exportNotice, setExportNotice] = useState("");
@@ -69,6 +70,7 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
     link.click();
     URL.revokeObjectURL(url);
     setExportNotice(t("receipt.downloadSuccess"));
+    onExport("json");
   }
 
   function downloadMarkdownReceipt() {
@@ -80,6 +82,20 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
     link.click();
     URL.revokeObjectURL(url);
     setExportNotice(locale === "fr" ? "Reçu Markdown téléchargé." : "Markdown receipt downloaded.");
+    onExport("markdown");
+  }
+
+  function downloadEvidenceCsv() {
+    if (!receipt) return;
+    const csv = serializeEvidenceMatrixCsv({ caseName: receipt.caseName, results, locale });
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${receipt.reviewId}-evidence.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setExportNotice(locale === "fr" ? "Matrice de preuves CSV téléchargée." : "CSV evidence matrix downloaded.");
+    onExport("csv");
   }
 
   function moveInQueue(direction: -1 | 1, unresolvedOnly = false) {
@@ -153,11 +169,12 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
 
           {summary.reviewed > 0 && <section className="receipt-section">
             <div className="receipt-toolbar">
-              <button type="button" onClick={() => window.print()} className="receipt-primary-action">{t("action.print")}</button>
+              <button type="button" onClick={() => { onExport("print"); window.print(); }} className="receipt-primary-action">{t("action.print")}</button>
               <button type="button" onClick={downloadReceipt}>{t("action.downloadJson")}</button>
               <button type="button" onClick={downloadMarkdownReceipt}>{locale === "fr" ? "Télécharger Markdown" : "Download Markdown"}</button>
-              <button type="button" onClick={() => copyReceiptContent(receipt.reviewId)}>{t("action.copyReceiptId")}</button>
-              <button type="button" onClick={() => copyReceiptContent(createConciseReviewSummary(receipt))}>{t("action.copySummary")}</button>
+              <button type="button" onClick={downloadEvidenceCsv}>{locale === "fr" ? "Télécharger CSV" : "Download CSV"}</button>
+              <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(receipt.reviewId); }}>{t("action.copyReceiptId")}</button>
+              <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(createConciseReviewSummary(receipt)); }}>{t("action.copySummary")}</button>
               <span>{receipt.reviewId}.json</span>
             </div>
             <p aria-live="polite" className="receipt-export-notice">{exportNotice}</p>

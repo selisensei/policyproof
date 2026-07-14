@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { AppHeader } from "@/components/workspace/app-header";
 import { CaseLibrary } from "@/components/workspace/case-library";
+import { CompetitionTools, type CompletedScenarioReview } from "@/components/workspace/competition-tools";
 import { ControlsPanel } from "@/components/workspace/controls-panel";
 import { DecisionPanel } from "@/components/workspace/decision-panel";
 import { DocumentsPanel } from "@/components/workspace/documents-panel";
@@ -20,11 +21,12 @@ import { defaultScenarioId, reviewScenarios } from "@/src/fixtures/scenarios";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, type TranslationKey } from "@/src/i18n/translations";
 import { createDecisionReceipt } from "@/src/lib/decision-receipt";
+import { appendAuditEvent, createAuditEvent, type AuditAction, type AuditEvent } from "@/src/lib/audit-trail";
 import { LocalDocumentError, readLocalDocuments, type LocalDocument } from "@/src/lib/local-documents";
 import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/review-summary";
-import { createRunSnapshot } from "@/src/lib/review-intelligence";
+import { assessEvidenceIntegrity, createRunSnapshot } from "@/src/lib/review-intelligence";
 import { advanceRunHistory, loadRunHistory, persistRunHistory, removeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 
@@ -90,6 +92,10 @@ export function DemoReviewWorkspace() {
   const [isRunning, setIsRunning] = useState(false);
   const [guideDismissed, setGuideDismissed] = useState(true);
   const [guideMilestones, setGuideMilestones] = useState<Set<GuidedDemoMilestone>>(() => new Set());
+  const [completedScenarios, setCompletedScenarios] = useState<CompletedScenarioReview[]>([]);
+  const [auditTrail, setAuditTrail] = useState<AuditEvent[]>([]);
+  const [judgeMode, setJudgeMode] = useState(false);
+  const [judgeStep, setJudgeStep] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -120,7 +126,7 @@ export function DemoReviewWorkspace() {
   const summary = useMemo(() => summarizeResults(results), [results]);
   const visibleResults = useMemo(() => filterResults(results, filter), [results, filter]);
   const enabledControlCount = mode === "DETERMINISTIC_DEMO" ? controls.filter((control) => control.enabled).length : proposals.filter((control) => control.enabled).length;
-  const receipt = useMemo(() => runGeneratedAt && results.length ? createDecisionReceipt({ results, policyName: activeScenario.policy.title, policyVersion: activeScenario.policy.version, caseName: mode === "DETERMINISTIC_DEMO" ? activeScenario.caseName[locale] : "Local fictional document review", selectedLanguage: locale, runMode: mode, generatedAt: runGeneratedAt, enabledControlCount }) : null, [activeScenario, enabledControlCount, locale, mode, results, runGeneratedAt]);
+  const receipt = useMemo(() => runGeneratedAt && results.length ? createDecisionReceipt({ results, policyName: activeScenario.policy.title, policyVersion: activeScenario.policy.version, caseName: mode === "DETERMINISTIC_DEMO" ? activeScenario.caseName[locale] : "Local fictional document review", selectedLanguage: locale, runMode: mode, generatedAt: runGeneratedAt, enabledControlCount, auditTrail }) : null, [activeScenario, auditTrail, enabledControlCount, locale, mode, results, runGeneratedAt]);
   const documentCount = mode === "DETERMINISTIC_DEMO" ? activeScenario.documents.length : localDocuments.length;
   const documentTypes = useMemo(
     () => mode === "DETERMINISTIC_DEMO"
@@ -136,6 +142,11 @@ export function DemoReviewWorkspace() {
       milestones.forEach((milestone) => next.add(milestone));
       return next;
     });
+  }
+
+  function audit(action: AuditAction, description: string, controlId: string | null = null) {
+    const event = createAuditEvent({ action, scenarioId: activeScenario.id, controlId, description, timestamp: new Date().toISOString() });
+    setAuditTrail((current) => appendAuditEvent(current, event));
   }
 
   function navigate(step: WorkflowStep) {
@@ -156,14 +167,14 @@ export function DemoReviewWorkspace() {
     setNotice(nextNotice);
   }
 
-  function selectScenario(scenarioId: string, confirmDecisionLoss = true, forceReload = false) {
-    if (!forceReload && scenarioId === activeScenario.id && mode === "DETERMINISTIC_DEMO") return;
+  function selectScenario(scenarioId: string, confirmDecisionLoss = true, forceReload = false): boolean {
+    if (!forceReload && scenarioId === activeScenario.id && mode === "DETERMINISTIC_DEMO") return true;
     const hasDecisions = results.some((result) => result.reviewerDecision.state !== "PENDING");
     if (confirmDecisionLoss && hasDecisions) {
       const approved = window.confirm(locale === "fr"
         ? "Changer de scénario supprimera les résultats, décisions, reçu et comparaison actuels. Continuer ?"
         : "Changing scenario will clear the current results, decisions, receipt, and run comparison. Continue?");
-      if (!approved) return;
+      if (!approved) return false;
     }
     const nextScenario = loadScenario(scenarioId, reviewScenarios);
     const reset = createScenarioResetState(nextScenario, locale);
@@ -183,6 +194,15 @@ export function DemoReviewWorkspace() {
     clearReview({ key: "notice.demoLoaded" });
     setGuideMilestones(new Set(["CASE_LOADED"]));
     setCurrentStep("policy");
+    const event = createAuditEvent({ action: "SCENARIO_LOADED", scenarioId: nextScenario.id, description: `Loaded controlled scenario ${nextScenario.caseReference}.`, timestamp: new Date().toISOString() });
+    setAuditTrail((current) => appendAuditEvent(current, event));
+    return true;
+  }
+
+  function enterJudgeMode() {
+    if (activeScenario.id !== defaultScenarioId && !selectScenario(defaultScenarioId, true)) return;
+    setJudgeMode(true);
+    setJudgeStep(0);
   }
 
   function loadDemo() {
@@ -262,6 +282,7 @@ export function DemoReviewWorkspace() {
       setWorkspaceError("");
       setNotice({ key: "notice.proposalsApproved" });
       setCurrentStep("documents");
+      audit("CONTROLS_APPROVED", `Approved ${activeProposals.length} proposed controls.`);
     } catch {
       setWorkspaceError(t("error.approveControls"));
     }
@@ -364,11 +385,22 @@ export function DemoReviewWorkspace() {
       setCurrentStep("review");
       const nextSummary = summarizeResults(nextResults);
       const snapshot = createRunSnapshot(generatedAt, Number(threshold), nextResults, nextSummary, activeScenario.id);
+      audit("CONTROLS_APPROVED", `Approved ${nextResults.length} enabled controls for evaluation.`);
+      audit("REVIEW_RUN", `Evaluated ${nextResults.length} controls; ${nextSummary.pending} human decisions remain open.`);
+      if (runHistory.latest && runHistory.latest.threshold !== Number(threshold)) {
+        audit("THRESHOLD_CHANGED", `Changed approval threshold to ${Number(threshold)} EUR.`);
+        audit("RUN_COMPARISON_CREATED", "Created a comparison with the previous run.");
+      }
       setRunHistory((current) => {
         const next = advanceRunHistory(current, snapshot);
         persistRunHistory(window.localStorage, next, activeScenario.id);
         return next;
       });
+      if (mode === "DETERMINISTIC_DEMO") {
+        const verifiedControls = nextResults.filter((result) => assessEvidenceIntegrity(result, nextReviewDocuments).state === "VERIFIED").length;
+        const completed: CompletedScenarioReview = { scenarioId: activeScenario.id, summary: nextSummary, unresolved: nextSummary.pending, verifiedControls, controlCount: nextResults.length };
+        setCompletedScenarios((current) => [...current.filter((item) => item.scenarioId !== activeScenario.id), completed]);
+      }
       if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === activeScenario.thresholdParameters.defaultAmount && nextSummary.PASS === activeScenario.expectedOutcomeCounts.PASS && nextSummary.FAIL === activeScenario.expectedOutcomeCounts.FAIL && nextSummary.MISSING === activeScenario.expectedOutcomeCounts.MISSING && nextSummary.WARNING === activeScenario.expectedOutcomeCounts.WARNING) completeGuide("INITIAL_REVIEW_RUN");
       if (mode === "DETERMINISTIC_DEMO" && activeScenario.thresholdParameters.comparisonAmount === Number(threshold) && nextResults.find((result) => result.controlId === "CTRL-APPROVAL")?.status === "PASS") completeGuide("THRESHOLD_RERUN");
     } catch (error) {
@@ -388,10 +420,18 @@ export function DemoReviewWorkspace() {
     if (!selectedResult) return;
     try {
       const reviewed = recordReviewDecision(selectedResult, state, selectedResult.reviewerDecision.comment);
-      setResults((current) => current.map((result) => result.controlId === reviewed.controlId ? reviewed : result));
+      setResults((current) => {
+        const next = current.map((result) => result.controlId === reviewed.controlId ? reviewed : result);
+        if (mode === "DETERMINISTIC_DEMO") {
+          const nextSummary = summarizeResults(next);
+          setCompletedScenarios((completed) => completed.map((item) => item.scenarioId === activeScenario.id ? { ...item, summary: nextSummary, unresolved: nextSummary.pending } : item));
+        }
+        return next;
+      });
       setReviewError("");
       setNotice({ key: "notice.decisionSaved", controlId: selectedResult.controlId, fallbackTitle: selectedResult.title, decisionState: state });
       completeGuide("DECISION_RECORDED");
+      audit("REVIEWER_DECISION_SAVED", `Saved reviewer decision ${state}.`, reviewed.controlId);
     } catch {
       setReviewError(state === "REJECTED" || state === "ACCEPTED_EXCEPTION" ? t("error.overrideComment") : t("error.decision"));
     }
@@ -417,7 +457,7 @@ export function DemoReviewWorkspace() {
   ) : currentStep === "review" ? (
     <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} controls={controls} policyText={activeScenario.policy.text} caseName={activeScenario.caseName[locale]} caseReference={activeScenario.caseReference} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === activeScenario.guidedDemo.defaultSelectedControlId) completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
   ) : (
-    <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} />
+    <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} onExport={(format) => audit("RECEIPT_EXPORTED", `Exported the review receipt as ${format}.`)} />
   );
 
   const primaryLabel = currentStep === "policy"
@@ -455,6 +495,7 @@ export function DemoReviewWorkspace() {
           {currentStep === "policy" && mode === "DETERMINISTIC_DEMO" && <CaseLibrary scenarios={reviewScenarios} activeScenarioId={activeScenario.id} onSelect={selectScenario} />}
           {currentStep === "policy" && !guideMilestones.has("CASE_LOADED") && <IntroPanel onStartDemo={loadDemo} />}
           <WorkspaceSummary onLoadDemo={loadDemo} guideDismissed={guideDismissed} guideMilestones={guideMilestones} onDismissGuide={() => setGuideDismissed(true)} />
+          <CompetitionTools judgeMode={judgeMode} judgeStep={judgeStep} completed={completedScenarios} scenarios={reviewScenarios} auditTrail={auditTrail} onEnterJudgeMode={enterJudgeMode} onExitJudgeMode={() => setJudgeMode(false)} onJudgeStep={setJudgeStep} onSelectScenario={(scenarioId) => { if (scenarioId === activeScenario.id && results.length) navigate("review"); else selectScenario(scenarioId); }} onClearAudit={() => setAuditTrail([])} />
           <div className="workspace-notice" data-tone={workspaceError ? "error" : "neutral"}>
             <span aria-hidden="true" className="workspace-notice-dot" />
             <div>

@@ -336,3 +336,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Keep Northstar as the default mixed-risk case and add Meridian as a complete below-threshold case plus Atlas as an incomplete above-threshold case. Present them in a compact bilingual case register with fictional-data provenance and assumptions. Do not expose expected outcome counts before a review runs. Reset volatile review state on switching, require confirmation when human decisions would be lost, and preserve the interface language.
 - **Rationale:** Three deliberately controlled profiles provide strong, testable evidence of reuse while staying inside one procurement policy, seven existing control types, one shared engine, and one client-side workspace.
 - **Consequences:** Northstar remains the only scenario validated by a real GPT-5.6 run. Meridian and Atlas are deterministic and mocked fixtures only. Their displayed results must always be calculated at runtime; schema expectations remain test assertions and never feed the UI.
+
+## D037 - Add optional judge and trust tools over production state
+
+- **Date:** 2026-07-15
+- **Status:** Accepted
+- **Context:** Judges need to understand reuse, evidence trust, system responsibilities, and human oversight quickly, but a separate scripted application or dashboard would weaken credibility.
+- **Decision:** Add one optional competition toolbar over the existing workspace. Judge Mode provides manual bilingual guidance only. Scenario comparison uses current-session engine results only and exposes no score or ranking. The architecture surface states the validated GPT-5.6, TypeScript, and human responsibilities. Evidence trust explains verified, missing, and rejected references. A bounded in-memory audit trail stores only safe action metadata and is included in JSON receipts. Add a dependency-free UTF-8 CSV evidence matrix derived from `ControlResult` data.
+- **Rationale:** These surfaces make the validated architecture inspectable without changing review semantics, invoking a provider, creating a backend, or duplicating the product.
+- **Consequences:** Audit history is intentionally session-local and is not a durable compliance log. Comparison rows disappear after refresh. Judge Mode never performs or records an action. CSV source excerpts remain in their original fictional language while headers follow the selected receipt language.

@@ -66,6 +66,7 @@ describe("PolicyProof workspace interactions", () => {
 
     await user.click(screen.getByRole("button", { name: "Inspect Currency consistency" }));
     const evidence = screen.getByLabelText("Evidence details");
+    expect(within(evidence).getByText("Why this evidence is trusted")).toBeTruthy();
     expect(within(evidence).getByText(/Purchase order amount: 12,480 EUR/)).toBeTruthy();
     expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
     await user.click(within(evidence).getAllByRole("button", { name: "Copy excerpt" })[0]);
@@ -283,12 +284,43 @@ describe("PolicyProof workspace interactions", () => {
     const meridian = screen.getByRole("button", { name: /Meridian Office Services/ });
     await user.click(meridian);
     expect(confirm).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("button", { name: /Northstar Facilities/ }).getAttribute("aria-pressed")).toBe("true");
+    const library = screen.getByRole("region", { name: "Choisir un dossier contrôlé" });
+    expect(within(library).getByRole("button", { name: /Northstar Facilities/ }).getAttribute("aria-pressed")).toBe("true");
     await user.click(meridian);
     expect(confirm).toHaveBeenCalledTimes(2);
-    expect(screen.getByRole("button", { name: /Meridian Office Services/ }).getAttribute("aria-pressed")).toBe("true");
+    expect(within(library).getByRole("button", { name: /Meridian Office Services/ }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: "Français" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: "Revue" })).toBeTruthy();
+  });
+
+  it("uses Judge Mode as guidance without running GPT or recording a decision", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+    await user.click(screen.getByRole("button", { name: "Enter Judge Mode" }));
+    const judge = screen.getByRole("region", { name: "Judge Mode sequence" });
+    expect(within(judge).getByText("Select Northstar")).toBeTruthy();
+    expect(within(judge).getByText(/no action or decision is automated/i)).toBeTruthy();
+    await user.click(within(judge).getByRole("button", { name: "Next →" }));
+    expect(within(judge).getByText("Review policy-to-control chain")).toBeTruthy();
+    await user.click(screen.getByText("Architecture"));
+    expect(screen.getByText(/Policy interpretation and structured fact/)).toBeTruthy();
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+    expect(screen.queryByLabelText("Decision receipt")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Exit Judge Mode" }));
+    expect(screen.queryByRole("region", { name: "Judge Mode sequence" })).toBeNull();
+  });
+
+  it("compares only scenarios completed in the current session and reopens them", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+    await runReviewFromControls(user);
+    await user.click(screen.getByText("Compare completed cases"));
+    const comparison = screen.getByRole("table", { name: "Completed scenario comparison" });
+    expect(within(comparison).getByRole("button", { name: /Northstar Facilities/ })).toBeTruthy();
+    expect(within(comparison).queryByText(/Meridian Office Services/)).toBeNull();
+    expect(within(comparison).getByText(/no score or ranking/i)).toBeTruthy();
+    await user.click(within(comparison).getByRole("button", { name: /Northstar Facilities/ }));
+    expect(screen.getByRole("button", { name: "Review" }).getAttribute("aria-current")).toBe("step");
   });
 
   it("keeps mocked GPT-5.6 proposals unapproved until human review", async () => {

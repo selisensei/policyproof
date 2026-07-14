@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ControlStatusSchema, ReviewDecisionStateSchema, type ControlResult } from "@/src/domain/schemas";
+import { AuditEventSchema, type AuditEvent } from "@/src/lib/audit-trail";
 
 export const REVIEW_DISCLAIMER =
   "PolicyProof is a review aid. This receipt is not legal advice, a compliance certification, or payment approval.";
@@ -31,6 +32,7 @@ export const DecisionReceiptSchema = z.object({
       reviewerComment: z.string(),
     }),
   ),
+  auditTrail: z.array(AuditEventSchema).max(100),
   disclaimer: z.literal(REVIEW_DISCLAIMER),
 });
 
@@ -49,6 +51,7 @@ export function createDecisionReceipt(input: {
   runMode: DecisionReceipt["runMode"];
   generatedAt: string;
   enabledControlCount: number;
+  auditTrail?: AuditEvent[];
 }): DecisionReceipt {
   const counts = input.results.reduce(
     (summary, result) => {
@@ -77,6 +80,7 @@ export function createDecisionReceipt(input: {
       reviewerDecision: result.reviewerDecision.state,
       reviewerComment: result.reviewerDecision.comment,
     })),
+    auditTrail: input.auditTrail ?? [],
     disclaimer: REVIEW_DISCLAIMER,
   });
 }
