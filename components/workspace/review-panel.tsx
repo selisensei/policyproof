@@ -1,13 +1,15 @@
 import { useSyncExternalStore, useState, type KeyboardEvent } from "react";
-import type { ControlResult, EvidenceReference } from "@/src/domain/schemas";
+import type { CaseDocument, ControlResult, EvidenceReference } from "@/src/domain/schemas";
 import type { AppMode } from "@/components/workspace/types";
 import type { ResultFilter, ResultSummary } from "@/src/lib/review-summary";
-import { controlRef, decisionRef, evidenceCount, methodLabel, requirementRef } from "@/components/workspace/presentation";
+import { controlRef, decisionRef, evidenceCount, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
 import { StatusBadge } from "@/components/workspace/status-badge";
 import { demoPolicy } from "@/src/fixtures/demo-case";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedMissingEvidence, localizedResultExplanation } from "@/src/i18n/translations";
+import { ReviewIntelligencePanels } from "@/components/workspace/review-intelligence-panels";
+import { assessEvidenceIntegrity, type RunSnapshot } from "@/src/lib/review-intelligence";
 
 const filterOrder: ResultFilter[] = ["ALL", "PASS", "FAIL", "MISSING", "WARNING", "OPEN"];
 
@@ -26,7 +28,7 @@ function useMobileReview() {
   return useSyncExternalStore(subscribeMobile, getMobileSnapshot, () => false);
 }
 
-export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documentTypes, changedControlId, onFilterChange, onSelectResult, onGoDecision }: {
+export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documents, documentTypes, changedControlId, currentRun, previousRun, onFilterChange, onSelectResult, onClearHistory, onGoDecision }: {
   results: ControlResult[];
   visibleResults: ControlResult[];
   summary: ResultSummary;
@@ -34,10 +36,14 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
   selectedResult: ControlResult | null;
   threshold: string;
   mode: AppMode;
+  documents: CaseDocument[];
   documentTypes: Record<string, string>;
   changedControlId: string | null;
+  currentRun: RunSnapshot | null;
+  previousRun: RunSnapshot | null;
   onFilterChange: (filter: ResultFilter) => void;
   onSelectResult: (controlId: string) => void;
+  onClearHistory: () => void;
   onGoDecision: () => void;
 }) {
   const { locale, t } = useLocale();
@@ -81,6 +87,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
       result={selectedResult}
       threshold={threshold}
       mode={mode}
+      documents={documents}
       documentTypes={documentTypes}
       changed={changedControlId === selectedResult.controlId}
       onGoDecision={onGoDecision}
@@ -93,6 +100,18 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
         <div className="empty-state"><strong>{t("review.empty")}</strong><p>{t("review.emptyHelp")}</p></div>
       ) : (
         <>
+          <ReviewIntelligencePanels
+            results={results}
+            documents={documents}
+            summary={summary}
+            threshold={Number(threshold)}
+            mode={mode}
+            currentRun={currentRun}
+            previousRun={previousRun}
+            onFilterChange={onFilterChange}
+            onInspectControl={(controlId) => { onFilterChange("ALL"); onSelectResult(controlId); }}
+            onClearHistory={onClearHistory}
+          />
           <div className="review-filter-row" role="radiogroup" aria-label={locale === "fr" ? "Filtrer les résultats" : "Filter results"}>
             {filterOrder.map((candidate) => (
               <button key={candidate} type="button" data-filter={candidate} data-status={candidate} aria-label={candidate === "ALL" ? (locale === "fr" ? `Afficher les ${summary.total} résultats` : `Show all ${summary.total} results`) : candidate === "OPEN" ? (locale === "fr" ? `Afficher ${summary.pending} décisions ouvertes` : `Show ${summary.pending} open decisions`) : t("review.showStatus", { count: summary[candidate], status: t(`status.${candidate}`) })} aria-pressed={filter === candidate} onKeyDown={(event) => onFilterKeyDown(event, candidate)} onClick={() => onFilterChange(candidate)} className={filter === candidate ? "is-active" : ""}>
@@ -101,7 +120,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
             ))}
           </div>
 
-          <div className="review-workbench">
+          <div className="review-workbench" id="result-ledger">
             <div className="result-register">
               <div className="result-register-heading" aria-hidden="true"><span>REF</span><span>{locale === "fr" ? "CONTRÔLE" : "CONTROL"}</span><span>{locale === "fr" ? "CONCLUSION" : "CONCLUSION"}</span><span>{locale === "fr" ? "GRAVITÉ" : "SEVERITY"}</span><span>{locale === "fr" ? "MÉTHODE" : "METHOD"}</span><span>EV</span><span>{locale === "fr" ? "REVUE" : "REVIEW"}</span></div>
               <div className="result-register-list">
@@ -115,7 +134,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
                         <span className="result-copy"><strong>{title}</strong><small>{result.controlId}</small></span>
                         <StatusBadge status={result.status} />
                         <span className="severity-label" data-severity={result.severity}>{t(`severity.${result.severity}`)}</span>
-                        <span className="method-label">{mode === "DETERMINISTIC_DEMO" ? "TS" : "GPT"}</span>
+                        <span className="method-label">{mode === "DETERMINISTIC_DEMO" ? (locale === "fr" ? "Contrôle déterministe" : "Deterministic check") : (locale === "fr" ? "Revue hybride" : "Hybrid review")}</span>
                         <span className="result-evidence-count">{evidenceCount(result)}</span>
                         <span className="result-decision">{selected ? (locale === "fr" ? "Décider →" : "Decide →") : t(`decision.${result.reviewerDecision.state}`)}</span>
                       </button>
@@ -136,12 +155,13 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
   );
 }
 
-function EvidenceDetails({ result, threshold, mode, documentTypes, changed, onGoDecision }: { result: ControlResult; threshold: string; mode: AppMode; documentTypes: Record<string, string>; changed: boolean; onGoDecision: () => void }) {
+function EvidenceDetails({ result, threshold, mode, documents, documentTypes, changed, onGoDecision }: { result: ControlResult; threshold: string; mode: AppMode; documents: CaseDocument[]; documentTypes: Record<string, string>; changed: boolean; onGoDecision: () => void }) {
   const { locale, t } = useLocale();
   const [copied, setCopied] = useState<string | null>(null);
   const title = localizedControl(result.controlId, locale, result.title).title;
   const sequence = Number(requirementRef(result.controlId).replace("R-", ""));
   const requirement = Number.isFinite(sequence) ? demoPolicy.text.split("\n")[sequence - 1]?.replace(/^\d+\.\s*/, "") : null;
+  const integrity = assessEvidenceIntegrity(result, documents);
 
   async function copy(key: string, value: string) {
     try {
@@ -160,7 +180,11 @@ function EvidenceDetails({ result, threshold, mode, documentTypes, changed, onGo
       <div className="evidence-heading"><div><h3>{title}</h3><p>{localizedResultExplanation(result.controlId, result.status, result.explanation, locale, threshold)}</p></div></div>
       {changed && <div className="conclusion-changed" role="status"><strong>{locale === "fr" ? "Conclusion modifiée — CTRL-01 ÉCHEC → CONFORME" : "Conclusion changed — CTRL-01 FAIL → PASS"}</strong><p>{locale === "fr" ? "12 480 EUR ne dépasse plus le seuil de 15 000 EUR. Tous les autres résultats sont inchangés et les décisions précédentes ont été réinitialisées." : "12,480 EUR no longer exceeds the 15,000 EUR threshold. All other results are unchanged and previous reviewer decisions were reset."}</p></div>}
       {requirement && <blockquote className="requirement-quote"><span>{locale === "fr" ? "EXTRAIT SOURCE (EN)" : "SOURCE REQUIREMENT"}</span>“{requirement}”</blockquote>}
-      <p className="evidence-provenance">METHOD: {methodLabel(mode)} · {evidenceCount(result)} FACTS CITED</p>
+      <div className="evidence-integrity" data-state={integrity.state} aria-label={locale === "fr" ? "Intégrité des preuves" : "Evidence integrity"}>
+        <strong>{integrity.state === "VERIFIED" ? (locale === "fr" ? "✓ Sources exactes vérifiées" : "✓ Exact sources verified") : integrity.state === "MISSING" ? (locale === "fr" ? "○ Preuve exigée manquante" : "○ Required evidence missing") : (locale === "fr" ? "× Référence de preuve rejetée" : "× Evidence reference rejected")}</strong>
+        <span>{integrity.verifiedReferences} {locale === "fr" ? "extrait(s) exact(s)" : "exact excerpt(s)"} · {integrity.missingRequirements} {locale === "fr" ? "exigence(s) absente(s)" : "missing requirement(s)"}</span>
+      </div>
+      <p className="evidence-provenance">{locale === "fr" ? "MÉTHODE" : "METHOD"}: {mode === "DETERMINISTIC_DEMO" ? (locale === "fr" ? "Contrôle déterministe" : "Deterministic check") : (locale === "fr" ? "Revue hybride" : "Hybrid review")} · {evidenceCount(result)} {locale === "fr" ? "FAITS CITÉS" : "FACTS CITED"}</p>
       <div className="evidence-groups">
         <EvidenceList kind="contradictory" title={t("evidence.contradictory")} items={result.contradictoryEvidence} empty={t("evidence.noContradictory")} documentTypes={documentTypes} copied={copied} onCopy={copy} />
         {result.contradictoryEvidence.length >= 2 && <CurrencyComparison items={result.contradictoryEvidence} locale={locale} />}
@@ -181,14 +205,13 @@ function EvidenceList({ title, items, empty, kind, documentTypes, copied, onCopy
     <p className="evidence-relation">{item.locator}{item.relationToControl ? ` · ${item.relationToControl}` : ""}</p>
     <blockquote>“{item.excerpt}”</blockquote>
     <p className="evidence-fact">{item.factId} · {modeForEvidence(item)}</p>
-    {item.confidence !== null && <p className="evidence-confidence">{t("evidence.confidence", { value: Math.round(item.confidence * 100) })}</p>}
     <div className="evidence-actions"><button type="button" onClick={() => onCopy(`${item.id}-excerpt`, item.excerpt)}>{copied === `${item.id}-excerpt` ? `${t("action.copied")} ✓` : t("evidence.copyExcerpt")}</button><button type="button" onClick={() => onCopy(`${item.id}-reference`, `${item.factId} · ${item.documentId} ${item.documentTitle} · ${item.locator}`)}>{copied === `${item.id}-reference` ? `${t("action.copied")} ✓` : t("evidence.copyReference")}</button></div>
     {locale === "fr" && <span className="source-language-tag">EXTRAIT SOURCE (EN)</span>}
   </article>)}</div> : <p className="empty-evidence-row">{empty}</p>}</section>;
 }
 
 function modeForEvidence(item: EvidenceReference): string {
-  return item.confidence === null ? "DETERMINISTIC EXTRACTION" : "SEMANTIC EXTRACTION";
+  return item.confidence === null ? "DETERMINISTIC CHECK" : "SEMANTIC EXTRACTION";
 }
 
 function monetaryEvidence(item: EvidenceReference) {

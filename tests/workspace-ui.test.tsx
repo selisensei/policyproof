@@ -210,6 +210,8 @@ describe("PolicyProof workspace interactions", () => {
     const user = userEvent.setup();
     renderWorkspace();
 
+    expect(screen.queryByRole("heading", { name: "Judge demo checklist" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Judge demo checklist" }));
     expect(screen.getByRole("heading", { name: "Judge demo checklist" })).toBeTruthy();
     await user.click(screen.getAllByRole("button", { name: "Start guided demo" })[0]);
     expect(screen.getByText("1 of 9 steps complete")).toBeTruthy();

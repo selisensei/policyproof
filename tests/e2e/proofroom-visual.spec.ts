@@ -25,7 +25,8 @@ test("captures the complete Proofroom visual comparison matrix", async ({ page }
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   await page.getByRole("button", { name: "Load demo case" }).first().click();
-  await page.getByRole("button", { name: "Dismiss guided demo" }).click();
+  const dismissGuide = page.getByRole("button", { name: "Dismiss guided demo" });
+  if (await dismissGuide.isVisible()) await dismissGuide.click();
 
   await capture(page, "01-policy-desktop-en");
 
@@ -69,7 +70,8 @@ test("captures the complete Proofroom visual comparison matrix", async ({ page }
 test("captures final empty, threshold, print, loading, and provider-error states", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
-  await page.getByRole("button", { name: "Dismiss guided demo" }).click();
+  const dismissGuide = page.getByRole("button", { name: "Dismiss guided demo" });
+  if (await dismissGuide.isVisible()) await dismissGuide.click();
 
   await page.getByRole("button", { name: "Review", exact: true }).click();
   await expect(page.getByText("No review results yet")).toBeVisible();
@@ -98,7 +100,9 @@ test("captures final empty, threshold, print, loading, and provider-error states
     await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: { code: "AI_AUTHENTICATION_ERROR", category: "authentication", message: "Live GPT-5.6 authentication failed. Check the server-side API key configuration.", correlationId: "pp-visual-mock", requestId: "req_visual_mock" } }) });
   });
   await page.reload();
-  await page.getByRole("button", { name: "Dismiss guided demo" }).click();
+  if (await page.getByRole("button", { name: "Dismiss guided demo" }).isVisible()) {
+    await page.getByRole("button", { name: "Dismiss guided demo" }).click();
+  }
   await page.getByRole("button", { name: "Live GPT-5.6" }).click();
   await page.getByRole("button", { name: "Propose controls with GPT-5.6" }).click();
   await expect(page.locator(".progress-rule")).toBeVisible();

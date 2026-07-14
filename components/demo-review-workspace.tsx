@@ -13,7 +13,7 @@ import { StepNavigation } from "@/components/workspace/step-navigation";
 import { WorkspaceSummary } from "@/components/workspace/workspace-summary";
 import type { AiAvailability, AppMode, GuidedDemoMilestone, ProposalReviewState, WorkflowStep } from "@/components/workspace/types";
 import { AiControlProposalSchema, CaseAnalysisSchema, PolicyCompilationSchema, type AiControlProposal } from "@/src/domain/ai-schemas";
-import { ControlDefinitionSchema, type ControlDefinition, type ControlResult, type ReviewDecision } from "@/src/domain/schemas";
+import { ControlDefinitionSchema, type CaseDocument, type ControlDefinition, type ControlResult, type ReviewDecision } from "@/src/domain/schemas";
 import { demoControls, demoDocuments, demoPolicy } from "@/src/fixtures/demo-case";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, type TranslationKey } from "@/src/i18n/translations";
@@ -22,10 +22,13 @@ import { LocalDocumentError, readLocalDocuments, type LocalDocument } from "@/sr
 import { recordReviewDecision } from "@/src/lib/review-decision";
 import { runDeterministicReview } from "@/src/lib/review-engine";
 import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/review-summary";
+import { createRunSnapshot } from "@/src/lib/review-intelligence";
+import { advanceRunHistory, parseRunHistory, REVIEW_RUN_HISTORY_KEY, serializeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 
 const CASE_NAME = "Northstar Facilities vendor change";
 const steps: WorkflowStep[] = ["policy", "controls", "documents", "review", "decision"];
+const emptyRunHistory: RunHistory = { version: 1, previous: null, latest: null };
 
 type Notice = {
   key: TranslationKey;
@@ -73,6 +76,8 @@ export function DemoReviewWorkspace() {
   const [workspaceError, setWorkspaceError] = useState("");
   const [notice, setNotice] = useState<Notice>({ key: "notice.ready" });
   const [results, setResults] = useState<ControlResult[]>([]);
+  const [reviewDocuments, setReviewDocuments] = useState<CaseDocument[]>([]);
+  const [runHistory, setRunHistory] = useState<RunHistory>(emptyRunHistory);
   const [selectedControlId, setSelectedControlId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ResultFilter>("ALL");
   const [reviewError, setReviewError] = useState("");
@@ -80,7 +85,7 @@ export function DemoReviewWorkspace() {
   const [changedControlId, setChangedControlId] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [guideDismissed, setGuideDismissed] = useState(false);
+  const [guideDismissed, setGuideDismissed] = useState(true);
   const [guideMilestones, setGuideMilestones] = useState<Set<GuidedDemoMilestone>>(() => new Set());
 
   useEffect(() => {
@@ -99,6 +104,13 @@ export function DemoReviewWorkspace() {
         if (!cancelled) setAi({ available: false, model: "gpt-5.6", checking: false });
       });
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const loadHistory = window.setTimeout(() => {
+      setRunHistory(parseRunHistory(window.localStorage.getItem(REVIEW_RUN_HISTORY_KEY)));
+    }, 0);
+    return () => window.clearTimeout(loadHistory);
   }, []);
 
   const selectedResult = useMemo(() => results.find((result) => result.controlId === selectedControlId) ?? null, [results, selectedControlId]);
@@ -131,6 +143,7 @@ export function DemoReviewWorkspace() {
 
   function clearReview(nextNotice: Notice) {
     setResults([]);
+    setReviewDocuments([]);
     setSelectedControlId(null);
     setRunGeneratedAt(null);
     setFilter("ALL");
@@ -299,10 +312,12 @@ export function DemoReviewWorkspace() {
     setWorkspaceError("");
     try {
       let nextResults: ControlResult[];
+      let nextReviewDocuments: CaseDocument[];
       if (mode === "DETERMINISTIC_DEMO") {
         const nextControls = prepareDemoControls();
         setControls(nextControls);
         nextResults = runDeterministicReview(nextControls, demoDocuments);
+        nextReviewDocuments = demoDocuments;
       } else {
         if (!ai.available) throw new Error(t("error.liveUnavailable"));
         if (!proposalsApproved) throw new Error(t("error.liveApprove"));
@@ -315,17 +330,26 @@ export function DemoReviewWorkspace() {
         const analysis = z.object({ analysis: CaseAnalysisSchema }).parse(body).analysis;
         const deterministicControls = toDeterministicControls(approvedProposals);
         if (!deterministicControls.length) throw new Error(t("error.noControls"));
-        nextResults = runDeterministicReview(deterministicControls, toCaseDocuments(analysis, localDocuments));
+        nextReviewDocuments = toCaseDocuments(analysis, localDocuments);
+        nextResults = runDeterministicReview(deterministicControls, nextReviewDocuments);
       }
       setResults(nextResults);
+      setReviewDocuments(nextReviewDocuments);
       setChangedControlId(nextResults.find((result) => previousStatuses.has(result.controlId) && previousStatuses.get(result.controlId) !== result.status)?.controlId ?? null);
       setSelectedControlId(nextResults[0]?.controlId ?? null);
       setFilter("ALL");
-      setRunGeneratedAt(new Date().toISOString());
+      const generatedAt = new Date().toISOString();
+      setRunGeneratedAt(generatedAt);
       setReviewError("");
       setNotice(hadReviewerDecisions ? { key: "notice.reviewRerun" } : { key: "notice.reviewComplete", values: { count: nextResults.length } });
       setCurrentStep("review");
       const nextSummary = summarizeResults(nextResults);
+      const snapshot = createRunSnapshot(generatedAt, Number(threshold), nextResults, nextSummary);
+      setRunHistory((current) => {
+        const next = advanceRunHistory(current, snapshot);
+        window.localStorage.setItem(REVIEW_RUN_HISTORY_KEY, serializeRunHistory(next));
+        return next;
+      });
       if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === 10_000 && nextSummary.PASS === 3 && nextSummary.FAIL === 2 && nextSummary.MISSING === 1 && nextSummary.WARNING === 1) completeGuide("INITIAL_REVIEW_RUN");
       if (mode === "DETERMINISTIC_DEMO" && Number(threshold) === 15_000 && nextResults.find((result) => result.controlId === "CTRL-APPROVAL")?.status === "PASS") completeGuide("THRESHOLD_RERUN");
     } catch (error) {
@@ -360,6 +384,11 @@ export function DemoReviewWorkspace() {
     if (nextVisible.length && !nextVisible.some((result) => result.controlId === selectedControlId)) setSelectedControlId(nextVisible[0].controlId);
   }
 
+  function clearRunHistory() {
+    window.localStorage.removeItem(REVIEW_RUN_HISTORY_KEY);
+    setRunHistory(emptyRunHistory);
+  }
+
   const panel = currentStep === "policy" ? (
     <PolicyPanel mode={mode} ai={ai} policyText={policyText} expanded={policyExpanded} isCompiling={isCompiling} compilationError={compilationError} onPolicyTextChange={(value) => { setPolicyText(value); setProposalsApproved(false); }} onToggleExpanded={() => { setPolicyExpanded((current) => !current); completeGuide("POLICY_REVIEWED"); }} onCompile={compilePolicy} onOpenControls={() => navigate("controls")} />
   ) : currentStep === "controls" ? (
@@ -367,7 +396,7 @@ export function DemoReviewWorkspace() {
   ) : currentStep === "documents" ? (
     <DocumentsPanel mode={mode} demoDocuments={demoDocuments} localDocuments={localDocuments} documentError={documentError} onSelectFiles={selectFiles} onRemoveDocument={removeDocument} onUpdateLabel={updateDocumentLabel} onLoadDemo={loadDemo} onResetDemo={loadDemo} />
   ) : currentStep === "review" ? (
-    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documentTypes={documentTypes} changedControlId={changedControlId} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} onGoDecision={() => navigate("decision")} />
+    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === "CTRL-CURRENCY") completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
   ) : (
     <DecisionPanel results={results} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} />
   );
