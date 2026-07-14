@@ -124,6 +124,25 @@ The review-intelligence harness adds exact-size 1440 × 900, 1280 × 720, 1024 �
 
 These are implementation checkpoints. The final release-gate results are recorded only after documentation, the fourth visual pass, and the production smoke test are complete.
 
+## Review-intelligence final release gate — 2026-07-14
+
+- `pnpm test`: PASS — 14 files, 89 tests, 16.01 s
+- `pnpm typecheck`: PASS — no TypeScript errors
+- `pnpm lint`: PASS — no ESLint errors or warnings
+- `pnpm build`: PASS — compiled in 4.0 s; static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`
+- `pnpm test:e2e`: PASS — 11 Chromium tests, 29.2 s
+- `pnpm audit --prod`: PASS — no known vulnerabilities
+- `git diff --check`: PASS — no whitespace errors; Windows emitted informational LF-to-CRLF warnings
+- Production smoke test: PASS — `GET /` and `GET /api/ai/status` returned 200; PolicyProof content, model `gpt-5.6`, boolean availability, `nosniff`, and `DENY` were verified; port 3200 was released
+- Safe content scan: PASS — 120 non-ignored candidate files considered, 0 potential secret-pattern files, 0 personal absolute-path files
+- Generated-path review: PASS — no `.env.local`, `node_modules/`, `.next/`, `test-results/`, `playwright-report/`, `coverage/`, or `.vercel/` path is tracked
+- Dependency review: PASS — no change to `package.json`, `pnpm-lock.yaml`, or `pnpm-workspace.yaml`
+- Visual pass 4: PASS — 15 ignored captures covering English/French desktop, 1280 px, 390 px, all review-intelligence panels, decision, receipt, threshold rerun, run comparison, and effective 200% zoom
+
+The fourth pass initially exposed that the header primary action disappeared below 760 CSS pixels while the footer offered only Continue. PolicyProof now reuses the same primary action in the mobile/high-zoom footer. The focused Playwright pass then completed 4/4 tests. Two subsequent jsdom-only failures were test-query ambiguities because jsdom does not evaluate CSS media queries; the helper now selects the desktop action explicitly, while Playwright verifies both responsive action locations.
+
+No authenticated or paid OpenAI endpoint was called by the review-intelligence implementation or final release gates.
+
 ## Latest recorded results — 2026-07-14
 
 Pre-change baseline preserved before overnight work:

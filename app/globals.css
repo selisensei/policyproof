@@ -126,6 +126,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .active-workflow { margin-top: 12px; }
 .workflow-actions { display: flex; margin-top: 12px; align-items: center; justify-content: space-between; gap: 12px; }
 .workflow-actions button:disabled { visibility: hidden; }
+.mobile-primary-action { display: none; }
 
 /* Optional first-run folio and guide */
 .intro-panel { max-width: 720px; margin: 0 auto 16px; border: 1px solid var(--pp-frame); border-top: 3px solid var(--pp-ink); background: var(--pp-sheet); padding: 28px 40px; }
@@ -630,6 +631,8 @@ body { font-size: 14.5px; }
   .app-header-inner { height: 54px; flex-wrap: nowrap; padding: 0 16px; }
   .product-identity { flex: 0 0 auto; }
   .identity-rule, .brand-tagline, .human-review-indicator, .help-button, .run-button { display: none; }
+  .workflow-actions .mobile-primary-action { display: inline-flex; }
+  .workflow-actions .workflow-next-action { display: none; }
   .header-tools { display: flex; width: auto; flex: 0 1 auto; gap: 6px; }
   .language-switch button, .mode-switch button { min-height: 32px; }
   .mode-switch { min-width: 0; }

@@ -309,3 +309,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Add a compact Case Overview, outcome composition, evidence coverage map, chronology, threshold sensitivity, reviewer queue, local search, evidence-integrity indicators, and one-run comparison. Derive every value from existing `ControlResult`, `CaseDocument`, control parameter, and reviewer-decision data using pure TypeScript functions and semantic HTML/SVG. Store only a versioned, minimal previous-run snapshot in browser local storage. Add no runtime dependency and no composite compliance score.
 - **Rationale:** These features answer concrete review questions while preserving the narrow Northstar scope, beginner-readable architecture, deterministic calculations, and evidence-first product identity.
 - **Consequences:** Review gains a clearer attention-to-decision sequence. The previous-run comparison is local to one browser and intentionally limited; it is not durable audit storage. Visualizations must retain text alternatives, keyboard access, non-color encodings, and mobile transformations. Existing GPT-5.6 integration, evidence validation, deterministic outcomes, and receipt rules remain authoritative.
+
+## D034 - Preserve the primary workflow action at narrow widths and high zoom
+
+- **Date:** 2026-07-14
+- **Status:** Accepted
+- **Context:** The desktop header carries the primary workflow action, but it is intentionally hidden below 760 CSS pixels. The footer previously exposed only a secondary Continue shortcut, so the Run review action disappeared on mobile and at an effective 200% browser zoom.
+- **Decision:** When the header action is hidden, render the same primary action in the workflow footer and hide the secondary Continue shortcut.
+- **Rationale:** Reusing the existing action handler and disabled conditions restores the complete workflow without creating a second behavior or adding permanent header density.
+- **Consequences:** Desktop retains the compact header action and secondary step navigation. Mobile and high-zoom layouts expose one clear primary action for opening controls, running review, entering decisions, or printing the receipt.

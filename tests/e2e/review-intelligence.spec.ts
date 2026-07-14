@@ -117,3 +117,17 @@ test("supports empty search, keyboard coverage navigation, and history reset", a
   await page.getByRole("button", { name: "Clear history" }).click();
   await expect(page.getByText("No previous run to compare. Change the threshold and rerun the review.")).toBeVisible();
 });
+
+test("preserves the review path at an effective 200 percent browser zoom", async ({ page }) => {
+  // A 1280 × 720 browser viewport at 200% zoom exposes roughly 640 × 360 CSS pixels.
+  // Using that effective viewport exercises the same responsive reflow without
+  // relying on browser-specific keyboard shortcuts in headless Chromium.
+  await page.setViewportSize({ width: 640, height: 360 });
+  await loadAndRun(page);
+
+  await expect(page.getByRole("heading", { name: "Case overview" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evidence coverage map" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Inspect Currency consistency" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: `${captureRoot}/15-effective-zoom-200.png`, fullPage: true });
+});

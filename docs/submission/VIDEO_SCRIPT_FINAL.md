@@ -74,4 +74,3 @@
 - Do not show a key, `.env.local`, provider request reference, developer console, personal file, or private URL.
 - Do not claim general model accuracy, compliance certification, or production readiness.
 - If the deployed live model is unavailable, keep the video entirely on the deterministic path and describe the validated live run from the repository report.
-

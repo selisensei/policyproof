@@ -28,7 +28,9 @@ function renderWorkspace() {
 
 async function runReviewFromControls(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: /^(Controls|Contrôles)$/ }));
-  await user.click(screen.getByRole("button", { name: /^(Run review|Lancer la revue)$/ }));
+  // jsdom does not apply the media query that alternates the desktop header
+  // action and mobile footer action. Real-browser coverage verifies each width.
+  await user.click(screen.getAllByRole("button", { name: /^(Run review|Lancer la revue)$/ })[0]);
 }
 
 describe("PolicyProof workspace interactions", () => {
@@ -191,7 +193,7 @@ describe("PolicyProof workspace interactions", () => {
 
     await user.click(screen.getByRole("button", { name: "Français" }));
     expect(screen.getByRole("button", { name: "Revue" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Accéder aux décisions" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Accéder aux décisions" })).toHaveLength(2);
     expect(screen.getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
     expect(document.documentElement.lang).toBe("fr");
 

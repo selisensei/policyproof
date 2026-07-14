@@ -12,8 +12,8 @@
 
 ## Repository
 
-- [ ] Final local quality gates pass after the final documentation commit
-- [ ] Final secret and personal-path scan passes
+- [x] Final local quality gates pass after the final documentation commit
+- [x] Final secret and personal-path scan passes
 - [x] `.env.local`, build output, dependencies, and test artifacts remain ignored
 - [ ] Repository has a selected license
 - [x] README setup and test instructions are current

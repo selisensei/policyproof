@@ -87,4 +87,3 @@ Return browser zoom to 100%. At narrow widths, use the horizontal step strip and
 2. Confirm the recording contains no credential, personal path, private tab, or provider request reference.
 3. Check the final video duration and public playback in a private browser window.
 4. Complete the public URL, repository URL, YouTube URL, and primary `/feedback` Session ID fields in the submission checklist.
-

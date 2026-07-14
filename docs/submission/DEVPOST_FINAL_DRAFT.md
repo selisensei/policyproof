@@ -73,4 +73,3 @@ PolicyProof is a hackathon prototype and review aid, not a compliance certificat
 ## What's next
 
 The next step is user validation with finance and control professionals before expanding scope. A production direction would require organization-specific control governance, secure document ingestion, identity and authorization, durable audit records, privacy and retention controls, monitoring, broader model evaluations, and legal and security review.
-

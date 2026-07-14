@@ -67,5 +67,15 @@
 - **Files changed:** `README.md`, `PRODUCT.md`, `PLAN.md`, six product guides under `docs/`, three final submission documents, judge Q&A, submission checklist, and this log.
 - **Tests run:** Markdown structure review, documentation consistency review, public-path scan, and `git diff --check` before the documentation checkpoint.
 - **Result:** PASS. Required documents were present, internally consistent with the single supervised live validation, free of unresolved placeholders, and clean under Markdown/diff and safe-content checks.
-- **Commit hash:** Pending documentation checkpoint.
+- **Commit hash:** `3b0d05064665cd414d7702694d0e2f2680cb9b6d`.
 - **Blockers:** License, deployment, public URLs, video recording, and manual assistive-technology review remain builder-owned submission tasks.
+
+## Phase 7 — Accessibility hardening and final release gates
+
+- **Objective:** Complete the final viewport pass, preserve the primary action at effective 200% zoom, and verify the repository as a judge-ready local build.
+- **Decisions:** Model 200% zoom as the browser's effective 640 × 360 CSS viewport for a 1280 × 720 window; reuse the existing primary action in the mobile footer; keep all captures and smoke logs ignored.
+- **Files changed:** `app/globals.css`, `components/demo-review-workspace.tsx`, `DECISIONS.md`, component and Playwright tests, `TESTING.md`, three final submission files with whitespace cleanup, and this log.
+- **Tests run:** Focused Playwright pass 4 (4 tests), `pnpm test` (14 files / 89 tests), `pnpm typecheck`, `pnpm lint`, `pnpm build`, full `pnpm test:e2e` (11 tests), `pnpm audit --prod`, `git diff --check`, production HTTP smoke test, safe content scan, generated-path and dependency review.
+- **Result:** PASS after one real responsive defect was found and corrected. The first full unit rerun also exposed jsdom query ambiguity because CSS media queries are not evaluated there; the test helper was narrowed while real-browser coverage continued to verify both layouts.
+- **Commit hash:** This phase is the final test checkpoint; its hash is reported in the final handoff because a commit cannot contain its own hash.
+- **Blockers:** Manual screen-reader review, production deployment, public smoke test, license, public screenshots, video, and submission remain outside this local autonomous phase.

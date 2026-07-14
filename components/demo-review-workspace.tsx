@@ -457,7 +457,15 @@ export function DemoReviewWorkspace() {
             {panel}
             <div className="workflow-actions">
               <button type="button" onClick={() => navigate(steps[Math.max(0, currentStepIndex - 1)])} disabled={currentStepIndex === 0} className="secondary-button disabled:invisible">← {t("action.back")}</button>
-              {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button">{t("action.next")} →</button>}
+              <button
+                type="button"
+                onClick={runPrimaryAction}
+                disabled={isRunning || isCompiling || (currentStep === "policy" && mode === "LIVE_GPT_5_6" && (!ai.available || policyText.trim().length < 50))}
+                className="primary-button mobile-primary-action"
+              >
+                {primaryLabel}
+              </button>
+              {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button workflow-next-action">{t("action.next")} →</button>}
             </div>
           </div>
         </div>
