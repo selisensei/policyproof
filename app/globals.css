@@ -669,7 +669,71 @@ body { font-size: 14.5px; }
 .receipt-meta dt, .receipt-outcome-head, .receipt-followup strong, .decision-receipt > footer span { font-size: 10.5px; }
 .decision-receipt > footer p { font-size: 11.5px; }
 
+/* Focused Demo and presentation-level switching */
+[hidden] { display: none !important; }
+
+.focused-frame { width: min(1220px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 44px; }
+.focused-demo { display: grid; gap: 16px; }
+.focused-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 36px; align-items: end; border-top: 4px solid var(--pp-ink); background: var(--pp-sheet); padding: 26px 30px; box-shadow: 0 0 0 1px var(--pp-hairline); }
+.focused-hero h1 { max-width: 760px; margin: 6px 0 8px; font-family: var(--pp-font-display); font-size: clamp(28px, 3vw, 44px); line-height: 1.02; letter-spacing: -.03em; }
+.focused-hero p:not(.eyebrow) { max-width: 760px; margin: 0; color: var(--pp-muted); font-size: 15px; line-height: 1.5; }
+.focused-workspace-link, .return-focused-action { min-height: 40px; border: 1px solid var(--pp-frame); background: var(--pp-sheet); padding: 9px 13px; color: var(--pp-petrol); font-weight: 700; }
+.return-focused-action { position: absolute; z-index: 3; top: 118px; right: 28px; }
+.focused-case-strip { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(480px, 1fr); border: 1px solid var(--pp-hairline); background: var(--pp-sunken); }
+.focused-case-strip > div { display: grid; gap: 3px; padding: 14px 18px; }
+.focused-case-strip > div > span, .focused-case-strip dt, .focused-case-strip small { color: var(--pp-muted); font-family: var(--pp-font-data); font-size: 10px; text-transform: uppercase; }
+.focused-case-strip > div > strong { font-size: 16px; }
+.focused-case-strip dl { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; border-left: 1px solid var(--pp-hairline); }
+.focused-case-strip dl > div { display: grid; align-content: center; gap: 4px; padding: 10px 12px; }
+.focused-case-strip dl > div + div { border-left: 1px solid var(--pp-hairline); }
+.focused-case-strip dd { margin: 0; font-size: 12px; font-weight: 700; }
+.focused-run-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 320px); gap: 20px; align-items: center; border: 1px solid var(--pp-frame); background: var(--pp-sheet); padding: 24px 28px; }
+.focused-run-card > div { display: flex; gap: 18px; align-items: center; }
+.focused-run-card > div > span { font-family: var(--pp-font-data); font-size: 26px; color: var(--pp-petrol); }
+.focused-run-card strong { font-size: 18px; }
+.focused-run-card p { margin: 4px 0 0; color: var(--pp-muted); line-height: 1.45; }
+.focused-primary-action { min-height: 54px; font-size: 16px; }
+.focused-results, .focused-exception, .focused-human-decision { border: 1px solid var(--pp-frame); background: var(--pp-sheet); }
+.focused-results > header, .focused-exception > header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--pp-hairline); }
+.focused-results h2, .focused-exception h2, .focused-human-decision h2 { margin: 2px 0 0; font-family: var(--pp-font-display); font-size: 22px; }
+.focused-results > header > span { font-family: var(--pp-font-data); font-weight: 700; }
+.focused-outcomes { display: grid; grid-template-columns: repeat(4, 1fr); }
+.focused-outcomes > div { display: flex; gap: 9px; align-items: baseline; padding: 13px 18px; border-top: 3px solid currentColor; }
+.focused-outcomes > div + div { border-left: 1px solid var(--pp-hairline); }
+.focused-outcomes strong { font-family: var(--pp-font-data); font-size: 25px; }
+.focused-outcomes span { font-size: 11px; font-weight: 700; }
+.focused-outcomes [data-status="PASS"] { color: var(--pp-pass); }
+.focused-outcomes [data-status="FAIL"] { color: var(--pp-fail); }
+.focused-outcomes [data-status="MISSING"] { color: var(--pp-missing); }
+.focused-outcomes [data-status="WARNING"] { color: var(--pp-warning); }
+.focused-conclusion { margin: 0; padding: 12px 18px; border-bottom: 1px solid var(--pp-hairline); font-size: 15px; }
+.focused-currency-comparison { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: stretch; padding: 14px 18px; }
+.focused-currency-comparison > span { display: grid; place-items: center; color: var(--pp-fail); font-family: var(--pp-font-display); font-size: 25px; }
+.focused-currency-comparison article { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; border: 1px solid var(--pp-hairline); padding: 12px 14px; }
+.focused-currency-comparison article > span { color: var(--pp-muted); font-family: var(--pp-font-data); font-size: 10px; text-transform: uppercase; }
+.focused-currency-comparison article > strong { grid-column: 2; grid-row: 1 / 3; align-self: center; color: var(--pp-fail); font-family: var(--pp-font-display); font-size: clamp(19px, 2.1vw, 28px); }
+.focused-currency-comparison article > small { font-family: var(--pp-font-data); font-size: 10px; }
+.focused-currency-comparison blockquote { grid-column: 1 / -1; margin: 5px 0 0; border-left: 2px solid var(--pp-fail); background: var(--pp-fail-tint); padding: 8px 10px; font-family: var(--pp-font-source); }
+.focused-integrity { display: flex; justify-content: space-between; gap: 18px; padding: 10px 18px; border-top: 1px solid var(--pp-hairline); background: var(--pp-pass-tint); color: var(--pp-pass); }
+.focused-integrity span { color: var(--pp-muted); }
+.focused-human-decision { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(280px, 1fr) minmax(300px, auto); gap: 18px; align-items: end; padding: 18px; }
+.focused-human-decision p { margin: 5px 0 0; color: var(--pp-muted); }
+.focused-human-decision label { display: grid; gap: 6px; font-weight: 700; }
+.focused-human-decision textarea { min-height: 66px; resize: vertical; border: 1px solid var(--pp-frame); padding: 9px; font: inherit; }
+.focused-decision-error { grid-column: 2; color: var(--pp-fail) !important; }
+.focused-decision-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.focused-decision-actions button { min-height: 38px; border: 1px solid var(--pp-frame); background: var(--pp-sheet); padding: 7px 10px; font-weight: 700; }
+.focused-decision-actions .primary-button { width: 100%; border-color: var(--pp-petrol); background: var(--pp-petrol); color: white; }
+.focused-demo[data-has-results] .focused-hero { padding-block: 14px; }
+.focused-demo[data-has-results] .focused-hero h1 { font-size: 26px; }
+.focused-demo[data-has-results] .focused-hero p:not(.eyebrow) { display: none; }
+.focused-frame > .competition-tools { margin-top: 12px; }
+
 @media (max-width: 1279px) {
+  .focused-case-strip { grid-template-columns: 1fr; }
+  .focused-case-strip dl { border-top: 1px solid var(--pp-hairline); border-left: 0; }
+  .focused-human-decision { grid-template-columns: 1fr 1fr; }
+  .focused-decision-actions { grid-column: 1 / -1; }
   .brand-tagline { display: none; }
   .app-header-inner, .workflow-nav-inner { padding-inline: 20px; }
   .workspace-surface { padding-inline: 20px; }
@@ -698,6 +762,26 @@ body { font-size: 14.5px; }
 }
 
 @media (max-width: 759px) {
+  .focused-frame { width: auto; margin: 0; padding: 14px 14px 32px; }
+  .focused-demo { gap: 10px; }
+  .focused-hero { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+  .focused-hero h1, .focused-demo[data-has-results] .focused-hero h1 { font-size: 25px; }
+  .focused-hero p:not(.eyebrow) { font-size: 14px; }
+  .focused-workspace-link { width: 100%; }
+  .return-focused-action { position: static; width: calc(100% - 32px); margin: 12px 16px 0; }
+  .focused-case-strip dl { grid-template-columns: repeat(2, 1fr); }
+  .focused-case-strip dl > div:nth-child(3) { border-top: 1px solid var(--pp-hairline); border-left: 0; }
+  .focused-case-strip dl > div:nth-child(4) { border-top: 1px solid var(--pp-hairline); }
+  .focused-run-card { grid-template-columns: 1fr; padding: 18px; }
+  .focused-run-card > div { align-items: flex-start; }
+  .focused-outcomes { grid-template-columns: repeat(2, 1fr); }
+  .focused-outcomes > div:nth-child(3) { border-left: 0; }
+  .focused-currency-comparison { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+  .focused-currency-comparison > span { min-height: 26px; transform: rotate(90deg); }
+  .focused-currency-comparison article > strong { font-size: 21px; }
+  .focused-integrity { align-items: flex-start; flex-direction: column; }
+  .focused-human-decision { grid-template-columns: 1fr; padding: 14px; }
+  .focused-decision-actions { grid-column: 1; }
   .app-header { height: 54px; }
   .case-library-heading { display: block; }
   .case-library-heading > p { margin-top: 5px; }

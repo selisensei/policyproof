@@ -18,10 +18,10 @@ function jsonResponse(body: unknown, ok = true) {
   return { ok, json: async () => body } as Response;
 }
 
-function renderWorkspace() {
+function renderWorkspace(focused = false) {
   return render(
     <LocaleProvider>
-      <DemoReviewWorkspace />
+      <DemoReviewWorkspace initialPresentationLevel={focused ? "FOCUSED_DEMO" : "FULL_WORKSPACE"} />
     </LocaleProvider>,
   );
 }
@@ -45,6 +45,29 @@ describe("PolicyProof workspace interactions", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+  });
+
+  it("starts with a focused Northstar path and preserves results across presentation levels", async () => {
+    const user = userEvent.setup();
+    renderWorkspace(true);
+    const focused = screen.getByRole("region", { name: "Focused Demo" });
+    expect(within(focused).getByText("Every result traced. Every decision defensible.")).toBeTruthy();
+    expect(within(focused).getByText(/7 enabled/)).toBeTruthy();
+    expect(screen.queryByRole("navigation", { name: "Review progress" })).toBeNull();
+
+    await user.click(within(focused).getByRole("button", { name: "Run review" }));
+    expect(within(focused).getByText("The case at a glance")).toBeTruthy();
+    expect(within(focused).getByText("12,480 EUR")).toBeTruthy();
+    expect(within(focused).getByText("12,480 USD")).toBeTruthy();
+    expect(within(focused).getByText("✓ Exact sources verified")).toBeTruthy();
+
+    await user.click(within(focused).getByRole("button", { name: /Open full workspace/ }));
+    expect(screen.getByRole("navigation", { name: "Review progress" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Review" }).getAttribute("aria-current")).toBe("step");
+    expect(screen.getByRole("button", { name: "Show 2 FAIL results" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Return to focused demo" }));
+    expect(screen.getByRole("region", { name: "Focused Demo" })).toBeTruthy();
+    expect(screen.getByText("12,480 USD")).toBeTruthy();
   });
 
   it("loads the deterministic demo, runs it, filters results, and inspects evidence", async () => {
@@ -300,10 +323,11 @@ describe("PolicyProof workspace interactions", () => {
     renderWorkspace();
     await user.click(screen.getByRole("button", { name: "Enter Judge Mode" }));
     const judge = screen.getByRole("region", { name: "Judge Mode sequence" });
-    expect(within(judge).getByText("Select Northstar")).toBeTruthy();
+    expect(within(judge).getByText("Run the review")).toBeTruthy();
+    expect(within(judge).getByText(/1\/4/)).toBeTruthy();
     expect(within(judge).getByText(/no action or decision is automated/i)).toBeTruthy();
     await user.click(within(judge).getByRole("button", { name: "Next →" }));
-    expect(within(judge).getByText("Review policy-to-control chain")).toBeTruthy();
+    expect(within(judge).getByText("Inspect the evidence")).toBeTruthy();
     await user.click(screen.getByText("Architecture"));
     expect(screen.getByText(/Policy interpretation and structured fact/)).toBeTruthy();
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);

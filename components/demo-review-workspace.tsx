@@ -8,6 +8,7 @@ import { CompetitionTools, type CompletedScenarioReview } from "@/components/wor
 import { ControlsPanel } from "@/components/workspace/controls-panel";
 import { DecisionPanel } from "@/components/workspace/decision-panel";
 import { DocumentsPanel } from "@/components/workspace/documents-panel";
+import { FocusedDemo } from "@/components/workspace/focused-demo";
 import { IntroPanel } from "@/components/workspace/intro-panel";
 import { PolicyPanel } from "@/components/workspace/policy-panel";
 import { ReviewPanel } from "@/components/workspace/review-panel";
@@ -33,6 +34,7 @@ import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 const steps: WorkflowStep[] = ["policy", "controls", "documents", "review", "decision"];
 const emptyRunHistory: RunHistory = { version: 1, previous: null, latest: null };
 const initialScenario = loadScenario(defaultScenarioId, reviewScenarios);
+type PresentationLevel = "FOCUSED_DEMO" | "FULL_WORKSPACE";
 
 type Notice = {
   key: TranslationKey;
@@ -60,7 +62,7 @@ function getApiError(body: unknown, fallbackKey: TranslationKey, t: Translator, 
   return t(fallbackKey);
 }
 
-export function DemoReviewWorkspace() {
+export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" }: { initialPresentationLevel?: PresentationLevel } = {}) {
   const { locale, t } = useLocale();
   const policyCompilationInFlight = useRef(false);
   const [activeScenario, setActiveScenario] = useState<ReviewScenario>(() => structuredClone(initialScenario));
@@ -96,6 +98,7 @@ export function DemoReviewWorkspace() {
   const [auditTrail, setAuditTrail] = useState<AuditEvent[]>([]);
   const [judgeMode, setJudgeMode] = useState(false);
   const [judgeStep, setJudgeStep] = useState(0);
+  const [presentationLevel, setPresentationLevel] = useState<PresentationLevel>(initialPresentationLevel);
 
   useEffect(() => {
     let cancelled = false;
@@ -212,6 +215,7 @@ export function DemoReviewWorkspace() {
   function changeMode(nextMode: AppMode) {
     if (nextMode === "LIVE_GPT_5_6" && !ai.available) return;
     setMode(nextMode);
+    if (nextMode === "LIVE_GPT_5_6") setPresentationLevel("FULL_WORKSPACE");
     setPolicyExpanded(nextMode === "LIVE_GPT_5_6");
     setCurrentStep("policy");
     clearReview({ key: nextMode === "LIVE_GPT_5_6" ? "notice.liveSelected" : "notice.demoSelected" });
@@ -410,16 +414,20 @@ export function DemoReviewWorkspace() {
     }
   }
 
-  function updateComment(comment: string) {
-    if (!selectedControlId) return;
-    setResults((current) => current.map((result) => result.controlId === selectedControlId ? { ...result, reviewerDecision: { ...result.reviewerDecision, comment } } : result));
+  function updateCommentFor(controlId: string, comment: string) {
+    setResults((current) => current.map((result) => result.controlId === controlId ? { ...result, reviewerDecision: { ...result.reviewerDecision, comment } } : result));
     setReviewError("");
   }
 
-  function applyDecision(state: ReviewDecision["state"]) {
-    if (!selectedResult) return;
+  function updateComment(comment: string) {
+    if (selectedControlId) updateCommentFor(selectedControlId, comment);
+  }
+
+  function applyDecisionFor(controlId: string, state: ReviewDecision["state"]) {
+    const target = results.find((result) => result.controlId === controlId);
+    if (!target) return;
     try {
-      const reviewed = recordReviewDecision(selectedResult, state, selectedResult.reviewerDecision.comment);
+      const reviewed = recordReviewDecision(target, state, target.reviewerDecision.comment);
       setResults((current) => {
         const next = current.map((result) => result.controlId === reviewed.controlId ? reviewed : result);
         if (mode === "DETERMINISTIC_DEMO") {
@@ -429,12 +437,16 @@ export function DemoReviewWorkspace() {
         return next;
       });
       setReviewError("");
-      setNotice({ key: "notice.decisionSaved", controlId: selectedResult.controlId, fallbackTitle: selectedResult.title, decisionState: state });
+      setNotice({ key: "notice.decisionSaved", controlId: target.controlId, fallbackTitle: target.title, decisionState: state });
       completeGuide("DECISION_RECORDED");
       audit("REVIEWER_DECISION_SAVED", `Saved reviewer decision ${state}.`, reviewed.controlId);
     } catch {
       setReviewError(state === "REJECTED" || state === "ACCEPTED_EXCEPTION" ? t("error.overrideComment") : t("error.decision"));
     }
+  }
+
+  function applyDecision(state: ReviewDecision["state"]) {
+    if (selectedControlId) applyDecisionFor(selectedControlId, state);
   }
 
   function changeFilter(nextFilter: ResultFilter) {
@@ -460,15 +472,26 @@ export function DemoReviewWorkspace() {
     <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} onExport={(format) => audit("RECEIPT_EXPORTED", `Exported the review receipt as ${format}.`)} />
   );
 
-  const primaryLabel = currentStep === "policy"
+  const workspacePrimaryLabel = currentStep === "policy"
     ? mode === "LIVE_GPT_5_6" ? (locale === "fr" ? "Compiler la politique" : "Compile policy") : (locale === "fr" ? "Ouvrir le registre" : "Open register")
     : currentStep === "controls" || currentStep === "documents"
       ? isRunning ? t("action.running") : t("action.run")
       : currentStep === "review"
         ? (locale === "fr" ? "Accéder aux décisions" : "Go to decisions")
         : t("action.print");
+  const primaryLabel = presentationLevel === "FOCUSED_DEMO"
+    ? results.length ? (locale === "fr" ? "Ouvrir la décision" : "Open decision") : t("action.run")
+    : workspacePrimaryLabel;
 
   function runPrimaryAction() {
+    if (presentationLevel === "FOCUSED_DEMO") {
+      if (!results.length) void runReview();
+      else {
+        setPresentationLevel("FULL_WORKSPACE");
+        navigate("decision");
+      }
+      return;
+    }
     if (currentStep === "policy") {
       if (mode === "LIVE_GPT_5_6") void compilePolicy();
       else navigate("controls");
@@ -486,10 +509,30 @@ export function DemoReviewWorkspace() {
   }
 
   return (
-    <main className="app-root" aria-busy={isCompiling || isRunning}>
+    <main className="app-root" data-presentation={presentationLevel} aria-busy={isCompiling || isRunning}>
       <a href="#workspace" className="skip-link">{t("a11y.skip")}</a>
       <AppHeader mode={mode} ai={ai} onModeChange={changeMode} primaryLabel={primaryLabel} onPrimaryAction={runPrimaryAction} primaryDisabled={isRunning || isCompiling || (currentStep === "policy" && mode === "LIVE_GPT_5_6" && (!ai.available || policyText.trim().length < 50))} onShowGuide={() => setGuideDismissed(false)} />
-      <div className="workspace-frame">
+      {presentationLevel === "FOCUSED_DEMO" && (
+        <div className="focused-frame">
+          <FocusedDemo
+          scenario={activeScenario}
+          results={results}
+          summary={summary}
+          threshold={threshold}
+          enabledControlCount={enabledControlCount}
+          isRunning={isRunning}
+          reviewError={reviewError}
+          onRunReview={() => void runReview()}
+          onOpenFullWorkspace={() => setPresentationLevel("FULL_WORKSPACE")}
+          onOpenDecision={() => { setPresentationLevel("FULL_WORKSPACE"); navigate("decision"); }}
+          onCommentChange={updateCommentFor}
+          onDecision={applyDecisionFor}
+          />
+          <CompetitionTools compact judgeMode={judgeMode} judgeStep={judgeStep} completed={completedScenarios} scenarios={reviewScenarios} auditTrail={auditTrail} onEnterJudgeMode={enterJudgeMode} onExitJudgeMode={() => setJudgeMode(false)} onJudgeStep={setJudgeStep} onSelectScenario={(scenarioId) => { if (scenarioId === activeScenario.id && results.length) navigate("review"); else selectScenario(scenarioId); }} onClearAudit={() => setAuditTrail([])} />
+        </div>
+      )}
+      <div className="workspace-frame" hidden={presentationLevel !== "FULL_WORKSPACE"}>
+        <button type="button" className="return-focused-action" onClick={() => setPresentationLevel("FOCUSED_DEMO")}><span aria-hidden="true">← </span>{locale === "fr" ? "Revenir à la démonstration ciblée" : "Return to focused demo"}</button>
         <StepNavigation current={currentStep} onChange={navigate} enabledControls={enabledControlCount} documentCount={documentCount} summary={summary} caseReference={activeScenario.caseReference} policyReference={activeScenario.policyReference} policyVersion={activeScenario.policy.version} />
         <div id="workspace" className="workspace-surface">
           {currentStep === "policy" && mode === "DETERMINISTIC_DEMO" && <CaseLibrary scenarios={reviewScenarios} activeScenarioId={activeScenario.id} onSelect={selectScenario} />}

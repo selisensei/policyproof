@@ -345,3 +345,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Add one optional competition toolbar over the existing workspace. Judge Mode provides manual bilingual guidance only. Scenario comparison uses current-session engine results only and exposes no score or ranking. The architecture surface states the validated GPT-5.6, TypeScript, and human responsibilities. Evidence trust explains verified, missing, and rejected references. A bounded in-memory audit trail stores only safe action metadata and is included in JSON receipts. Add a dependency-free UTF-8 CSV evidence matrix derived from `ControlResult` data.
 - **Rationale:** These surfaces make the validated architecture inspectable without changing review semantics, invoking a provider, creating a backend, or duplicating the product.
 - **Consequences:** Audit history is intentionally session-local and is not a durable compliance log. Comparison rows disappear after refresh. Judge Mode never performs or records an action. CSV source excerpts remain in their original fictional language while headers follow the selected receipt language.
+
+## D038 - Add a focused presentation over the same review state
+
+- **Date:** 2026-07-15
+- **Status:** Accepted
+- **Context:** The complete Proofroom workspace is credible but too dense for a judge's first fifteen seconds. Case selection, workflow navigation, analytics, trust tools, and source registers compete with the primary Northstar proof moment.
+- **Decision:** Make a Northstar-first Focused Demo the default presentation level and keep the existing Full Workspace as an explicit secondary level. Both presentations use the same `DemoReviewWorkspace` state, controls, documents, engine, evidence, decisions, receipt, and audit events. Keep the inactive Full Workspace mounted but hidden so component-local search state is not discarded. Reduce the visible Judge Mode sequence from twelve steps to four manual stages.
+- **Rationale:** One additional presentation component creates a clear demonstration path without duplicating business logic, adding routing, or removing advanced capabilities.
+- **Consequences:** Focused Demo intentionally collapses analytics, Case Library, audit details, comparison, and secondary exports. Switching presentation level changes no review data and makes no provider request. Full Workspace remains the authoritative advanced inspection surface.

@@ -12,21 +12,14 @@ export type CompletedScenarioReview = {
 };
 
 const judgeSteps = [
-  { en: "Select Northstar", fr: "Sélectionner Northstar" },
-  { en: "Review policy-to-control chain", fr: "Examiner la chaîne politique-contrôles" },
   { en: "Run the review", fr: "Lancer la revue" },
-  { en: "Read outcome composition", fr: "Lire la composition des résultats" },
-  { en: "Inspect evidence coverage", fr: "Examiner la couverture des preuves" },
-  { en: "Open Currency consistency", fr: "Ouvrir la cohérence des devises" },
-  { en: "Verify exact EUR/USD excerpts", fr: "Vérifier les extraits EUR/USD exacts" },
-  { en: "Record a human decision", fr: "Enregistrer une décision humaine" },
-  { en: "Change the threshold", fr: "Modifier le seuil" },
-  { en: "Review the run comparison", fr: "Examiner la comparaison des exécutions" },
-  { en: "Open the receipt", fr: "Ouvrir le reçu" },
-  { en: "Explain GPT-5.6 → TypeScript → Human", fr: "Expliquer GPT-5.6 → TypeScript → Humain" },
+  { en: "Inspect the evidence", fr: "Examiner les preuves" },
+  { en: "Reproduce the result", fr: "Reproduire le résultat" },
+  { en: "Record the decision", fr: "Enregistrer la décision" },
 ];
 
-export function CompetitionTools({ judgeMode, judgeStep, completed, scenarios, auditTrail, onEnterJudgeMode, onExitJudgeMode, onJudgeStep, onSelectScenario, onClearAudit }: {
+export function CompetitionTools({ compact = false, judgeMode, judgeStep, completed, scenarios, auditTrail, onEnterJudgeMode, onExitJudgeMode, onJudgeStep, onSelectScenario, onClearAudit }: {
+  compact?: boolean;
   judgeMode: boolean;
   judgeStep: number;
   completed: CompletedScenarioReview[];
@@ -42,9 +35,9 @@ export function CompetitionTools({ judgeMode, judgeStep, completed, scenarios, a
   return <section className="competition-tools" aria-label={locale === "fr" ? "Outils de démonstration" : "Demonstration tools"}>
     <div className="competition-toolbar">
       {!judgeMode ? <button type="button" onClick={onEnterJudgeMode}>{locale === "fr" ? "Entrer en mode jury" : "Enter Judge Mode"}</button> : <button type="button" className="is-active" onClick={onExitJudgeMode}>{locale === "fr" ? "Quitter le mode jury" : "Exit Judge Mode"}</button>}
-      <details><summary>{locale === "fr" ? "Comparer les cas exécutés" : "Compare completed cases"}</summary><ScenarioComparison completed={completed} scenarios={scenarios} onSelect={onSelectScenario} /></details>
+      {!compact && <><details><summary>{locale === "fr" ? "Comparer les cas exécutés" : "Compare completed cases"}</summary><ScenarioComparison completed={completed} scenarios={scenarios} onSelect={onSelectScenario} /></details>
       <details><summary>{locale === "fr" ? "Architecture" : "Architecture"}</summary><ArchitectureExplanation /></details>
-      <details><summary>{locale === "fr" ? "Piste d’audit" : "Audit trail"} ({auditTrail.length})</summary><AuditTrail events={auditTrail} onClear={onClearAudit} /></details>
+      <details><summary>{locale === "fr" ? "Piste d’audit" : "Audit trail"} ({auditTrail.length})</summary><AuditTrail events={auditTrail} onClear={onClearAudit} /></details></>}
     </div>
     {judgeMode && <div className="judge-mode-panel" role="region" aria-label={locale === "fr" ? "Séquence du mode jury" : "Judge Mode sequence"}>
       <div><span>{locale === "fr" ? "MODE JURY" : "JUDGE MODE"} · {judgeStep + 1}/{judgeSteps.length}</span><strong>{judgeSteps[judgeStep][locale]}</strong><small>{locale === "fr" ? "Guide uniquement : aucune action ni décision n’est automatisée." : "Guidance only: no action or decision is automated."}</small></div>
