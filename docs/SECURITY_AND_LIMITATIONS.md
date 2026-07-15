@@ -53,3 +53,9 @@ During the hackathon, record reproducible issues in the primary Codex task and i
 - Judge Mode is guidance only and cannot perform user actions or invoke GPT-5.6.
 
 The prototype remains limited to one policy domain, three controlled profiles, seven supported control types, and text documents. It does not establish cross-industry generalization, complete model accuracy, or WCAG conformance. Manual screen-reader and production-host security checks remain required.
+
+## Review Fingerprint boundary
+
+The Review Fingerprint is an unkeyed SHA-256 digest of a strict canonical semantic payload. It contains no secret and makes no provider request. Exact evidence is marked verified only when the current document, fact ID, excerpt, and locator match. Unsupported canonical values, non-finite numbers, symbol keys, non-plain objects, and cycles fail closed.
+
+An unchanged digest supports byte-level equality of the normalized review payload supplied to SHA-256. It does not prove that an original document is authentic, who created or approved the review, when it existed, or whether it is legally binding. It is not a digital signature, trusted timestamp, fraud guarantee, or compliance certification. Human decisions and receipt metadata are excluded; receipt-integrity hashing and verification remain a separate future phase.

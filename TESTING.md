@@ -299,3 +299,28 @@ Fresh final local results:
 - production smoke test: PASS — root and `/api/ai/status` returned 200; PolicyProof content, `gpt-5.6`, boolean availability, `nosniff`, and `strict-origin-when-cross-origin` were verified.
 
 No live OpenAI request was made during competition hardening. All provider behavior in this phase was mocked, and the previously validated live-model evidence remains documented separately.
+
+## Focused verifiability release gate — 2026-07-15
+
+Fresh results after the final application and browser-test changes:
+
+- `pnpm test`: PASS — 18 test files, 133 tests, 23.41 s (25.1 s command wall time).
+- `pnpm typecheck`: PASS — no TypeScript errors, 10.8 s command wall time.
+- `pnpm lint`: PASS — no ESLint errors or warnings, 14.1 s command wall time.
+- `pnpm build`: PASS — compiled in 5.4 s, completed its TypeScript phase in 8.4 s, and finished in 19.8 s command wall time; static `/` and dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze` were produced.
+- `pnpm test:e2e`: PASS — 19 Chromium tests, 50.1 s (52.4 s command wall time).
+- `pnpm audit --prod`: PASS — no known vulnerabilities, 1.5 s command wall time.
+- Production smoke test: PASS — root and `/api/ai/status` returned 200; PolicyProof content, model `gpt-5.6`, boolean availability, `nosniff`, `DENY`, and `strict-origin-when-cross-origin` were verified; the isolated port 3400 server was stopped.
+- `git diff --check`: PASS — no whitespace errors; Git emitted only informational LF-to-CRLF notices on Windows.
+- Safe changed-file scan: PASS — 21 candidate files, 0 potential secret-pattern files, and 0 personal absolute-path files.
+- Generated-path review: PASS — no `.env.local`, `node_modules/`, `.next/`, `test-results/`, `playwright-report/`, `coverage/`, or `.vercel/` path is tracked.
+- Dependency review: PASS — no change to `package.json`, `pnpm-lock.yaml`, or `pnpm-workspace.yaml`.
+- Visual pass 1: PASS after correction — the first isolated capture exposed stale local-server/CSS output and hidden duplicate DOM; the final focused hierarchy preserves one accessible presentation and state-safe Full Workspace access.
+- Visual pass 2: PASS — same-input reproduction, matching fingerprints, threshold mutation, changed fingerprint, and exact EUR/USD evidence were inspected.
+- Visual pass 3: PASS — 1440, 1280, 1024, 768, and 390 px; English and French; effective 200% zoom; reduced motion; keyboard focus; and Full Workspace state preservation were inspected.
+
+Focused Playwright coverage proves the Northstar-first presentation, exact evidence, 7/7 same-input rerun, matching and changed fingerprints, threshold causal explanation, divergence visibility, bilingual behavior, responsive layouts, keyboard operation, reduced motion, print output, and state-safe presentation switching. Existing browser suites still cover Meridian, Atlas, decisions, receipts, JSON/Markdown/CSV actions, case switching, review intelligence, mocked provider failures, and the complete workspace.
+
+The first final `typecheck` and the following build attempt failed because an old PolicyProof `next start` process and a previously generated `.next/dev/types` directory shared the same Next.js cache. Inspection found duplicated and truncated generated declarations, not a source-code error. The identified port 3200 process chain was stopped, the corrupted generated directory was preserved under an ignored diagnostic name, and the official build regenerated a clean cache. The subsequent build, standalone typecheck, lint, Playwright run, and production smoke test all passed.
+
+No authenticated or paid OpenAI request was made. Provider behavior remained mocked, the same-input rerun remained inside the deterministic TypeScript boundary, `.env.local` was not opened or read, and generated screenshots and smoke logs remain ignored under `test-results/focused-verifiability/`.

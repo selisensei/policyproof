@@ -14,6 +14,10 @@ The deterministic demo is the guaranteed, fully tested path. It uses version-con
 
 The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, a bilingual Case Library, policy and case-file folios, dense control and result registers, a split evidence inspector, review-intelligence panels, a prioritized human-decision queue, and a formal decision receipt. Optional Judge Mode guides real actions without performing them. Current-session case comparison, architecture, evidence-trust, and audit surfaces remain secondary and expose no score or ranking.
 
+The default **Focused Demo** presents the same production state through a Northstar-first judge path: one Run review action, compact outcomes, the exact EUR/USD contradiction, deterministic rerun, Review Fingerprint, and human decision. **Open full workspace** exposes every advanced surface without resetting review state. Judge Mode is now a compact four-stage manual guide.
+
+Each deterministic run produces a versioned Review Fingerprint: a lowercase SHA-256 digest of canonical policy, controls, parameters, source documents, structured facts, exact evidence, and deterministic conclusions. A same-input rerun reproduces 7/7 Northstar conclusions and the same digest without replacing human state. A EUR 10,000 → EUR 15,000 change makes only `CTRL-01` pass, leaves six controls unchanged, and changes the digest. The fingerprint is not a signature, identity proof, authorship proof, or trusted timestamp.
+
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
 ## Screenshots
@@ -89,10 +93,9 @@ Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows depende
 
 ## Deterministic demo instructions
 
-1. Confirm that **Deterministic demo** is selected and the disclosure says no AI request is made.
-2. Select **Load demo case**, then use the five-step navigation as needed.
-3. Leave the approval threshold at `10000` and select **Run review**.
-4. Confirm the expected outcomes:
+1. Open PolicyProof and confirm the default **Focused Demo** shows Northstar, seven enabled controls, five fictional records, and no precomputed outcome counts.
+2. Leave the approval threshold at `10000` and select **Run review** in the focused panel.
+3. Confirm the expected outcomes:
    - Purchase order timing: PASS
    - Amount match: PASS
    - Currency consistency: FAIL
@@ -100,11 +103,11 @@ Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows depende
    - Delivery evidence: PASS
    - Independent bank verification: MISSING
    - Segregation of duties: WARNING
-5. Filter to FAIL and inspect **Currency consistency**. Confirm that the purchase order excerpt uses EUR and the invoice excerpt uses USD.
-6. Enter a reviewer comment and select **Reject**. Confirm that the decision receipt preserves the original result and records the human decision.
-   The receipt can be printed, downloaded as structured JSON or Markdown, or summarized through browser-native copy actions.
-7. Change the approval threshold to `15000`, select **Run review**, and confirm that **Approval threshold** changes to PASS. A rerun intentionally resets prior reviewer decisions.
-8. Open **Controls**, select **Reset controls**, and confirm that results are cleared and all seven controls return to their defaults.
+4. Inspect **Currency consistency** and confirm the exact `12,480 EUR` purchase-order excerpt and `12,480 USD` invoice excerpt plus their source IDs and locators.
+5. Select **Rerun deterministic checks**. Confirm **7 of 7 conclusions reproduced identically** and **Review fingerprint unchanged**. This action makes no OpenAI request and preserves human decisions.
+6. Change the focused approval threshold to `15000` and rerun. Confirm `CTRL-01: FAIL → PASS`, six unchanged controls, and a changed fingerprint. Parameter-changing reruns intentionally reset prior reviewer decisions.
+7. Record a human decision, then open the full decision to inspect or export the receipt.
+8. Select **Open full workspace** to inspect the five-step workflow, Case Library, analytics, search, audit trail, scenario comparison, print, JSON, Markdown, and CSV exports. Select **Return to focused demo** to confirm state remains intact.
 
 Use the **English / Français** selector at any point. Navigation, actions, statuses, validation, and the displayed receipt change language immediately. Source documents, exact evidence excerpts, stable control identifiers, and internal enum values remain unchanged.
 
@@ -237,6 +240,7 @@ The scope is still intentionally narrow: one fictional procurement policy, three
 - There is no durable persistence, authentication, collaboration, or external business-system integration.
 - Automated keyboard, accessible-name, responsive overflow, and document-language checks pass; a final assistive-technology review remains before submission.
 - A strict Content Security Policy is deferred until it can be verified against the deployed Next.js runtime.
+- The Review Fingerprint detects changes in canonical review content; it does not prove source authenticity, identity, authorship, legal signature, or trusted time. Receipt-integrity verification is a separate planned phase.
 
 ## How Codex contributed
 

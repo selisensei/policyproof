@@ -16,10 +16,15 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
-test("completes the 12-step deterministic judge path with traceable evidence and a receipt", async ({ page }) => {
+async function openFullWorkspace(page: Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open full workspace" }).click();
+}
+
+test("completes the deterministic workspace path with traceable evidence and a receipt", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   // 1. Open the fictional case workspace.
-  await page.goto("/");
+  await openFullWorkspace(page);
   await expect(page.getByText(/The deterministic demo makes no AI request/)).toBeVisible();
   await capture(page, "test-results/01-english-policy-1440.png");
 
@@ -92,7 +97,7 @@ test("completes the 12-step deterministic judge path with traceable evidence and
 test("keeps English and French workflows usable across responsive widths", async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
-  await page.goto("/");
+  await openFullWorkspace(page);
 
   for (const [width, label] of [[1280, "1280"], [1024, "1024"], [768, "768"], [390, "390"]] as const) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
@@ -118,7 +123,7 @@ test("keeps English and French workflows usable across responsive widths", async
 
 test("supports keyboard navigation on a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toBeVisible();
   await page.getByRole("button", { name: "Case documents", exact: true }).focus();
@@ -129,7 +134,7 @@ test("supports keyboard navigation on a narrow viewport", async ({ page }) => {
 
 test("honors reduced motion while keeping evidence available", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await openFullWorkspace(page);
   await page.getByRole("button", { name: "Controls", exact: true }).click();
   await page.getByRole("button", { name: "Run review" }).click();
   await page.getByRole("button", { name: "Inspect Currency consistency" }).click();
@@ -144,7 +149,7 @@ test("honors reduced motion while keeping evidence available", async ({ page }) 
 
 test("captures bilingual judge states and a safely mocked provider failure", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   await expect(page.getByText("Human review remains required.")).toBeVisible();
   await capture(page, "test-results/07-api-unavailable-state-1440.png");
 

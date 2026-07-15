@@ -32,7 +32,7 @@ The deterministic demo skips both GPT-5.6 operations and reads repository-contro
 
 ## State ownership
 
-`DemoReviewWorkspace` is the single browser state owner. It stores the active step, mode, controls, documents, results, selected control, filter, reviewer comments and decisions, guide progress, and current run metadata in React state. This remains intentionally understandable for a first-time builder.
+`DemoReviewWorkspace` is the single browser state owner. It stores the active step, mode, presentation level, controls, documents, results, selected control, filter, reviewer comments and decisions, guide progress, fingerprint comparison, and current run metadata in React state. Focused Demo and Full Workspace receive the same handlers and domain state. The inactive Full Workspace remains mounted and hidden to preserve component-local search state; the inactive Focused presentation is unmounted to avoid duplicate accessible content.
 
 ## Run-history persistence
 
@@ -82,3 +82,9 @@ The React workspace remains the single state owner. Switching scenarios clears r
 ## Shared evaluation path
 
 Northstar, Meridian, and Atlas all call `runDeterministicReview()` with the same seven control kinds. Fixture `expectedOutcomes` are used only by automated validation and never by the application rendering path. The optional GPT-5.6 routes and exact-excerpt validation are unchanged.
+
+## Review Fingerprint boundary
+
+`src/domain/review-fingerprint-schema.ts` defines the strict `policyproof.review-fingerprint.v1` payload. `src/lib/review-fingerprint.ts` builds it from current policy, enabled controls, active parameters, structured documents and facts, normalized deterministic results, exact evidence, and stable validation state. Semantic collections have explicit ordering; recursive object keys and line endings are canonicalized before deterministic UTF-8 JSON serialization.
+
+The client-safe implementation calls Web Crypto SHA-256 and adds no dependency or Node-only bundle import. The dedicated rerun action calls `runDeterministicReview()` directly and never enters the OpenAI branch. Same-input success does not replace current results or human state. Changed inputs use established review replacement and decision reset. Same-input divergence retains both current and candidate results in React state and logs only a bounded safe audit event.

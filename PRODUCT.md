@@ -18,19 +18,21 @@ The first working version supports one fictional procurement and vendor-change p
 
 ## Core journey
 
-1. Use the guaranteed deterministic demo or select Live GPT-5.6 mode when it is configured.
-2. Review a short fictional procurement policy.
-3. Review, edit, enable, and explicitly approve the applicable controls.
-4. Select one bundled fictional case from the Case Library or select fictional `.txt`, `.md`, or `.json` documents in Live mode.
-5. Use GPT-5.6 for policy interpretation and evidence extraction in Live mode.
-6. Use deterministic TypeScript logic for supported calculations and comparisons.
-7. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
-8. Derive review intelligence—outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison—from the same structured review state.
-9. Prioritize unresolved controls for human attention without inventing a composite risk score.
-10. Let the user confirm, reject, or accept an exception while preserving the original result.
-11. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
-12. Switch the complete application presentation between English and French without resetting the review.
-13. Follow optional manual Judge Mode guidance and export the current structured receipt through print, JSON, Markdown, CSV, or copy actions.
+1. Start in the Northstar-first Focused Demo or open the complete five-step workspace.
+2. Use the guaranteed deterministic demo or select Live GPT-5.6 mode when it is configured.
+3. Review a short fictional procurement policy.
+4. Review, edit, enable, and explicitly approve the applicable controls.
+5. Select one bundled fictional case from the Case Library or select fictional `.txt`, `.md`, or `.json` documents in Live mode.
+6. Use GPT-5.6 for policy interpretation and evidence extraction in Live mode.
+7. Use deterministic TypeScript logic for supported calculations and comparisons.
+8. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
+9. Rerun deterministic checks and compare normalized conclusions and the versioned Review Fingerprint.
+10. Derive review intelligence—outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison—from the same structured review state.
+11. Prioritize unresolved controls for human attention without inventing a composite risk score.
+12. Let the user confirm, reject, or accept an exception while preserving the original result.
+13. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
+14. Switch presentation level or language without resetting the review.
+15. Follow optional four-stage Judge Mode guidance and export the current structured receipt through print, JSON, Markdown, CSV, or copy actions.
 
 ## Status definitions
 
@@ -93,3 +95,6 @@ Desktop prioritizes density suitable for a 13-inch work screen. Mobile uses stac
 - Guided-demo completion is based only on real user actions and remains optional, dismissible, keyboard-accessible, and temporary.
 - Receipt exports are generated from current validated review state; no PDF service, server storage, or invented audit metadata is used.
 - Run comparison stores at most one versioned minimal snapshot in optional browser storage; current review behavior does not depend on persistence.
+- Focused Demo and Full Workspace are two presentations over one state owner and review engine; switching never reloads or duplicates business state.
+- The Review Fingerprint includes normalized deterministic review semantics and excludes UI state, timestamps, audit events, human decisions, comments, and receipt metadata.
+- Receipt-integrity hashing and verification are not implemented in this phase.

@@ -72,6 +72,20 @@ States are PENDING, CONFIRMED, REJECTED, and ACCEPTED_EXCEPTION. Rejecting or ac
 
 The local comparison snapshot contains `scenarioId`, `id`, `generatedAt`, `threshold`, `summary`, and a control-ID-to-status map. Storage keys are isolated by scenario ID. The snapshot deliberately excludes source content and human comments.
 
+### ReviewFingerprintPayload
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | literal | Required `policyproof.review-fingerprint.v1` contract identifier. |
+| `scenarioId` / `caseReference` | string | Stable case identity. |
+| `policy` | object | Policy ID, version, and normalized source content. |
+| `approvalParameters` | object | Active threshold, EUR currency, and required approver count. |
+| `controls` | enabled control[] | Stable definitions, kinds, severity, and deterministic parameters. |
+| `documents` | document[] | Stable source IDs, types, normalized content, and structured facts. |
+| `results` | normalized result[] | Status, explanation, missing requirements, exact evidence, relationship, locator, and validation state. |
+
+Controls, documents, facts, results, evidence, and missing requirements use documented semantic ordering. Object keys are recursively sorted, CRLF/CR becomes LF, finite numbers remain locale-neutral JSON numbers, dates become ISO 8601, and Unicode code points are preserved before UTF-8 serialization. Human decisions, comments, timestamps, locale, selection, search, filters, audit events, and receipt metadata are excluded.
+
 ## Status meanings
 
 - **PASS:** available evidence supports the control.

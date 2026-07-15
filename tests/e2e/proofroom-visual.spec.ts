@@ -21,9 +21,14 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.width + 1);
 }
 
+async function openFullWorkspace(page: Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open full workspace" }).click();
+}
+
 test("captures the complete Proofroom visual comparison matrix", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   await page.getByRole("button", { name: "Load demo case" }).first().click();
   const dismissGuide = page.getByRole("button", { name: "Dismiss guided demo" });
   if (await dismissGuide.isVisible()) await dismissGuide.click();
@@ -69,7 +74,7 @@ test("captures the complete Proofroom visual comparison matrix", async ({ page }
 
 test("captures final empty, threshold, print, loading, and provider-error states", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   const dismissGuide = page.getByRole("button", { name: "Dismiss guided demo" });
   if (await dismissGuide.isVisible()) await dismissGuide.click();
 

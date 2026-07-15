@@ -4,8 +4,13 @@ import { expect, test, type Page } from "@playwright/test";
 const captures = "test-results/competition-hardening";
 mkdirSync(captures, { recursive: true });
 
-async function selectScenario(page: Page, name: RegExp) {
+async function openFullWorkspace(page: Page) {
   await page.goto("/");
+  await page.getByRole("button", { name: "Open full workspace" }).click();
+}
+
+async function selectScenario(page: Page, name: RegExp) {
+  await openFullWorkspace(page);
   await page.getByRole("region", { name: "Choose a controlled case" }).getByRole("button", { name }).click();
 }
 
@@ -42,7 +47,7 @@ test("runs Atlas and keeps missing delivery and bank evidence explicit", async (
 });
 
 test("confirms a destructive case switch and does not leak Northstar decisions", async ({ page }) => {
-  await page.goto("/");
+  await openFullWorkspace(page);
   await runSelectedScenario(page);
   await page.getByRole("button", { name: "Decision", exact: true }).click();
   await page.getByRole("button", { name: "Confirm", exact: true }).click();
@@ -57,17 +62,17 @@ test("confirms a destructive case switch and does not leak Northstar decisions",
 
 test("keeps Judge Mode manual, bilingual, keyboard usable, and responsive", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   const meridian = page.getByRole("region", { name: "Choose a controlled case" }).getByRole("button", { name: /Meridian Office Services/ });
   await meridian.focus();
   await page.keyboard.press("Enter");
   await expect(meridian).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Enter Judge Mode" }).click();
   const judge = page.getByRole("region", { name: "Judge Mode sequence" });
-  await expect(judge).toContainText("Select Northstar");
+  await expect(judge).toContainText("Run the review");
   await expect(judge).toContainText(/no action or decision is automated/i);
   await page.getByRole("button", { name: "Français" }).click();
-  await expect(page.getByRole("region", { name: "Séquence du mode jury" })).toContainText("Sélectionner Northstar");
+  await expect(page.getByRole("region", { name: "Séquence du mode jury" })).toContainText("Lancer la revue");
   const dimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
   await page.screenshot({ path: `${captures}/judge-mode-mobile-fr.png`, fullPage: true });
@@ -77,7 +82,7 @@ test("keeps Judge Mode manual, bilingual, keyboard usable, and responsive", asyn
 
 test("captures the competition hardening visual review matrix", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/");
+  await openFullWorkspace(page);
   await page.screenshot({ path: `${captures}/case-library-desktop-en.png`, fullPage: true });
   await page.getByRole("button", { name: "Français" }).click();
   await page.setViewportSize({ width: 390, height: 844 });

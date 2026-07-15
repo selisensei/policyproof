@@ -18,6 +18,10 @@ PolicyProof provides one focused five-step workspace for one fictional procureme
 4. run the review and investigate PASS, FAIL, MISSING, and WARNING outcomes;
 5. record human decisions and export a decision receipt.
 
+The default presentation is a Northstar-first Focused Demo over the same application state. One action reveals the 3 PASS / 2 FAIL / 1 MISSING / 1 WARNING composition, the exact 12,480 EUR purchase order versus 12,480 USD invoice contradiction, source references, deterministic reproduction, and human decision. Full Workspace keeps the complete five-step workflow and advanced inspection tools without resetting state.
+
+A versioned Review Fingerprint makes reproducibility concrete. It is a native SHA-256 digest of normalized policy, controls, parameters, source documents, structured facts, exact evidence, and deterministic conclusions. An unchanged rerun reproduces 7/7 conclusions and the same digest without a model call. Raising the approval threshold to EUR 15,000 changes `CTRL-01` from FAIL to PASS, leaves six controls unchanged, and changes the digest. It is not a signature, identity proof, or trusted timestamp.
+
 The Review workspace adds evidence-led intelligence without becoming a generic dashboard. It shows case outcome composition, evidence coverage, an event chronology, threshold sensitivity, a prioritized reviewer queue, and a comparison with the previous local run. Search and filters narrow the same underlying results. Selecting a visual always leads back to a control or its exact evidence.
 
 The three profiles use the same strict scenario schema, policy, seven control kinds, deterministic engine, evidence inspector, and human-decision receipt. Northstar produces a mixed 3/2/1/1 profile, Meridian produces seven supported passes, and Atlas produces one approval failure plus two explicit missing-evidence outcomes. These results are calculated at runtime from each case's documents. Fixture expectations exist only as regression assertions.
@@ -29,6 +33,8 @@ At the default EUR 10,000 threshold, the deterministic demonstration produces 3 
 ## How we built it
 
 PolicyProof is a single Next.js and React application written in strict TypeScript. Zod validates runtime data, the official OpenAI JavaScript SDK implements the optional server-only GPT-5.6 workflow, Vitest and Testing Library protect the domain and interface, and Playwright verifies the complete browser journey. There is no database, authentication layer, external document service, or multi-agent application architecture.
+
+The Review Fingerprint uses a strict versioned Zod payload, recursively canonical JSON, deterministic semantic collection ordering, `TextEncoder`, and browser-compatible Web Crypto SHA-256. It adds no hashing package. The dedicated rerun calls the shared TypeScript engine and cannot enter the OpenAI path.
 
 GPT-5.6 handles semantic work that benefits from a language model:
 
@@ -63,6 +69,8 @@ The hardest challenge was preserving trust while combining model interpretation 
 - A bilingual English/French interface that preserves review state.
 - Accessible keyboard navigation, reduced-motion behavior, print output, JSON, Markdown, and UTF-8 CSV exports.
 - A meaningful threshold rerun and previous-run comparison derived from real state.
+- Same-input 7/7 deterministic reproduction with a versioned Review Fingerprint and explicit change/divergence handling.
+- A focused judge path with the full advanced workspace preserved behind one state-safe action.
 - Three controlled case profiles processed by one shared engine and interface.
 - Manual Judge Mode, current-session comparison, architecture, evidence-trust, and safe audit surfaces.
 - A deterministic fallback that makes no OpenAI request.
@@ -79,5 +87,7 @@ PolicyProof is a hackathon prototype and review aid, not a compliance certificat
 It has no PDF/OCR ingestion, durable collaboration, identity, authorization, external integrations, or production audit store. Current-session comparison and audit events disappear on refresh. Browser storage retains at most one minimal comparison snapshot per scenario and may be unavailable. The deterministic demo is the reliable judging path; live behavior still depends on valid model access, quota, and provider availability.
 
 ## What's next
+
+Receipt-integrity hashing, local receipt verification, and tamper tests are the next bounded technical phase. They remain separate from the current Review Fingerprint, which deliberately excludes human decision and receipt metadata.
 
 The next step is user validation with finance and control professionals before expanding scope. A production direction would require organization-specific control governance, secure document ingestion, identity and authorization, durable audit records, privacy and retention controls, monitoring, broader model evaluations, and legal and security review.

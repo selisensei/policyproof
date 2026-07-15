@@ -26,6 +26,8 @@ Completed and locally verified:
 - Reviewer attention queue, evidence-integrity language, keyboard-operable visual controls, and dependency-free Markdown receipts
 - Complete product narrative, feature guide, architecture, data dictionary, user guide, security/limitations guide, final Devpost draft, video script, and demo runbook
 - Bilingual Case Library, current-session comparison, manual Judge Mode, architecture and evidence-trust explanations, safe session audit trail, and dependency-free CSV evidence matrix
+- Northstar-first Focused Demo over the preserved Full Workspace, with a four-stage Judge Mode and state-preserving presentation switching
+- Strict `policyproof.review-fingerprint.v1` canonical payload, native SHA-256, same-input 7/7 reproduction, threshold diff, and explicit divergence handling
 
 Still pending and requiring builder supervision:
 
@@ -46,10 +48,11 @@ Still pending and requiring builder supervision:
 | Proofroom integration | Apply the approved evidence-led design without changing validated logic | Complete | Separate handoff commit, implementation mapping, three visual passes, responsive/motion tests, and final quality gates |
 | Review intelligence | Turn structured evidence into reviewer attention, causality, and local run comparison | Complete | Pure TypeScript derivations, semantic visuals, prioritized queue, responsive browser tests, and no new dependency |
 | Judge readiness | Polished, accessible, documented public demo | In progress | Case Library, Judge Mode, scenario matrix, Proofroom, and supervised Northstar validation complete; manual assistive-technology review, deployment, and video pending |
+| Focused verifiability phase 1 | Judge-first path and deterministic semantic fingerprint | Complete | Focused/Full state preservation, four-stage guide, 7/7 rerun, threshold diff, 19 Playwright paths, and ignored screenshot passes |
 
 ## Next supervised sequence
 
-1. Review the complete deterministic workflow and review intelligence in English and French.
+1. Review the Focused Demo and complete deterministic workflow in English and French.
 2. Inspect the ignored final viewport and component captures.
 3. Review the sanitized live-validation report and its documented limitations.
 4. Perform the remaining manual screen-reader and deployed-browser checks.
@@ -58,6 +61,7 @@ Still pending and requiring builder supervision:
 
 ## Deferred until explicitly approved
 
+- Receipt-integrity hash, local receipt verification, and tamper tests
 - Additional policy types or business cases
 - PDF parsing, OCR, external storage, or a database
 - Authentication, multi-tenancy, payments, or business-system integrations

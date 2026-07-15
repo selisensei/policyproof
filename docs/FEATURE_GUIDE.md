@@ -2,7 +2,7 @@
 
 ## Product shell
 
-The compact Proofroom shell keeps language, mode, workflow step, case context, and the current primary action visible. English and French can be switched without resetting the current review. The optional guide is collapsed by default and can be reopened from the help button.
+The compact Proofroom shell has two presentation levels over one state owner. Focused Demo is the Northstar-first judge and video path. Full Workspace keeps the five-step workflow, Case Library, analytics, audit, comparison, exports, and detailed registers. English and French or presentation level can be switched without resetting the current review.
 
 ## Policy
 
@@ -53,6 +53,12 @@ At desktop size, a compact number line compares amount and threshold. On mobile,
 
 PolicyProof stores a versioned, minimal snapshot for the latest and previous run in local browser storage. It contains run ID, timestamp, threshold, result counts, and control statuses—no policy text, document contents, evidence excerpts, comments, or provider payloads. The reviewer can clear history. If storage is blocked, the application continues without comparison.
 
+## Review Fingerprint and deterministic rerun
+
+Each deterministic review has a strict `policyproof.review-fingerprint.v1` semantic payload and a native SHA-256 digest. **Rerun deterministic checks** uses the same approved controls, current structured documents, current parameters, and shared TypeScript engine. Identical inputs reproduce all conclusions, preserve decisions, comments, selection, filters, and receipt state, and keep the digest. A changed threshold applies the established decision reset and displays the exact control diff. Same-input divergence preserves current and candidate conclusions for inspection.
+
+The main UI abbreviates the digest and provides copy plus full disclosure. The digest excludes timestamps, locale, search, filters, selection, audit events, human decisions, comments, and receipt metadata. It does not prove identity, authorship, signature, or trusted time.
+
 ## Local search
 
 Search covers control IDs, localized control titles, statuses, reviewer states, comments, document names, fact IDs, and exact evidence excerpts. Selecting a match opens the related control. No remote request is made.
@@ -83,7 +89,7 @@ The optional comparison includes only cases run during the current browser sessi
 
 ## Judge Mode and architecture
 
-Judge Mode is a 12-point bilingual manual guide over the production workspace. It cannot call GPT-5.6, run a review, change a threshold, or record a decision. The architecture explanation describes the validated split: GPT-5.6 interprets and extracts, TypeScript checks objective rules, and a human confirms, rejects, or accepts an exception.
+Judge Mode is a four-stage bilingual manual guide over the production workspace: Run the review, Inspect the evidence, Reproduce the result, and Record the decision. It cannot call GPT-5.6, run a review, change a threshold, or record a decision. The architecture explanation describes the validated split: GPT-5.6 interprets and extracts, TypeScript checks objective rules, and a human confirms, rejects, or accepts an exception.
 
 ## Evidence trust and audit trail
 

@@ -2,7 +2,7 @@
 
 ## Tagline
 
-**From policy text to an evidence-backed human decision.**
+**Every result traced. Every decision defensible.**
 
 ## The work problem
 
@@ -14,7 +14,7 @@ Traditional checklists capture an answer but often lose the chain that produced 
 
 PolicyProof makes the review chain explicit:
 
-**Policy → Control → Evidence → Conclusion → Human decision**
+**Policy → Control → Evidence → Conclusion → Human decision → Verifiable receipt**
 
 GPT-5.6 interprets policy language and extracts structured facts and exact excerpts. A human approves the proposed controls. TypeScript performs supported calculations. The workspace then shows PASS, FAIL, MISSING, or WARNING with traceable evidence and asks the reviewer to confirm, reject, or accept an exception.
 
@@ -46,6 +46,12 @@ Every value comes from structured case data. There are no decorative metrics or 
 ## Human judgment is a product feature
 
 PolicyProof preserves the automated conclusion even when the reviewer disagrees. Confirming a conclusion is the standard path. Rejecting it or accepting an exception requires a comment. The receipt records both layers so a later reader can distinguish what the system concluded from what the person decided.
+
+## Focused proof and reproducibility
+
+The default presentation removes dashboard competition from the first fifteen seconds. A judge sees Northstar, one Run review action, the outcome composition, the EUR/USD contradiction, exact sources, a deterministic rerun, and the human decision. The complete Case Library, analytics, exports, audit trail, and comparison remain available in Full Workspace over the same state.
+
+The versioned Review Fingerprint makes the reproducibility claim testable. Identical normalized policy, controls, documents, facts, evidence, and conclusions produce the same SHA-256 digest. Changing the approval threshold changes one conclusion and the digest. Human decisions and receipt metadata are deliberately excluded; the digest is not a signature or identity proof.
 
 ## Why GPT-5.6 matters
 

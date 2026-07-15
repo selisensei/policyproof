@@ -12,8 +12,10 @@
 
 | Image | Required state | Intended use |
 | --- | --- | --- |
-| English product overview | Proofroom Policy folio, deterministic mode, guide dismissed | Devpost introduction |
-| Evidence workbench | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING; Currency consistency selected | README hero and Devpost |
+| Focused Demo overview | Northstar ready, deterministic mode, seven controls and five records summarized, no outcome counts yet | Devpost introduction |
+| Focused evidence proof | EUR 10,000; 3 PASS, 2 FAIL, 1 MISSING, 1 WARNING; Currency consistency selected with exact EUR/USD sources | README hero and Devpost |
+| Same-input fingerprint | 7/7 reproduced with matching versioned fingerprints | Reproducibility story |
+| Changed-input comparison | EUR 10,000 → EUR 15,000; only Approval changes; fingerprints differ | Causal-change story |
 | Evidence inspector | Selected-row bridge, exact EUR and USD excerpts, and currency comparison visible | Main differentiation |
 | Decision receipt | Rejected currency result with fictional comment | Human oversight and export story |
 | French workspace | French Review or Decision step with preserved evidence | Bilingual capability |
@@ -41,3 +43,13 @@ All development captures below remain ignored under `test-results/competition-ha
 Direct PNG inspection confirmed that two transient black bands shown by the local image preview were preview artifacts over opaque white pixels, not application output. Production candidates must still be recaptured from the deployed build and inspected independently.
 
 Add these public candidates only after deployment: Case Library, Northstar, Meridian, Atlas, completed-case comparison, Judge Mode, architecture, Decision, Receipt, and mobile. Do not publish `test-results` paths or development screenshots.
+
+## Focused-verifiability passes
+
+All development captures remain ignored under `test-results/focused-verifiability/`:
+
+1. **Pass 1 — hierarchy:** Focused landing, reviewed 1280 × 720, Full Workspace preservation, and compact Judge Mode.
+2. **Pass 2 — reproducibility:** EUR/USD evidence, initial fingerprint, same-input 7/7 match, EUR 10,000 baseline, and EUR 15,000 causal difference.
+3. **Pass 3 — resilience:** 1440, 1280, 1024, 768, and 390 px; English and French; effective 200% zoom; and keyboard focus.
+
+Use Focused Demo as the public hero. Full Workspace, Case Library, Meridian, Atlas, exports, and architecture are supporting images, not the opening proof. Recreate every public candidate from the deployed production build and inspect it independently.

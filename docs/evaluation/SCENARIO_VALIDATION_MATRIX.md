@@ -41,6 +41,9 @@ Every fixture fact excerpt must occur verbatim in its source document. Scenario 
 - `tests/workspace-ui.test.tsx` verifies selection, destructive-switch confirmation, language preservation, Judge Mode, comparison, evidence trust, and receipts.
 - `tests/e2e/competition-hardening.spec.ts` runs Meridian, Atlas, scenario switching, Judge Mode, keyboard/mobile behavior, and the screenshot matrix.
 - Existing mocked OpenAI suites protect compilation, extraction, exact evidence, and safe provider failure behavior without a live request.
+- `tests/review-fingerprint.test.ts` verifies canonical ordering, date and line-ending handling, Unicode preservation, unsupported-value rejection, semantic mutations, 64-character SHA-256 output, 7/7 same-input reproduction, one-control threshold change, and divergence classification.
+- `tests/review-fingerprint-panel.test.tsx` verifies safe unexpected-divergence disclosure with current and candidate conclusions.
+- `tests/e2e/focused-verifiability.spec.ts` verifies Focused Demo, exact EUR/USD evidence, unchanged and changed fingerprints, decision preservation/reset, Full Workspace state, four-stage Judge Mode, English/French, mobile, keyboard, reduced motion, zoom reflow, and no provider analysis or policy request.
 
 ## Manual checks
 
