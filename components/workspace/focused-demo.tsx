@@ -5,20 +5,28 @@ import { assessEvidenceIntegrity } from "@/src/lib/review-intelligence";
 import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
 import { useLocale } from "@/src/i18n/locale-context";
 import { StatusBadge } from "@/components/workspace/status-badge";
+import { ReviewFingerprintPanel } from "@/components/workspace/review-fingerprint-panel";
+import type { ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
 
 function evidenceForDocument(evidence: EvidenceReference[], fragment: string) {
   return evidence.find((item) => item.documentId.includes(fragment)) ?? null;
 }
 
-export function FocusedDemo({ scenario, results, summary, threshold, enabledControlCount, isRunning, reviewError, onRunReview, onOpenFullWorkspace, onOpenDecision, onCommentChange, onDecision }: {
+export function FocusedDemo({ scenario, results, summary, threshold, enabledControlCount, isRunning, isVerifying, reviewError, fingerprint, fingerprintComparison, divergenceCandidateResults, onRunReview, onRerun, onThresholdChange, onOpenFullWorkspace, onOpenDecision, onCommentChange, onDecision }: {
   scenario: ReviewScenario;
   results: ControlResult[];
   summary: ResultSummary;
   threshold: string;
   enabledControlCount: number;
   isRunning: boolean;
+  isVerifying: boolean;
   reviewError: string;
+  fingerprint: string;
+  fingerprintComparison: ReviewFingerprintComparison | null;
+  divergenceCandidateResults: ControlResult[];
   onRunReview: () => void;
+  onRerun: () => void;
+  onThresholdChange: (value: string) => void;
   onOpenFullWorkspace: () => void;
   onOpenDecision: () => void;
   onCommentChange: (controlId: string, comment: string) => void;
@@ -88,15 +96,25 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
             </section>
           )}
 
+          {fingerprint && (
+            <section className="focused-reproducibility" aria-labelledby="focused-reproducibility-title">
+              <div className="focused-threshold-control">
+                <div><p className="eyebrow">02 · {locale === "fr" ? "REPRODUIRE" : "REPRODUCE"}</p><h2 id="focused-reproducibility-title">{locale === "fr" ? "Même revue, même empreinte" : "Same review, same fingerprint"}</h2></div>
+                <label>{locale === "fr" ? "Seuil d’approbation" : "Approval threshold"}<span><input type="number" min="0" step="1000" value={threshold} onChange={(event) => onThresholdChange(event.target.value)} aria-label={locale === "fr" ? "Seuil d’approbation en EUR" : "Approval threshold in EUR"} /> EUR</span></label>
+              </div>
+              <ReviewFingerprintPanel fingerprint={fingerprint} comparison={fingerprintComparison} results={results} candidateResults={divergenceCandidateResults} isVerifying={isVerifying} onRerun={onRerun} compact />
+            </section>
+          )}
+
           {currencyResult && (
             <section className="focused-human-decision" aria-labelledby="focused-decision-title">
-              <div><p className="eyebrow">{locale === "fr" ? "DÉCISION HUMAINE" : "HUMAN DECISION"}</p><h2 id="focused-decision-title">{locale === "fr" ? "L’automatisation conclut. Vous décidez." : "Automation concludes. You decide."}</h2><p>{locale === "fr" ? "La conclusion d’origine reste visible quelle que soit votre décision." : "The original conclusion remains visible whatever you decide."}</p></div>
+              <div><p className="eyebrow">03 · {locale === "fr" ? "DÉCISION HUMAINE" : "HUMAN DECISION"}</p><h2 id="focused-decision-title">{locale === "fr" ? "L’automatisation conclut. Vous décidez." : "Automation concludes. You decide."}</h2><p>{locale === "fr" ? "La conclusion d’origine reste visible quelle que soit votre décision." : "The original conclusion remains visible whatever you decide."}</p></div>
               <label>{locale === "fr" ? "Commentaire du réviseur" : "Reviewer comment"}<textarea value={currencyResult.reviewerDecision.comment} onChange={(event) => onCommentChange(currencyResult.controlId, event.target.value)} placeholder={t("decision.commentPlaceholder")} /></label>
               {reviewError && <p role="alert" className="focused-decision-error">{reviewError}</p>}
               <div className="focused-decision-actions">
-                <button type="button" onClick={() => onDecision(currencyResult.controlId, "CONFIRMED")}>{t("decision.confirm")}</button>
-                <button type="button" onClick={() => onDecision(currencyResult.controlId, "REJECTED")}>{t("decision.reject")}</button>
-                <button type="button" onClick={() => onDecision(currencyResult.controlId, "ACCEPTED_EXCEPTION")}>{t("decision.exception")}</button>
+                <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "CONFIRMED"} onClick={() => onDecision(currencyResult.controlId, "CONFIRMED")}>{t("decision.confirm")}</button>
+                <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "REJECTED"} onClick={() => onDecision(currencyResult.controlId, "REJECTED")}>{t("decision.reject")}</button>
+                <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "ACCEPTED_EXCEPTION"} onClick={() => onDecision(currencyResult.controlId, "ACCEPTED_EXCEPTION")}>{t("decision.exception")}</button>
                 <button type="button" className="primary-button" onClick={onOpenDecision}>{currencyResult.reviewerDecision.state === "PENDING" ? (locale === "fr" ? "Ouvrir la décision complète" : "Open full decision") : (locale === "fr" ? "Ouvrir le reçu" : "Open receipt")} →</button>
               </div>
             </section>

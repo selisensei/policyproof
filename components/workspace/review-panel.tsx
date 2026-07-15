@@ -9,6 +9,8 @@ import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedMissingEvidence, localizedResultExplanation } from "@/src/i18n/translations";
 import { ReviewIntelligencePanels } from "@/components/workspace/review-intelligence-panels";
 import { assessEvidenceIntegrity, type RunSnapshot } from "@/src/lib/review-intelligence";
+import { ReviewFingerprintPanel } from "@/components/workspace/review-fingerprint-panel";
+import type { ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
 
 const filterOrder: ResultFilter[] = ["ALL", "PASS", "FAIL", "MISSING", "WARNING", "OPEN"];
 
@@ -27,7 +29,7 @@ function useMobileReview() {
   return useSyncExternalStore(subscribeMobile, getMobileSnapshot, () => false);
 }
 
-export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documents, controls, policyText, caseName, caseReference, documentTypes, changedControlId, currentRun, previousRun, onFilterChange, onSelectResult, onClearHistory, onGoDecision }: {
+export function ReviewPanel({ results, visibleResults, summary, filter, selectedResult, threshold, mode, documents, controls, policyText, caseName, caseReference, documentTypes, changedControlId, currentRun, previousRun, fingerprint, fingerprintComparison, divergenceCandidateResults, isVerifying, onRerun, onFilterChange, onSelectResult, onClearHistory, onGoDecision }: {
   results: ControlResult[];
   visibleResults: ControlResult[];
   summary: ResultSummary;
@@ -44,6 +46,11 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
   changedControlId: string | null;
   currentRun: RunSnapshot | null;
   previousRun: RunSnapshot | null;
+  fingerprint: string;
+  fingerprintComparison: ReviewFingerprintComparison | null;
+  divergenceCandidateResults: ControlResult[];
+  isVerifying: boolean;
+  onRerun: () => void;
   onFilterChange: (filter: ResultFilter) => void;
   onSelectResult: (controlId: string) => void;
   onClearHistory: () => void;
@@ -119,6 +126,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
             onInspectControl={(controlId) => { onFilterChange("ALL"); onSelectResult(controlId); }}
             onClearHistory={onClearHistory}
           />
+          {mode === "DETERMINISTIC_DEMO" && fingerprint && <ReviewFingerprintPanel fingerprint={fingerprint} comparison={fingerprintComparison} results={results} candidateResults={divergenceCandidateResults} isVerifying={isVerifying} onRerun={onRerun} />}
           <div className="review-filter-row" role="radiogroup" aria-label={locale === "fr" ? "Filtrer les résultats" : "Filter results"}>
             {filterOrder.map((candidate) => (
               <button key={candidate} type="button" data-filter={candidate} data-status={candidate} aria-label={candidate === "ALL" ? (locale === "fr" ? `Afficher les ${summary.total} résultats` : `Show all ${summary.total} results`) : candidate === "OPEN" ? (locale === "fr" ? `Afficher ${summary.pending} décisions ouvertes` : `Show ${summary.pending} open decisions`) : t("review.showStatus", { count: summary[candidate], status: t(`status.${candidate}`) })} aria-pressed={filter === candidate} onKeyDown={(event) => onFilterKeyDown(event, candidate)} onClick={() => onFilterChange(candidate)} className={filter === candidate ? "is-active" : ""}>

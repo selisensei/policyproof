@@ -354,3 +354,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Make a Northstar-first Focused Demo the default presentation level and keep the existing Full Workspace as an explicit secondary level. Both presentations use the same `DemoReviewWorkspace` state, controls, documents, engine, evidence, decisions, receipt, and audit events. Keep the inactive Full Workspace mounted but hidden so component-local search state is not discarded. Reduce the visible Judge Mode sequence from twelve steps to four manual stages.
 - **Rationale:** One additional presentation component creates a clear demonstration path without duplicating business logic, adding routing, or removing advanced capabilities.
 - **Consequences:** Focused Demo intentionally collapses analytics, Case Library, audit details, comparison, and secondary exports. Switching presentation level changes no review data and makes no provider request. Full Workspace remains the authoritative advanced inspection surface.
+
+## D039 - Fingerprint normalized review semantics, not human receipt state
+
+- **Date:** 2026-07-15
+- **Status:** Accepted
+- **Context:** Judges need a concrete way to verify that deterministic checks reproduce the same conclusions, but timestamps, locale, UI state, comments, and reviewer decisions would make a review digest unstable or conflate computation with human accountability.
+- **Decision:** Define `policyproof.review-fingerprint.v1` as a strict Zod payload containing normalized policy content, enabled controls and parameters, source documents and structured facts, deterministic results, exact evidence references, and validation state. Canonically sort documented semantic collections, normalize line endings and finite numbers, preserve Unicode code points, and compute a lowercase SHA-256 digest with Web Crypto. Exclude all presentation state, timestamps, audit events, human decisions, comments, and receipt metadata.
+- **Rationale:** This boundary makes identical deterministic review semantics reproducible while keeping the fingerprint independent from the future receipt-integrity model.
+- **Consequences:** A same-input rerun compares normalized inputs, conclusions, and the fingerprint without replacing current results or decisions. A parameter change uses the existing decision reset and produces an explicit diff. Unexpected same-input divergence preserves both result sets for human inspection. The digest is not a signature, proof of identity, authorship, or trusted time.

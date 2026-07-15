@@ -56,7 +56,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(screen.queryByRole("navigation", { name: "Review progress" })).toBeNull();
 
     await user.click(within(focused).getByRole("button", { name: "Run review" }));
-    expect(within(focused).getByText("The case at a glance")).toBeTruthy();
+    expect(await within(focused).findByText("The case at a glance")).toBeTruthy();
     expect(within(focused).getByText("12,480 EUR")).toBeTruthy();
     expect(within(focused).getByText("12,480 USD")).toBeTruthy();
     expect(within(focused).getByText("✓ Exact sources verified")).toBeTruthy();
@@ -68,6 +68,40 @@ describe("PolicyProof workspace interactions", () => {
     await user.click(screen.getByRole("button", { name: "Return to focused demo" }));
     expect(screen.getByRole("region", { name: "Focused Demo" })).toBeTruthy();
     expect(screen.getByText("12,480 USD")).toBeTruthy();
+  });
+
+  it("reproduces the same fingerprint without a provider call and explains a threshold change", async () => {
+    const user = userEvent.setup();
+    renderWorkspace(true);
+    const focused = screen.getByRole("region", { name: "Focused Demo" });
+    await user.click(within(focused).getByRole("button", { name: "Run review" }));
+    expect(await within(focused).findByText("Review fingerprint")).toBeTruthy();
+    const initialAbbreviation = within(focused).getByText(/^[0-9a-f]{8}…[0-9a-f]{8}$/).textContent;
+
+    const confirm = within(focused).getByRole("button", { name: "Confirm" });
+    await user.click(confirm);
+    expect(confirm.getAttribute("aria-pressed")).toBe("true");
+    await user.click(within(focused).getByRole("button", { name: "Rerun deterministic checks" }));
+    expect(await within(focused).findByText("Same inputs and conclusions reproduced")).toBeTruthy();
+    expect(within(focused).getByText("7 of 7 conclusions reproduced identically")).toBeTruthy();
+    expect(within(focused).getByText("Review fingerprint unchanged")).toBeTruthy();
+    expect(within(focused).getByText(/^[0-9a-f]{8}…[0-9a-f]{8}$/).textContent).toBe(initialAbbreviation);
+    expect(confirm.getAttribute("aria-pressed")).toBe("true");
+
+    const threshold = within(focused).getByRole("spinbutton", { name: "Approval threshold in EUR" });
+    await user.clear(threshold);
+    await user.type(threshold, "15000");
+    await user.click(within(focused).getByRole("button", { name: "Rerun deterministic checks" }));
+    expect(await within(focused).findByText("Review content changed")).toBeTruthy();
+    expect(within(focused).getByText("Changed conclusion: CTRL-01: FAIL → PASS")).toBeTruthy();
+    expect(within(focused).getByText("Unchanged: 6 controls")).toBeTruthy();
+    expect(confirm.getAttribute("aria-pressed")).toBe("false");
+
+    await user.click(within(focused).getByRole("button", { name: /Open full workspace/ }));
+    expect(screen.getByRole("button", { name: "Show 4 PASS results" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show 1 FAIL results" })).toBeTruthy();
+    const fetchMock = vi.mocked(fetch);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes("/api/ai/analyze") || String(url).includes("/api/ai/policy"))).toBe(false);
   });
 
   it("loads the deterministic demo, runs it, filters results, and inspects evidence", async () => {

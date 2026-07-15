@@ -17,5 +17,25 @@
 - **Files changed:** `DECISIONS.md`, `docs/design/FOCUSED_VERIFIABILITY_AUDIT.md`, and this log.
 - **Tests run:** Baseline screenshot inspection at desktop, 1280 × 720, and mobile plus existing responsive Playwright coverage.
 - **Result:** PASS — the critical hierarchy and density problems are documented with bounded implementation decisions.
-- **Commit:** Pending first checkpoint.
+- **Commit:** `4922ddb` — `refactor: focus PolicyProof judge experience`.
 - **Blocker or compromise:** Real screen-reader and physical-device checks remain manual release tasks.
+
+## Phase 2 — Focused Demo and Full Workspace
+
+- **Objective:** Create one Northstar-first judge path without removing the advanced workspace.
+- **Implementation decision:** Use two presentation levels over one parent state; keep Full Workspace mounted while hidden and unmount only the inactive Focused presentation to avoid duplicate accessible content.
+- **Files changed:** Focused presentation component, workspace state owner, Judge Mode tools, global styles, translations, interaction tests, audit, decision log, and progress log.
+- **Tests run:** Focused component path, presentation switching, legacy workspace interactions, TypeScript, lint, production build, and screenshot inspection.
+- **Result:** PASS — the focused path loads without precomputed outcomes, runs the shared engine, exposes EUR/USD evidence, and returns to the complete workspace with state preserved.
+- **Commit:** `4922ddb` — `refactor: focus PolicyProof judge experience`.
+- **Blocker or compromise:** An old local server initially served stale UI and a secondary dev server briefly shared the Next cache; the final focused capture used a clean isolated server. Generated captures remain ignored.
+
+## Phase 3 — Review Fingerprint and deterministic rerun
+
+- **Objective:** Prove same-input reproducibility and explain semantic change without a provider request.
+- **Implementation decision:** Add a strict versioned payload, dependency-free canonicalization, native Web Crypto SHA-256, explicit same/changed/diverged comparison, and one shared rerun action in both presentation levels.
+- **Files changed:** Fingerprint schema and library, fingerprint UI, Focused Demo, Full Workspace Review panel, parent state, audit actions, styles, tests, decision log, fingerprint model, and progress log.
+- **Tests run:** Canonicalization, digest mutation, payload comparison, focused rerun, decision preservation/reset, divergence UI, and TypeScript.
+- **Result:** PASS in targeted validation — identical Northstar semantics reproduce 7/7 and the same fingerprint; EUR 10,000 → EUR 15,000 changes only `CTRL-APPROVAL`; no provider route is invoked.
+- **Commit:** Pending second checkpoint.
+- **Blocker or compromise:** Receipt integrity remains explicitly postponed to phase 2; the current digest is not a signature or trusted timestamp.

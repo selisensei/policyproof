@@ -18,6 +18,7 @@ import type { AiAvailability, AppMode, GuidedDemoMilestone, ProposalReviewState,
 import { AiControlProposalSchema, CaseAnalysisSchema, PolicyCompilationSchema, type AiControlProposal } from "@/src/domain/ai-schemas";
 import { loadScenario, buildScenarioControls, createScenarioResetState, type ReviewScenario } from "@/src/domain/scenario-schema";
 import { ControlDefinitionSchema, type CaseDocument, type ControlDefinition, type ControlResult, type ReviewDecision } from "@/src/domain/schemas";
+import type { ReviewFingerprintPayload } from "@/src/domain/review-fingerprint-schema";
 import { defaultScenarioId, reviewScenarios } from "@/src/fixtures/scenarios";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, type TranslationKey } from "@/src/i18n/translations";
@@ -29,6 +30,7 @@ import { runDeterministicReview } from "@/src/lib/review-engine";
 import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/review-summary";
 import { assessEvidenceIntegrity, createRunSnapshot } from "@/src/lib/review-intelligence";
 import { advanceRunHistory, loadRunHistory, persistRunHistory, removeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
+import { buildReviewFingerprintPayload, compareReviewFingerprintPayloads, computeReviewFingerprint, type ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 
 const steps: WorkflowStep[] = ["policy", "controls", "documents", "review", "decision"];
@@ -99,6 +101,11 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   const [judgeMode, setJudgeMode] = useState(false);
   const [judgeStep, setJudgeStep] = useState(0);
   const [presentationLevel, setPresentationLevel] = useState<PresentationLevel>(initialPresentationLevel);
+  const [reviewFingerprintPayload, setReviewFingerprintPayload] = useState<ReviewFingerprintPayload | null>(null);
+  const [reviewFingerprint, setReviewFingerprint] = useState("");
+  const [fingerprintComparison, setFingerprintComparison] = useState<ReviewFingerprintComparison | null>(null);
+  const [divergenceCandidateResults, setDivergenceCandidateResults] = useState<ControlResult[]>([]);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,7 +174,23 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
     setReviewError("");
     setChangedControlId(null);
     setWorkspaceError("");
+    setReviewFingerprintPayload(null);
+    setReviewFingerprint("");
+    setFingerprintComparison(null);
+    setDivergenceCandidateResults([]);
+    setIsVerifying(false);
     setNotice(nextNotice);
+  }
+
+  function createFingerprintPayload(nextControls: ControlDefinition[], nextDocuments: CaseDocument[], nextResults: ControlResult[]) {
+    return buildReviewFingerprintPayload({
+      scenarioId: activeScenario.id,
+      caseReference: activeScenario.caseReference,
+      policy: { ...activeScenario.policy, text: policyText },
+      controls: nextControls,
+      documents: nextDocuments,
+      results: nextResults,
+    });
   }
 
   function selectScenario(scenarioId: string, confirmDecisionLoss = true, forceReload = false): boolean {
@@ -357,8 +380,10 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
     try {
       let nextResults: ControlResult[];
       let nextReviewDocuments: CaseDocument[];
+      let evaluatedControls: ControlDefinition[] = [];
       if (mode === "DETERMINISTIC_DEMO") {
         const nextControls = prepareDemoControls();
+        evaluatedControls = nextControls;
         setControls(nextControls);
         nextResults = runDeterministicReview(nextControls, activeScenario.documents);
         nextReviewDocuments = activeScenario.documents;
@@ -374,8 +399,25 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
         const analysis = z.object({ analysis: CaseAnalysisSchema }).parse(body).analysis;
         const deterministicControls = toDeterministicControls(approvedProposals);
         if (!deterministicControls.length) throw new Error(t("error.noControls"));
+        evaluatedControls = deterministicControls;
         nextReviewDocuments = toCaseDocuments(analysis, localDocuments);
         nextResults = runDeterministicReview(deterministicControls, nextReviewDocuments);
+      }
+      if (mode === "DETERMINISTIC_DEMO") {
+        const nextPayload = createFingerprintPayload(evaluatedControls, nextReviewDocuments, nextResults);
+        const nextFingerprint = await computeReviewFingerprint(nextPayload);
+        const nextComparison = reviewFingerprintPayload && reviewFingerprint
+          ? compareReviewFingerprintPayloads(reviewFingerprintPayload, nextPayload, reviewFingerprint, nextFingerprint)
+          : null;
+        setReviewFingerprintPayload(nextPayload);
+        setReviewFingerprint(nextFingerprint);
+        setFingerprintComparison(nextComparison?.kind === "CHANGED" ? nextComparison : null);
+        setDivergenceCandidateResults([]);
+      } else {
+        setReviewFingerprintPayload(null);
+        setReviewFingerprint("");
+        setFingerprintComparison(null);
+        setDivergenceCandidateResults([]);
       }
       setResults(nextResults);
       setReviewDocuments(nextReviewDocuments);
@@ -411,6 +453,62 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
       setWorkspaceError(error instanceof Error ? error.message : t("error.review"));
     } finally {
       setIsRunning(false);
+    }
+  }
+
+  async function rerunDeterministicChecks() {
+    if (mode !== "DETERMINISTIC_DEMO" || !results.length || !reviewFingerprintPayload || !reviewFingerprint) return;
+    setIsVerifying(true);
+    setWorkspaceError("");
+    try {
+      const nextControls = prepareDemoControls();
+      const nextDocuments = reviewDocuments.length ? reviewDocuments : activeScenario.documents;
+      const candidateResults = runDeterministicReview(nextControls, nextDocuments);
+      const candidatePayload = createFingerprintPayload(nextControls, nextDocuments, candidateResults);
+      const candidateFingerprint = await computeReviewFingerprint(candidatePayload);
+      const comparison = compareReviewFingerprintPayloads(reviewFingerprintPayload, candidatePayload, reviewFingerprint, candidateFingerprint);
+      setFingerprintComparison(comparison);
+
+      if (comparison.kind === "DIVERGED") {
+        setDivergenceCandidateResults(candidateResults);
+        audit("DETERMINISTIC_DIVERGENCE_DETECTED", `Detected deterministic divergence in ${comparison.changedControlIds.length} control(s); retained both result sets.`);
+        return;
+      }
+
+      setDivergenceCandidateResults([]);
+      if (comparison.kind === "IDENTICAL") {
+        audit("DETERMINISTIC_RERUN_VERIFIED", `Reproduced ${comparison.unchangedControlCount} of ${comparison.unchangedControlCount} deterministic conclusions with an unchanged review fingerprint.`);
+        return;
+      }
+
+      const hadReviewerDecisions = results.some((result) => result.reviewerDecision.state !== "PENDING");
+      const generatedAt = new Date().toISOString();
+      const nextSummary = summarizeResults(candidateResults);
+      setControls(nextControls);
+      setResults(candidateResults);
+      setReviewDocuments(nextDocuments);
+      setReviewFingerprintPayload(candidatePayload);
+      setReviewFingerprint(candidateFingerprint);
+      setChangedControlId(comparison.changedControlIds[0] ?? null);
+      setRunGeneratedAt(generatedAt);
+      setReviewError("");
+      setNotice(hadReviewerDecisions ? { key: "notice.reviewRerun" } : { key: "notice.reviewComplete", values: { count: candidateResults.length } });
+      const snapshot = createRunSnapshot(generatedAt, Number(threshold), candidateResults, nextSummary, activeScenario.id);
+      setRunHistory((current) => {
+        const next = advanceRunHistory(current, snapshot);
+        persistRunHistory(window.localStorage, next, activeScenario.id);
+        return next;
+      });
+      const verifiedControls = candidateResults.filter((result) => assessEvidenceIntegrity(result, nextDocuments).state === "VERIFIED").length;
+      const completed: CompletedScenarioReview = { scenarioId: activeScenario.id, summary: nextSummary, unresolved: nextSummary.pending, verifiedControls, controlCount: candidateResults.length };
+      setCompletedScenarios((current) => [...current.filter((item) => item.scenarioId !== activeScenario.id), completed]);
+      audit("THRESHOLD_CHANGED", `Changed approval threshold from ${comparison.previousThreshold} EUR to ${comparison.candidateThreshold} EUR.`);
+      audit("RUN_COMPARISON_CREATED", `Compared deterministic runs; ${comparison.changedControlIds.length} control changed and ${comparison.unchangedControlCount} remained unchanged.`);
+      if (activeScenario.thresholdParameters.comparisonAmount === Number(threshold)) completeGuide("THRESHOLD_RERUN");
+    } catch (error) {
+      setWorkspaceError(error instanceof Error ? error.message : t("error.review"));
+    } finally {
+      setIsVerifying(false);
     }
   }
 
@@ -467,7 +565,7 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   ) : currentStep === "documents" ? (
     <DocumentsPanel mode={mode} demoDocuments={activeScenario.documents} localDocuments={localDocuments} documentError={documentError} onSelectFiles={selectFiles} onRemoveDocument={removeDocument} onUpdateLabel={updateDocumentLabel} onLoadDemo={loadDemo} onResetDemo={() => selectScenario(activeScenario.id, false, true)} caseName={activeScenario.caseName[locale]} />
   ) : currentStep === "review" ? (
-    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} controls={controls} policyText={activeScenario.policy.text} caseName={activeScenario.caseName[locale]} caseReference={activeScenario.caseReference} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === activeScenario.guidedDemo.defaultSelectedControlId) completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
+    <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} controls={controls} policyText={activeScenario.policy.text} caseName={activeScenario.caseName[locale]} caseReference={activeScenario.caseReference} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} fingerprint={reviewFingerprint} fingerprintComparison={fingerprintComparison} divergenceCandidateResults={divergenceCandidateResults} isVerifying={isVerifying} onRerun={() => void rerunDeterministicChecks()} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === activeScenario.guidedDemo.defaultSelectedControlId) completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
   ) : (
     <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} onExport={(format) => audit("RECEIPT_EXPORTED", `Exported the review receipt as ${format}.`)} />
   );
@@ -521,8 +619,14 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
           threshold={threshold}
           enabledControlCount={enabledControlCount}
           isRunning={isRunning}
-          reviewError={reviewError}
+          isVerifying={isVerifying}
+          reviewError={reviewError || workspaceError}
+          fingerprint={reviewFingerprint}
+          fingerprintComparison={fingerprintComparison}
+          divergenceCandidateResults={divergenceCandidateResults}
           onRunReview={() => void runReview()}
+          onRerun={() => void rerunDeterministicChecks()}
+          onThresholdChange={updateThreshold}
           onOpenFullWorkspace={() => setPresentationLevel("FULL_WORKSPACE")}
           onOpenDecision={() => { setPresentationLevel("FULL_WORKSPACE"); navigate("decision"); }}
           onCommentChange={updateCommentFor}
