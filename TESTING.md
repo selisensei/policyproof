@@ -338,3 +338,25 @@ No authenticated or paid OpenAI request was made. Provider behavior remained moc
 - Safety scans: PASS — 139 tracked text files, zero potential secret-pattern files, zero personal absolute-path files, zero forbidden generated paths tracked, and all required generated paths ignored.
 
 No live OpenAI request was made and `.env.local` was not read. These are baseline results; final phase results are recorded only after the receipt-integrity implementation and browser paths are complete.
+
+## Verifiable receipt final release gate — 2026-07-16
+
+Fresh results after the final application, unit, browser, documentation, and screenshot changes:
+
+- `pnpm test`: PASS — 20 test files, 161 tests, Vitest duration 22.77 s; 24.7 s command wall time.
+- `pnpm typecheck`: PASS — no TypeScript errors; 4.4 s command wall time.
+- `pnpm lint`: PASS — no ESLint errors or warnings; 10.6 s command wall time.
+- `pnpm build`: PASS — compiled in 3.8 s, completed its TypeScript phase in 7.3 s, and finished in 16.0 s command wall time. Routes: static `/` and `/_not-found`; dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`.
+- `pnpm test:e2e`: PASS — 23 Chromium tests in 52.0 s; 53.9 s command wall time.
+- `pnpm audit --prod`: PASS — no known vulnerabilities; 1.6 s command wall time.
+- `git diff --check`: PASS.
+- Production smoke: PASS — `/` and `/api/ai/status` returned 200; product text, model `gpt-5.6`, boolean availability, `nosniff`, and `DENY` were verified; the isolated port 3400 server was stopped.
+- Receipt model: PASS — strict versions, cross-references, canonical ordering, UTF-8, Unicode, line endings, finite-number handling, cycles, native SHA-256, stability, and Review Fingerprint separation.
+- Receipt verification: PASS — current and exported JSON valid; one-character comment, result, evidence, timestamp, stored hash, audit, decision, language, policy version, receipt ID, and Review Fingerprint modifications detected; unsupported, malformed, and missing-integrity inputs handled explicitly; no verification network request.
+- Regression paths: PASS — Northstar 3/2/1/1 and exact EUR/USD evidence; 7/7 same-input rerun; EUR 10,000 → EUR 15,000 approval-only change; Meridian 7 PASS; Atlas 4 PASS / 1 FAIL / 2 MISSING; mocked policy, analysis, and provider failure paths; print, JSON, Markdown, and CSV.
+- Accessibility/responsive: PASS in automated browser checks — keyboard focus, English/French, 1280 × 720, 1440 × 900, 1024 × 768, 390 × 844, effective 200% zoom, reduced motion, and no horizontal overflow.
+- Visual review: PASS — three ignored passes under `test-results/verifiable-receipt/`; fixed-header full-page stitching artifacts were replaced with clean component captures.
+- Dependencies: unchanged — no package or lockfile modification.
+- Ancestry: PASS — `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD` returned success.
+
+No live or paid OpenAI request was made. `.env.local` was not opened or read. Generated screenshots, Playwright traces, build output, dependencies, and smoke logs remain ignored and untracked.

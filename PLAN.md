@@ -49,6 +49,7 @@ Still pending and requiring builder supervision:
 | Review intelligence | Turn structured evidence into reviewer attention, causality, and local run comparison | Complete | Pure TypeScript derivations, semantic visuals, prioritized queue, responsive browser tests, and no new dependency |
 | Judge readiness | Polished, accessible, documented public demo | In progress | Case Library, Judge Mode, scenario matrix, Proofroom, and supervised Northstar validation complete; manual assistive-technology review, deployment, and video pending |
 | Focused verifiability phase 1 | Judge-first path and deterministic semantic fingerprint | Complete | Focused/Full state preservation, four-stage guide, 7/7 rerun, threshold diff, 19 Playwright paths, and ignored screenshot passes |
+| Verifiable receipt phase 2 | Exact receipt-instance integrity and local verification | Complete | Separate Review Fingerprint and Receipt Integrity Hash, strict schemas, native SHA-256, JSON tamper detection, bilingual responsive UI, and ignored screenshot passes |
 
 ## Next supervised sequence
 

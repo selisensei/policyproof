@@ -30,6 +30,8 @@ Local Playwright runs generate ignored English and French screenshots at desktop
 
 Mocked provider-error captures remain local-only and are not public product screenshots.
 
+The final verifiable-receipt gate passes 20 Vitest files / 161 tests and 23 Chromium Playwright paths, plus typecheck, lint, production build, production dependency audit, local production smoke, secret/path scans, and three ignored visual-review passes. No dependency was added and no live OpenAI request was made during this phase.
+
 ## Product workflow
 
 1. Select one of three controlled fictional cases and review the shared policy.

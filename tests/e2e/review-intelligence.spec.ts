@@ -65,6 +65,7 @@ test("completes the evidence-led review intelligence journey", async ({ page }) 
   await page.getByLabel("Reviewer comment").fill("Currency mismatch verified in the fictional case.");
   await page.getByRole("button", { name: "Reject" }).click();
   await expect(page.getByLabel("Decision receipt")).toContainText("Rejected");
+  await page.locator("summary", { hasText: "More exports" }).click();
   await expect(page.getByRole("button", { name: "Download Markdown" })).toBeVisible();
   await page.getByLabel("Decision receipt").screenshot({ path: `${captureRoot}/08-receipt.png` });
 
