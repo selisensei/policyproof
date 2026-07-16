@@ -390,3 +390,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Define `policyproof.competition-evaluation.v1`, `policyproof.business-rule-mutation.v1`, and `policyproof.adversarial-corpus.v1` as strict local evaluation contracts. Execute them inside the existing Vitest runtime, call the production scenario schemas and deterministic engine directly, block fetch and Node HTTP/HTTPS clients for the evaluation scope, and generate stable tracked Markdown and JSON reports without timestamps or local metadata. Use `pnpm eval:competition` for the complete harness and `pnpm demo:verify` for the focused judge gate.
 - **Rationale:** Vitest already resolves the repository TypeScript aliases and requires no new runner or dependency. Reusing production functions avoids a second rule engine, while deterministic reports and failure exit codes make the evidence independently repeatable.
 - **Consequences:** The harness has no browser or visible UI. It does not claim universal policy coverage or freshly rerun GPT-5.6 evidence. Northstar live validation remains historical; Meridian and Atlas remain deterministic and mocked. Any mandatory evaluation failure produces a non-zero command result.
+
+## D043 - Freeze product behavior and separate release engineering from product scope
+
+- **Date:** 2026-07-16
+- **Status:** Accepted
+- **Context:** The validated product, receipt, and evaluation baseline is complete. Public release now requires reproducible tooling, security documentation, CI, and repository hygiene without adding visible complexity or changing business conclusions.
+- **Decision:** Freeze product behavior at commit `1a6db74cef7331a2432b19c0f8bf6a8d894dd4e4`. Perform release work on `release/build-week-submission`, pin the validated Node and pnpm majors through repository metadata, retain the frozen lockfile, add no dependency, and require owner approval plus a regression test for any post-freeze product correction.
+- **Rationale:** A documented boundary preserves validated behavior while allowing reversible release, CI, documentation, accessibility, and security corrections.
+- **Consequences:** Release checks may inspect and exercise the product but may not broaden its scope. GitHub publication, deployment, video upload, `/feedback` submission, and Devpost submission remain explicit owner actions.
