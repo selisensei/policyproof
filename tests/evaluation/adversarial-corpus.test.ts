@@ -1,7 +1,16 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import { adversarialCases, runAdversarialCorpus } from "@/src/evaluation/adversarial-corpus";
+import { beforeAll, describe, expect, it } from "vitest";
+import { adversarialCases, runAdversarialCorpus, type AdversarialCaseResult } from "@/src/evaluation/adversarial-corpus";
+import { withNetworkBlocked } from "@/src/evaluation/network-guard";
+
+let results: AdversarialCaseResult[];
+
+beforeAll(async () => {
+  const guarded = await withNetworkBlocked(runAdversarialCorpus);
+  expect(guarded.attempts).toBe(0);
+  results = guarded.value;
+});
 
 describe("private adversarial corpus", () => {
   it("defines and passes the ten required fictional adversarial cases", async () => {
@@ -9,9 +18,12 @@ describe("private adversarial corpus", () => {
       "ADV-001", "ADV-002", "ADV-003", "ADV-004", "ADV-005",
       "ADV-006", "ADV-007", "ADV-008", "ADV-009", "ADV-010",
     ]);
-    const results = await runAdversarialCorpus();
     expect(results).toHaveLength(10);
     expect(results.every(({ passed }) => passed), results.filter(({ passed }) => !passed).map(({ adversarialId, detail }) => `${adversarialId}: ${detail}`).join("\n")).toBe(true);
+  });
+
+  it.each(adversarialCases)("$adversarialId fails closed at its documented boundary", ({ adversarialId }) => {
+    expect(results.find((result) => result.adversarialId === adversarialId)).toMatchObject({ passed: true });
   });
 
   it("renders prompt-like HTML and script content as inert escaped text", () => {

@@ -32,11 +32,19 @@ function validateReference(
 }
 
 export function validateScenarioResultEvidence(scenario: ReviewScenario, results: ControlResult[]): EvidenceValidation {
-  const failures = results.flatMap((result) => [
+  const duplicateFailures = results.flatMap((result) => {
+    const ids = [...result.supportingEvidence, ...result.contradictoryEvidence].map(({ id }) => id);
+    return [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))]
+      .map((id) => `${result.controlId}: duplicate evidence identifier ${id}.`);
+  });
+  const failures = [
+    ...duplicateFailures,
+    ...results.flatMap((result) => [
     ...result.supportingEvidence.flatMap((reference) => validateReference(scenario, result.controlId, reference)),
     ...result.contradictoryEvidence.flatMap((reference) => validateReference(scenario, result.controlId, reference)),
-  ]);
-  const referenceFailures = failures.filter((failure) => /unknown document|unknown fact/.test(failure));
+    ]),
+  ];
+  const referenceFailures = failures.filter((failure) => /unknown document|unknown fact|duplicate evidence/.test(failure));
   const excerptFailures = failures.filter((failure) => /excerpt|locator/.test(failure));
   const relationshipFailures = failures.filter((failure) => /allowed evidence relationship/.test(failure));
   return {

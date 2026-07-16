@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { businessRuleMutationCases, runBusinessRuleMutations, runThresholdBoundary } from "@/src/evaluation/business-rule-mutations";
+import { withNetworkBlocked } from "@/src/evaluation/network-guard";
 
 describe("business-rule mutation framework", () => {
   it("defines the seven stable Northstar mutations", () => {
@@ -10,7 +11,9 @@ describe("business-rule mutation framework", () => {
   });
 
   it("changes exactly the expected control for every mutation", async () => {
-    const results = await runBusinessRuleMutations();
+    const guarded = await withNetworkBlocked(runBusinessRuleMutations);
+    expect(guarded.attempts).toBe(0);
+    const results = guarded.value;
     expect(results).toHaveLength(7);
     for (const result of results) {
       expect(result.passed, `${result.mutationId}: ${result.failures.join(" ")}`).toBe(true);

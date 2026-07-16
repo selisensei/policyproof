@@ -49,8 +49,8 @@ export const ReviewScenarioSchema = z.object({
     relationship: z.enum(["SUPPORTING", "CONTRADICTORY", "MISSING"]),
   })),
   thresholdParameters: z.object({
-    defaultAmount: z.number().nonnegative(),
-    comparisonAmount: z.number().nonnegative().nullable(),
+    defaultAmount: z.number().finite().nonnegative(),
+    comparisonAmount: z.number().finite().nonnegative().nullable(),
     currency: z.literal("EUR"),
   }),
   guidedDemo: z.object({

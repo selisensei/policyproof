@@ -22,7 +22,7 @@ export const ControlDefinitionSchema = z.discriminatedUnion("kind", [
     ...controlBase,
     kind: z.literal("APPROVAL_THRESHOLD"),
     parameters: z.object({
-      thresholdAmount: z.number().nonnegative(),
+      thresholdAmount: z.number().finite().nonnegative(),
       currency: z.literal("EUR"),
       requiredApprovers: z.number().int().min(2),
     }),
@@ -54,9 +54,9 @@ export const PolicyDefinitionSchema = z.object({
 export const ExtractedFactSchema = z.object({
   id: z.string().min(1),
   key: z.string().min(1),
-  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
-  sourceLocator: z.string().min(1),
-  excerpt: z.string().min(1),
+  value: z.union([z.string(), z.number().finite(), z.boolean(), z.array(z.string())]),
+  sourceLocator: z.string().trim().min(1),
+  excerpt: z.string().trim().min(1),
   confidence: z.number().min(0).max(1).nullable().optional(),
   evidenceType: z.enum(["SUPPORTING", "CONTRADICTORY", "MISSING", "CONTEXT"]).nullable().optional(),
   relationToControl: z.string().min(1).nullable().optional(),

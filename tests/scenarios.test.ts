@@ -50,6 +50,25 @@ describe("review scenario architecture", () => {
     expect(safeValidateScenario(inventedExcerpt)).toBeNull();
   });
 
+  it("rejects ambiguous numbers, ambiguous dates, non-finite values, and missing control parameters", () => {
+    const ambiguousNumber = structuredClone(northstarScenario);
+    ambiguousNumber.documents[1].facts.find(({ key }) => key === "invoiceAmount")!.value = "12.480,00";
+    expect(safeValidateScenario(ambiguousNumber)).toBeNull();
+
+    const ambiguousDate = structuredClone(northstarScenario);
+    ambiguousDate.documents[1].facts.find(({ key }) => key === "invoiceDate")!.value = "04/05/26";
+    expect(safeValidateScenario(ambiguousDate)).toBeNull();
+
+    const infiniteAmount = structuredClone(northstarScenario);
+    infiniteAmount.documents[1].facts.find(({ key }) => key === "invoiceAmount")!.value = Number.POSITIVE_INFINITY;
+    expect(safeValidateScenario(infiniteAmount)).toBeNull();
+
+    const missingParameter = structuredClone(northstarScenario) as unknown as { controls: Array<{ kind: string; parameters: Record<string, unknown> }> };
+    const approval = missingParameter.controls.find(({ kind }) => kind === "APPROVAL_THRESHOLD")!;
+    delete approval.parameters.thresholdAmount;
+    expect(safeValidateScenario(missingParameter)).toBeNull();
+  });
+
   it("produces Northstar outcomes from cloned scenario data and the shared engine", () => {
     const controls = buildScenarioControls(northstarScenario);
     const documents = buildScenarioDocuments(northstarScenario);
