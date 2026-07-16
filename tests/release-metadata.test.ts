@@ -16,7 +16,7 @@ describe("public release metadata", () => {
 
     expect(manifest.private).toBe(true);
     expect(manifest.license).toBe("MIT");
-    expect(manifest.packageManager).toBe("pnpm@11.7.0");
+    expect(manifest.packageManager).toBe("pnpm@11.9.0");
     expect(manifest.engines?.node).toBe(">=24.0.0");
     expect(read(".nvmrc").trim()).toBe("24");
   });
