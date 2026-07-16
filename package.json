@@ -14,7 +14,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "eval:competition": "vitest run tests/evaluation/competition-evaluation.cli.test.ts --reporter=dot",
+    "demo:verify": "pnpm eval:competition && vitest run tests/evaluation/competition-evaluation.test.ts tests/evaluation/business-rule-mutations.test.ts tests/evaluation/adversarial-corpus.test.ts --reporter=dot && tsc --noEmit && node scripts/print-demo-verification.mjs"
   },
   "dependencies": {
     "next": "16.2.10",

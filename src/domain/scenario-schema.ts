@@ -100,6 +100,27 @@ export const ReviewScenarioSchema = z.object({
           message: "Fact excerpt must occur verbatim in its source document.",
         });
       }
+      const valuePath = ["documents", documentIndex, "facts", factIndex, "value"];
+      if (["purchaseOrderAmount", "invoiceAmount"].includes(fact.key) &&
+          (typeof fact.value !== "number" || !Number.isFinite(fact.value))) {
+        context.addIssue({ code: "custom", path: valuePath, message: `${fact.key} must be a finite numeric value.` });
+      }
+      if (["deliveryEvidenceExists", "bankDetailsChanged", "independentBankVerificationExists"].includes(fact.key) &&
+          typeof fact.value !== "boolean") {
+        context.addIssue({ code: "custom", path: valuePath, message: `${fact.key} must be a boolean value.` });
+      }
+      if (fact.key === "approvers" &&
+          (!Array.isArray(fact.value) || fact.value.some((value) => typeof value !== "string" || !value.trim()))) {
+        context.addIssue({ code: "custom", path: valuePath, message: "approvers must be an array of non-empty names." });
+      }
+      if (["purchaseOrderDate", "invoiceDate", "deliveryDate"].includes(fact.key)) {
+        const value = fact.value;
+        const validIsoDate = typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+          new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
+        if (!validIsoDate) {
+          context.addIssue({ code: "custom", path: valuePath, message: `${fact.key} must be an unambiguous ISO 8601 calendar date.` });
+        }
+      }
     });
   });
 

@@ -1,0 +1,307 @@
+{
+  "evaluationSchemaVersion": "policyproof.competition-evaluation.v1",
+  "applicationSchemaVersion": "policyproof.app-schema.v1",
+  "evaluationMode": "LOCAL_DETERMINISTIC_NO_NETWORK",
+  "evaluatedScenarios": [
+    {
+      "scenarioId": "northstar-mixed-risk",
+      "caseReference": "CASE-NORTHSTAR-2026-07",
+      "executionMode": "DETERMINISTIC",
+      "controlCount": 7,
+      "conclusions": [
+        {
+          "controlId": "CTRL-APPROVAL",
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-TIMING",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-AMOUNT",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-CURRENCY",
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-DELIVERY",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-BANK",
+          "expected": "MISSING",
+          "actual": "MISSING",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-SOD",
+          "expected": "WARNING",
+          "actual": "WARNING",
+          "matches": true
+        }
+      ],
+      "expectedOutcomeCounts": {
+        "PASS": 3,
+        "FAIL": 2,
+        "MISSING": 1,
+        "WARNING": 1,
+        "total": 7
+      },
+      "actualOutcomeCounts": {
+        "PASS": 3,
+        "FAIL": 2,
+        "MISSING": 1,
+        "WARNING": 1,
+        "total": 7
+      },
+      "outcomeProfileMatched": true,
+      "evidenceReferencesValid": true,
+      "exactExcerptsValid": true
+    },
+    {
+      "scenarioId": "meridian-clean-procurement",
+      "caseReference": "CASE-MERIDIAN-2026-08",
+      "executionMode": "DETERMINISTIC",
+      "controlCount": 7,
+      "conclusions": [
+        {
+          "controlId": "CTRL-APPROVAL",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-TIMING",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-AMOUNT",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-CURRENCY",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-DELIVERY",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-BANK",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-SOD",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        }
+      ],
+      "expectedOutcomeCounts": {
+        "PASS": 7,
+        "FAIL": 0,
+        "MISSING": 0,
+        "WARNING": 0,
+        "total": 7
+      },
+      "actualOutcomeCounts": {
+        "PASS": 7,
+        "FAIL": 0,
+        "MISSING": 0,
+        "WARNING": 0,
+        "total": 7
+      },
+      "outcomeProfileMatched": true,
+      "evidenceReferencesValid": true,
+      "exactExcerptsValid": true
+    },
+    {
+      "scenarioId": "atlas-incomplete-evidence",
+      "caseReference": "CASE-ATLAS-2026-09",
+      "executionMode": "DETERMINISTIC",
+      "controlCount": 7,
+      "conclusions": [
+        {
+          "controlId": "CTRL-APPROVAL",
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-TIMING",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-AMOUNT",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-CURRENCY",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-DELIVERY",
+          "expected": "MISSING",
+          "actual": "MISSING",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-BANK",
+          "expected": "MISSING",
+          "actual": "MISSING",
+          "matches": true
+        },
+        {
+          "controlId": "CTRL-SOD",
+          "expected": "PASS",
+          "actual": "PASS",
+          "matches": true
+        }
+      ],
+      "expectedOutcomeCounts": {
+        "PASS": 4,
+        "FAIL": 1,
+        "MISSING": 2,
+        "WARNING": 0,
+        "total": 7
+      },
+      "actualOutcomeCounts": {
+        "PASS": 4,
+        "FAIL": 1,
+        "MISSING": 2,
+        "WARNING": 0,
+        "total": 7
+      },
+      "outcomeProfileMatched": true,
+      "evidenceReferencesValid": true,
+      "exactExcerptsValid": true
+    }
+  ],
+  "totals": {
+    "scenariosEvaluated": 3,
+    "controlsEvaluated": 21,
+    "expectedConclusionsMatched": 21,
+    "outcomeProfilesMatched": 3,
+    "externalNetworkCalls": 0,
+    "unexpectedFailures": 0
+  },
+  "checks": {
+    "scenarioSchemas": {
+      "status": "PASS",
+      "detail": "Three strict scenario schemas validated."
+    },
+    "expectedConclusions": {
+      "status": "PASS",
+      "detail": "All 21 expected conclusions matched."
+    },
+    "outcomeProfiles": {
+      "status": "PASS",
+      "detail": "All three outcome profiles matched."
+    },
+    "evidenceReferences": {
+      "status": "PASS",
+      "detail": "All evidence references and control relationships are valid."
+    },
+    "exactExcerpts": {
+      "status": "PASS",
+      "detail": "All controlled excerpts are exact source text."
+    },
+    "scenarioIsolation": {
+      "status": "PASS",
+      "detail": "Scenario identifiers and state remain isolated."
+    },
+    "deterministicReproduction": {
+      "status": "PASS",
+      "detail": "All conclusions reproduced from cloned inputs."
+    },
+    "thresholdSensitivity": {
+      "status": "PASS",
+      "detail": "Only approval changes at EUR 15,000; strict > boundaries pass."
+    },
+    "reviewFingerprints": {
+      "status": "PASS",
+      "detail": "Same inputs preserve fingerprints; threshold mutation changes it."
+    },
+    "receiptIntegrity": {
+      "status": "PASS",
+      "detail": "Controlled receipts verify and modified receipts fail."
+    },
+    "businessRuleMutations": {
+      "status": "PASS",
+      "detail": "All 7 business-rule mutations passed."
+    },
+    "adversarialValidation": {
+      "status": "PASS",
+      "detail": "All 10 adversarial cases passed."
+    },
+    "noNetwork": {
+      "status": "PASS",
+      "detail": "Network APIs were blocked for the complete evaluation."
+    }
+  },
+  "mutationSummary": {
+    "schemaVersion": "policyproof.business-rule-mutation.v1",
+    "executed": 7,
+    "passed": 7,
+    "status": "PASS"
+  },
+  "adversarialSummary": {
+    "schemaVersion": "policyproof.adversarial-corpus.v1",
+    "executed": 10,
+    "passed": 10,
+    "status": "PASS"
+  },
+  "historicalLiveValidation": {
+    "status": "HISTORICAL_EVIDENCE",
+    "model": "gpt-5.6",
+    "validatedCommit": "eb120feaca78bf3cdbc71b7b7198045f86a44852",
+    "source": "docs/evaluation/LIVE_GPT56_VALIDATION.md",
+    "executedDuringEvaluation": false
+  },
+  "receiptSecurityBoundary": {
+    "classification": "EXPECTED SECURITY BOUNDARY",
+    "contentHashVerified": true,
+    "modifiedContentDetected": true,
+    "digitallySigned": false,
+    "provesOrigin": false,
+    "provesIdentity": false,
+    "provesAuthorship": false,
+    "provesTrustedTime": false,
+    "provesLegalSignature": false,
+    "simultaneousContentAndHashReplacementRemainsPossible": true
+  },
+  "warnings": [
+    "Historical live GPT-5.6 evidence was not rerun.",
+    "Evaluation covers one controlled procurement-policy domain, not universal policy coverage."
+  ],
+  "failures": [],
+  "overallResult": "PASS"
+}
