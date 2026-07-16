@@ -81,7 +81,14 @@ export function ReviewFingerprintPanel({ fingerprint, comparison, results, candi
         </div>
       )}
 
-      <small>{locale === "fr" ? "L’empreinte de revue est un condensat SHA-256 des entrées, preuves et conclusions déterministes normalisées. Elle ne prouve ni l’identité, ni l’auteur, ni une signature juridique." : "The review fingerprint is a SHA-256 digest of normalized review inputs, evidence and deterministic conclusions. It does not prove identity, authorship or legal signature."}</small>
+      {compact ? (
+        <details className="fingerprint-limitation">
+          <summary>{locale === "fr" ? "Limites de l’empreinte" : "Fingerprint limits"}</summary>
+          <small>{locale === "fr" ? "L’empreinte de revue est un condensat SHA-256 des entrées, preuves et conclusions déterministes normalisées. Elle ne prouve ni l’identité, ni l’auteur, ni une signature juridique." : "The review fingerprint is a SHA-256 digest of normalized review inputs, evidence and deterministic conclusions. It does not prove identity, authorship or legal signature."}</small>
+        </details>
+      ) : (
+        <small>{locale === "fr" ? "L’empreinte de revue est un condensat SHA-256 des entrées, preuves et conclusions déterministes normalisées. Elle ne prouve ni l’identité, ni l’auteur, ni une signature juridique." : "The review fingerprint is a SHA-256 digest of normalized review inputs, evidence and deterministic conclusions. It does not prove identity, authorship or legal signature."}</small>
+      )}
     </section>
   );
 }

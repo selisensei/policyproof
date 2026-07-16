@@ -675,7 +675,7 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   return (
     <main className="app-root" data-presentation={presentationLevel} aria-busy={isCompiling || isRunning}>
       <a href="#workspace" className="skip-link">{t("a11y.skip")}</a>
-      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} primaryLabel={primaryLabel} onPrimaryAction={runPrimaryAction} primaryDisabled={isRunning || isCompiling || (currentStep === "policy" && mode === "LIVE_GPT_5_6" && (!ai.available || policyText.trim().length < 50))} onShowGuide={() => setGuideDismissed(false)} />
+      <AppHeader mode={mode} ai={ai} onModeChange={changeMode} primaryLabel={primaryLabel} onPrimaryAction={runPrimaryAction} primaryDisabled={isRunning || isCompiling || (currentStep === "policy" && mode === "LIVE_GPT_5_6" && (!ai.available || policyText.trim().length < 50))} showPrimaryAction={presentationLevel === "FULL_WORKSPACE"} onShowGuide={() => setGuideDismissed(false)} />
       {presentationLevel === "FOCUSED_DEMO" && (
         <div className="focused-frame">
           <FocusedDemo

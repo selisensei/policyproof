@@ -53,6 +53,7 @@ describe("PolicyProof workspace interactions", () => {
     const focused = screen.getByRole("region", { name: "Focused Demo" });
     expect(within(focused).getByText("Review the Northstar vendor change")).toBeTruthy();
     expect(within(focused).getByText(/7 enabled/)).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Run review" })).toHaveLength(1);
     expect(screen.queryByRole("navigation", { name: "Review progress" })).toBeNull();
 
     await user.click(within(focused).getByRole("button", { name: "Run review" }));

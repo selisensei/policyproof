@@ -8,6 +8,7 @@ export function AppHeader({
   primaryLabel,
   onPrimaryAction,
   primaryDisabled,
+  showPrimaryAction = true,
   onShowGuide,
 }: {
   mode: AppMode;
@@ -16,6 +17,7 @@ export function AppHeader({
   primaryLabel: string;
   onPrimaryAction: () => void;
   primaryDisabled: boolean;
+  showPrimaryAction?: boolean;
   onShowGuide: () => void;
 }) {
   const { locale, setLocale, t } = useLocale();
@@ -71,9 +73,9 @@ export function AppHeader({
 
           <p className="human-review-indicator"><span aria-hidden="true" />{t("header.humanReview")}</p>
           <button type="button" className="help-button" onClick={onShowGuide} aria-label={t("guide.title")} title={t("guide.title")}>?</button>
-          <button type="button" onClick={onPrimaryAction} disabled={primaryDisabled} className="run-button">
+          {showPrimaryAction && <button type="button" onClick={onPrimaryAction} disabled={primaryDisabled} className="run-button">
             {primaryLabel}
-          </button>
+          </button>}
         </div>
       </div>
     </header>

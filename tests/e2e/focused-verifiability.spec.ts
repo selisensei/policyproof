@@ -26,7 +26,7 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.goto("/");
   const focused = page.getByRole("region", { name: "Focused Demo" });
   await expect(focused.getByRole("heading", { name: "Review the Northstar vendor change" })).toBeVisible();
-  await expect(focused).toContainText("Northstar Facilities — Mixed-Risk Case");
+  await expect(focused).toContainText("Northstar Facilities : Mixed-Risk Case");
   await expect(focused).toContainText("7 enabled");
   await expect(focused.getByText("Review results")).toHaveCount(0);
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-landing-1440x900.png`, fullPage: true });
