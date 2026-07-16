@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { collectMarkdownLinkErrors } from "../scripts/check-doc-links.mjs";
 // @ts-expect-error The release checker is an intentionally dependency-free Node ESM script.
 import { collectReleaseHygieneErrors } from "../scripts/check-release-hygiene.mjs";
+// @ts-expect-error The copy checker is an intentionally dependency-free Node ESM script.
+import { scanHumanCopy } from "../scripts/check-human-copy.mjs";
 // @ts-expect-error The release orchestrator is an intentionally dependency-free Node ESM script.
 import { releaseSteps, runReleaseVerification } from "../scripts/release-verify.mjs";
 
@@ -24,6 +26,10 @@ afterEach(() => {
 });
 
 describe("release documentation and hygiene tooling", () => {
+  it("keeps visible product and public submission copy free from long dashes and generic AI marketing", () => {
+    expect(scanHumanCopy()).toEqual([]);
+  });
+
   it("accepts existing relative Markdown links and rejects missing targets and file URLs", () => {
     const root = fixtureDirectory();
     mkdirSync(join(root, "docs"));

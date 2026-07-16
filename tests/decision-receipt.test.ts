@@ -33,7 +33,7 @@ describe("decision receipt", () => {
     expect(first.disclaimer).toBe(REVIEW_DISCLAIMER);
     expect(() => DecisionReceiptSchema.parse(first)).not.toThrow();
     expect(serializeDecisionReceipt(first)).toContain('"reviewId": "PP-20260713T200000000Z"');
-    expect(serializeDecisionReceiptMarkdown(first)).toContain("# PolicyProof — Decision receipt");
+    expect(serializeDecisionReceiptMarkdown(first)).toContain("# PolicyProof: Decision receipt");
     expect(serializeDecisionReceiptMarkdown(first)).toContain("| CTRL-01 | CTRL-APPROVAL | Approval threshold | FAIL | CONFIRMED | Evidence checked. |");
     expect(serializeDecisionReceiptMarkdown(first)).toContain(REVIEW_DISCLAIMER);
     expect(createConciseReviewSummary(first)).toContain("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING");

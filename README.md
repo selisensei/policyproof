@@ -1,6 +1,6 @@
 # PolicyProof
 
-**Every result traced. Every decision defensible.**
+**Policy review with exact evidence and a recorded human decision.**
 
 PolicyProof is a verification layer for procurement review. It turns written policy into reviewable controls, links each conclusion to exact evidence, runs objective checks deterministically, and keeps the final decision human.
 
@@ -41,7 +41,7 @@ Northstar is a fictional vendor-change and procurement case. The shared engine p
 
 The clearest evidence moment is a purchase order for **12,480 EUR** and an invoice for **12,480 USD**. PolicyProof shows both exact excerpts and fails currency consistency while amount match still passes. With one approver, changing the policy threshold from EUR 10,000 to EUR 15,000 changes only the approval control from FAIL to PASS; the other six conclusions remain unchanged.
 
-## Why this is not a document chatbot
+## Why the workflow is structured
 
 The model does not make the final control result. GPT-5.6 proposes structured controls and locates structured facts and exact excerpts. Strict schemas and source checks reject unsupported references. The TypeScript engine then performs supported amount, currency, date, threshold, evidence-presence, and role comparisons. A reviewer confirms or overrides the final review with comments.
 

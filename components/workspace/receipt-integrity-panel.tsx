@@ -14,7 +14,7 @@ function statusCopy(status: ReceiptVerificationResult["status"], locale: "en" | 
     MODIFIED: { en: ["Receipt content has changed", "The recalculated hash does not match. This receipt must not be treated as integrity-verified."], fr: ["Le contenu du reçu a été modifié", "L’empreinte recalculée ne correspond pas. Ce reçu ne doit pas être considéré comme vérifié."] },
     UNSUPPORTED_VERSION: { en: ["Unsupported receipt version", "PolicyProof did not attempt an unsafe migration."], fr: ["Version du reçu non prise en charge", "PolicyProof n’a tenté aucune migration non sûre."] },
     MALFORMED: { en: ["Invalid receipt structure", "The local content is not valid supported PolicyProof receipt JSON."], fr: ["Structure du reçu invalide", "Le contenu local n’est pas un JSON de reçu PolicyProof valide et pris en charge."] },
-    MISSING_INTEGRITY: { en: ["Receipt integrity block is missing", "This receipt cannot be integrity-verified; it is not being labelled as modified."], fr: ["Le bloc d’intégrité du reçu est absent", "Ce reçu ne peut pas être vérifié ; il n’est pas présenté comme modifié."] },
+    MISSING_INTEGRITY: { en: ["Receipt integrity block is missing", "This receipt cannot be integrity-verified. It is not labelled as modified."], fr: ["Le bloc d’intégrité du reçu est absent", "Ce reçu ne peut pas être vérifié. Il n’est pas présenté comme modifié."] },
   } as const;
   return copy[status][locale];
 }
@@ -83,11 +83,11 @@ export function ReceiptIntegrityPanel({ receipt, reviewFingerprint, verification
   return (
     <section className="receipt-integrity-panel" data-compact={compact || undefined} aria-labelledby={compact ? "focused-receipt-integrity-title" : "receipt-integrity-title"}>
       <header>
-        <div><p className="eyebrow">04 · {locale === "fr" ? "REÇU VÉRIFIABLE" : "VERIFIABLE RECEIPT"}</p><h2 id={compact ? "focused-receipt-integrity-title" : "receipt-integrity-title"}>{locale === "fr" ? "Décision consignée, contenu vérifiable" : "Decision recorded, content verifiable"}</h2></div>
+        <div><p className="eyebrow">04 · {locale === "fr" ? "REÇU DE DÉCISION" : "DECISION RECEIPT"}</p><h2 id={compact ? "focused-receipt-integrity-title" : "receipt-integrity-title"}>{locale === "fr" ? "Intégrité du reçu" : "Receipt integrity"}</h2></div>
         {receipt && <code aria-label={locale === "fr" ? "Empreinte abrégée" : "Abbreviated hash"}>{abbreviateReceiptHash(hash)}</code>}
       </header>
       {!receipt ? (
-        <div className="receipt-generate-row"><p>{locale === "fr" ? "Générez un instantané exact de la revue et des décisions humaines actuelles." : "Generate an exact snapshot of the current review and human decisions."}</p><button type="button" className="primary-button" onClick={onGenerate} disabled={isGenerating}>{isGenerating ? (locale === "fr" ? "Génération…" : "Generating…") : (locale === "fr" ? "Générer le reçu" : "Generate receipt")}</button></div>
+        <div className="receipt-generate-row"><p>{locale === "fr" ? "Enregistrez la revue et les décisions actuelles dans un reçu vérifiable localement." : "Record the current review and decisions in a locally verifiable receipt."}</p><button type="button" className="primary-button" onClick={onGenerate} disabled={isGenerating}>{isGenerating ? (locale === "fr" ? "Génération…" : "Generating…") : (locale === "fr" ? "Générer le reçu" : "Generate receipt")}</button></div>
       ) : (
         <>
           <dl className="receipt-integrity-summary">
@@ -96,7 +96,7 @@ export function ReceiptIntegrityPanel({ receipt, reviewFingerprint, verification
             <div><dt>{locale === "fr" ? "État de décision" : "Decision status"}</dt><dd>{receipt.receipt.decisionStatus === "COMPLETE" ? (locale === "fr" ? "Complet" : "Complete") : (locale === "fr" ? "En cours" : "In progress")}</dd></div>
           </dl>
           <div className="receipt-integrity-actions">
-            <button type="button" onClick={() => setTechnicalOpen((current) => !current)} aria-expanded={technicalOpen}>{locale === "fr" ? "Voir le reçu" : "View receipt"}</button>
+            <button type="button" onClick={() => setTechnicalOpen((current) => !current)} aria-expanded={technicalOpen}>{locale === "fr" ? "Détails techniques" : "Technical details"}</button>
             <button type="button" className="primary-button" onClick={onVerifyCurrent}>{locale === "fr" ? "Vérifier l’intégrité du reçu" : "Verify receipt integrity"}</button>
             <button type="button" onClick={downloadJson}>{locale === "fr" ? "Exporter le reçu JSON" : "Export receipt JSON"}</button>
             <button type="button" onClick={() => window.print()}>{locale === "fr" ? "Imprimer" : "Print"}</button>

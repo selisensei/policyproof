@@ -21,7 +21,7 @@ function markdownCell(value: string): string {
 export function serializeDecisionReceiptMarkdown(receipt: DecisionReceipt): string {
   const french = receipt.selectedLanguage === "fr";
   const lines = [
-    `# PolicyProof — ${french ? "Reçu de décision" : "Decision receipt"}`,
+    `# PolicyProof: ${french ? "Reçu de décision" : "Decision receipt"}`,
     "",
     `- **${french ? "Référence" : "Reference"}:** ${receipt.reviewId}`,
     `- **${french ? "Politique" : "Policy"}:** ${receipt.policyName} (${receipt.policyVersion})`,
@@ -37,7 +37,7 @@ export function serializeDecisionReceiptMarkdown(receipt: DecisionReceipt): stri
     "",
     `| ${french ? "Référence" : "Reference"} | ${french ? "ID technique" : "Technical ID"} | ${french ? "Contrôle" : "Control"} | ${french ? "Conclusion" : "Conclusion"} | ${french ? "Décision" : "Decision"} | ${french ? "Commentaire" : "Comment"} |`,
     "| --- | --- | --- | --- | --- | --- |",
-    ...receipt.outcomes.map((outcome) => `| ${outcome.displayReference} | ${outcome.controlId} | ${markdownCell(outcome.title)} | ${outcome.status} | ${outcome.reviewerDecision} | ${markdownCell(outcome.reviewerComment || "—")} |`),
+    ...receipt.outcomes.map((outcome) => `| ${outcome.displayReference} | ${outcome.controlId} | ${markdownCell(outcome.title)} | ${outcome.status} | ${outcome.reviewerDecision} | ${markdownCell(outcome.reviewerComment || (french ? "Aucun" : "None"))} |`),
     "",
     `> ${receipt.disclaimer}`,
     "",
@@ -59,8 +59,8 @@ export function serializeEvidenceMatrixCsv(input: { caseName: string; results: C
   for (const result of input.results) {
     const reference = resolveControlReference(result.controlId);
     const common = [input.caseName, reference.displayReference, reference.controlId, result.title, result.status, result.severity];
-    for (const evidence of result.supportingEvidence) rows.push([...common, "SUPPORTING", `${evidence.documentId} — ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
-    for (const evidence of result.contradictoryEvidence) rows.push([...common, "CONTRADICTORY", `${evidence.documentId} — ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
+    for (const evidence of result.supportingEvidence) rows.push([...common, "SUPPORTING", `${evidence.documentId}: ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
+    for (const evidence of result.contradictoryEvidence) rows.push([...common, "CONTRADICTORY", `${evidence.documentId}: ${evidence.documentTitle}`, evidence.locator, evidence.excerpt, result.reviewerDecision.state, result.reviewerDecision.comment]);
     for (const missing of result.missingEvidence) rows.push([...common, "MISSING", missing.expectedSource, "", missing.description, result.reviewerDecision.state, result.reviewerDecision.comment]);
     if (!result.supportingEvidence.length && !result.contradictoryEvidence.length && !result.missingEvidence.length) rows.push([...common, "NONE", "", "", "", result.reviewerDecision.state, result.reviewerDecision.comment]);
   }

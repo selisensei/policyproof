@@ -98,7 +98,7 @@ It is an optional current-session view of cases actually run in the browser. It 
 
 ## Why is the evidence trusted?
 
-The source document ID must be known, the excerpt must occur verbatim in the submitted text, and the locator and relationship must validate. Missing evidence has no fabricated source. Rejected references remain rejected. Deterministic rules and human judgment—not the trust label—produce the final conclusion.
+The source document ID must be known, the excerpt must occur verbatim in the submitted text, and the locator and relationship must validate. Missing evidence has no fabricated source. Rejected references remain rejected. Deterministic rules and human judgment produce the final conclusion; the trust label does not.
 
 ## Is the audit trail production-grade?
 

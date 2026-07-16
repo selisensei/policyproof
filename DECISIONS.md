@@ -399,3 +399,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Freeze product behavior at commit `1a6db74cef7331a2432b19c0f8bf6a8d894dd4e4`. Perform release work on `release/build-week-submission`, pin the validated Node and pnpm majors through repository metadata, retain the frozen lockfile, add no dependency, and require owner approval plus a regression test for any post-freeze product correction.
 - **Rationale:** A documented boundary preserves validated behavior while allowing reversible release, CI, documentation, accessibility, and security corrections.
 - **Consequences:** Release checks may inspect and exercise the product but may not broaden its scope. GitHub publication, deployment, video upload, `/feedback` submission, and Devpost submission remain explicit owner actions.
+
+## D044 - Use audit-working-paper language before technical language
+
+- **Date:** 2026-07-16
+- **Status:** Accepted
+- **Context:** The frozen product is technically complete, but repeated slogans, long-dash constructions, uppercase metadata, and early hash terminology can make the interface feel like a hackathon demonstration instead of professional review software.
+- **Decision:** Keep product behavior and schemas unchanged while making the primary presentation concrete: case context, automated result, exact evidence, then reviewer decision. Use direct sentence-case copy, reserve technical identifiers and cryptographic detail for secondary surfaces, remove generic AI marketing language, and enforce the public copy rules with a dependency-free release check.
+- **Rationale:** Audit, finance, procurement, and internal-control users need a calm evidence hierarchy. Concrete language and progressive disclosure improve comprehension without changing any calculation or capability.
+- **Consequences:** Machine identifiers, exact source excerpts, schema names, hashes, and required security limitations remain available and accurate. The final polish may change labels, spacing, borders, and presentation order only. Business rules, scenario outcomes, evidence content, API behavior, exports, and dependencies remain frozen.

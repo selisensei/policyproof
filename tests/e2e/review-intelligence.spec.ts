@@ -14,7 +14,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 async function loadAndRun(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Open full workspace" }).click();
-  await page.getByRole("button", { name: "Load demo case" }).first().click();
+  await page.getByRole("button", { name: "Load Northstar case" }).first().click();
   await expect(page.getByRole("status")).toContainText("Demo case loaded");
   await page.getByRole("button", { name: "Expand policy", exact: true }).click();
   await expect(page.getByText("The initiator and approver must be different people.")).toBeVisible();

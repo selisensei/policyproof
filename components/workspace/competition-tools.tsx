@@ -34,7 +34,7 @@ export function CompetitionTools({ compact = false, judgeMode, judgeStep, comple
   const { locale } = useLocale();
   return <section className="competition-tools" aria-label={locale === "fr" ? "Outils de démonstration" : "Demonstration tools"}>
     <div className="competition-toolbar">
-      {!judgeMode ? <button type="button" onClick={onEnterJudgeMode}>{locale === "fr" ? "Entrer en mode jury" : "Enter Judge Mode"}</button> : <button type="button" className="is-active" onClick={onExitJudgeMode}>{locale === "fr" ? "Quitter le mode jury" : "Exit Judge Mode"}</button>}
+      {!judgeMode ? <button type="button" onClick={onEnterJudgeMode}>{compact ? (locale === "fr" ? "Guide de démonstration" : "Demo guide") : (locale === "fr" ? "Guide du jury" : "Judge guide")}</button> : <button type="button" className="is-active" onClick={onExitJudgeMode}>{locale === "fr" ? "Fermer le guide" : "Close guide"}</button>}
       {!compact && <><details><summary>{locale === "fr" ? "Comparer les cas exécutés" : "Compare completed cases"}</summary><ScenarioComparison completed={completed} scenarios={scenarios} onSelect={onSelectScenario} /></details>
       <details><summary>{locale === "fr" ? "Architecture" : "Architecture"}</summary><ArchitectureExplanation /></details>
       <details><summary>{locale === "fr" ? "Piste d’audit" : "Audit trail"} ({auditTrail.length})</summary><AuditTrail events={auditTrail} onClear={onClearAudit} /></details></>}
@@ -55,7 +55,7 @@ function ScenarioComparison({ completed, scenarios, onSelect }: { completed: Com
   return <div className="scenario-comparison" role="table" aria-label={locale === "fr" ? "Comparaison des scénarios exécutés" : "Completed scenario comparison"}>
     <div role="row"><span role="columnheader">{locale === "fr" ? "Cas" : "Case"}</span><span role="columnheader">PASS</span><span role="columnheader">FAIL</span><span role="columnheader">MISSING</span><span role="columnheader">WARNING</span><span role="columnheader">{locale === "fr" ? "Décisions ouvertes" : "Open decisions"}</span><span role="columnheader">{locale === "fr" ? "Sources exactes" : "Exact sources"}</span></div>
     {completed.map((item) => { const scenario = scenarios.find((candidate) => candidate.id === item.scenarioId); return scenario && <div role="row" className="scenario-comparison-row" key={item.scenarioId}><span role="cell"><button type="button" onClick={() => onSelect(item.scenarioId)}>{scenario.caseName[locale]}</button></span><span role="cell">{item.summary.PASS}</span><span role="cell">{item.summary.FAIL}</span><span role="cell">{item.summary.MISSING}</span><span role="cell">{item.summary.WARNING}</span><span role="cell">{item.unresolved}</span><span role="cell">{item.verifiedControls}/{item.controlCount}</span></div>; })}
-    <p>{locale === "fr" ? "Résultats de la session actuelle — aucun score ni classement." : "Current-session results — no score or ranking."}</p>
+    <p>{locale === "fr" ? "Résultats de la session actuelle. Aucun score ni classement." : "Current-session results. No score or ranking."}</p>
   </div>;
 }
 

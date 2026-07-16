@@ -25,10 +25,10 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   const focused = page.getByRole("region", { name: "Focused Demo" });
-  await expect(focused.getByRole("heading", { name: "Every result traced. Every decision defensible." })).toBeVisible();
+  await expect(focused.getByRole("heading", { name: "Review the Northstar vendor change" })).toBeVisible();
   await expect(focused).toContainText("Northstar Facilities — Mixed-Risk Case");
   await expect(focused).toContainText("7 enabled");
-  await expect(focused.getByText("The case at a glance")).toHaveCount(0);
+  await expect(focused.getByText("Review results")).toHaveCount(0);
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-landing-1440x900.png`, fullPage: true });
 
   await runFocusedReview(page);
@@ -38,7 +38,7 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await expect(focused.locator('.focused-outcomes [data-status="WARNING"]')).toContainText(/1\s*WARNING/);
   await expect(focused.getByText("12,480 EUR", { exact: true })).toBeVisible();
   await expect(focused.getByText("12,480 USD", { exact: true })).toBeVisible();
-  await expect(focused.getByText("✓ Exact sources verified")).toBeVisible();
+  await expect(focused.getByText("✓ Exact excerpts verified")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-reviewed-1280x720.png`, fullPage: true });
 
@@ -49,7 +49,7 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.screenshot({ path: `${captureRoot}/pass-1/full-workspace-1280x720.png`, fullPage: true });
 
   await page.getByRole("button", { name: "Return to focused demo" }).click();
-  await page.getByRole("button", { name: "Enter Judge Mode" }).click();
+  await page.getByRole("button", { name: "Demo guide" }).click();
   const judge = page.getByRole("region", { name: "Judge Mode sequence" });
   await expect(judge).toContainText("Run the review");
   await judge.getByRole("button", { name: "Next" }).click();
@@ -78,7 +78,7 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
   const confirm = focused.getByRole("button", { name: "Confirm" });
   await confirm.click();
   await expect(confirm).toHaveAttribute("aria-pressed", "true");
-  await focused.getByRole("button", { name: "Rerun deterministic checks" }).click();
+  await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("Same inputs and conclusions reproduced")).toBeVisible();
   await expect(focused.getByText("7 of 7 conclusions reproduced identically")).toBeVisible();
   await expect(focused.getByText("Review fingerprint unchanged")).toBeVisible();
@@ -90,7 +90,7 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
   await expect(threshold).toHaveValue("10000");
   await focused.locator(".focused-reproducibility").screenshot({ path: `${captureRoot}/pass-2/threshold-10000.png` });
   await threshold.fill("15000");
-  await focused.getByRole("button", { name: "Rerun deterministic checks" }).click();
+  await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("Review content changed")).toBeVisible();
   await expect(focused.getByText("Changed conclusion: CTRL-01: FAIL → PASS")).toBeVisible();
   await expect(focused.getByText("Unchanged: 6 controls")).toBeVisible();
@@ -129,7 +129,7 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   const focusedFr = page.getByRole("region", { name: "Démonstration ciblée" });
   await expect(focusedFr.getByRole("heading", { name: "Empreinte de revue", level: 3 })).toBeVisible();
-  await expect(focusedFr.getByRole("button", { name: "Relancer les contrôles déterministes" })).toBeVisible();
+  await expect(focusedFr.getByRole("button", { name: "Relancer les contrôles" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/focused-fr-390x844.png`, fullPage: true });
 
@@ -138,7 +138,7 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/effective-zoom-200.png`, fullPage: true });
 
-  const rerun = focused.getByRole("button", { name: "Rerun deterministic checks" });
+  const rerun = focused.getByRole("button", { name: "Re-run checks" });
   await rerun.focus();
   await expect(rerun).toBeFocused();
   await page.screenshot({ path: `${captureRoot}/pass-3/keyboard-focus.png`, fullPage: true });

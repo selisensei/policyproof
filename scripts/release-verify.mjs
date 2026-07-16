@@ -8,6 +8,7 @@ const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 export const releaseSteps = Object.freeze([
   { label: "Release hygiene", command: process.execPath, args: ["scripts/check-release-hygiene.mjs"] },
   { label: "Documentation links", command: process.execPath, args: ["scripts/check-doc-links.mjs"] },
+  { label: "Human copy", command: process.execPath, args: ["scripts/check-human-copy.mjs"] },
   { label: "Deterministic demo verification and TypeScript", command: pnpm, args: ["demo:verify"] },
   { label: "Full Vitest suite", command: pnpm, args: ["test"] },
   { label: "ESLint", command: pnpm, args: ["lint"] },

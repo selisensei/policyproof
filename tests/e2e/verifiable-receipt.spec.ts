@@ -22,11 +22,11 @@ async function generateNorthstarReceipt(page: Page) {
   await expect(focused.getByText("12,480 EUR", { exact: true })).toBeVisible();
   await expect(focused.getByText("12,480 USD", { exact: true })).toBeVisible();
   const initialFingerprint = await focused.locator(".review-fingerprint > header code").textContent();
-  await focused.getByRole("button", { name: "Rerun deterministic checks" }).click();
+  await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("7 of 7 conclusions reproduced identically")).toBeVisible();
   await expect(focused.getByText("Review fingerprint unchanged")).toBeVisible();
   await focused.getByRole("spinbutton", { name: "Approval threshold in EUR" }).fill("15000");
-  await focused.getByRole("button", { name: "Rerun deterministic checks" }).click();
+  await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("Changed conclusion: CTRL-01: FAIL → PASS")).toBeVisible();
   await expect(focused.getByText("Unchanged: 6 controls")).toBeVisible();
   await expect(focused.locator(".review-fingerprint > header code")).not.toHaveText(initialFingerprint ?? "");

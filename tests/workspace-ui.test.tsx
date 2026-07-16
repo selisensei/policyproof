@@ -51,15 +51,15 @@ describe("PolicyProof workspace interactions", () => {
     const user = userEvent.setup();
     renderWorkspace(true);
     const focused = screen.getByRole("region", { name: "Focused Demo" });
-    expect(within(focused).getByText("Every result traced. Every decision defensible.")).toBeTruthy();
+    expect(within(focused).getByText("Review the Northstar vendor change")).toBeTruthy();
     expect(within(focused).getByText(/7 enabled/)).toBeTruthy();
     expect(screen.queryByRole("navigation", { name: "Review progress" })).toBeNull();
 
     await user.click(within(focused).getByRole("button", { name: "Run review" }));
-    expect(await within(focused).findByText("The case at a glance")).toBeTruthy();
+    expect(await within(focused).findByText("Review results")).toBeTruthy();
     expect(within(focused).getByText("12,480 EUR")).toBeTruthy();
     expect(within(focused).getByText("12,480 USD")).toBeTruthy();
-    expect(within(focused).getByText("✓ Exact sources verified")).toBeTruthy();
+    expect(within(focused).getByText("✓ Exact excerpts verified")).toBeTruthy();
 
     await user.click(within(focused).getByRole("button", { name: /Open full workspace/ }));
     expect(screen.getByRole("navigation", { name: "Review progress" })).toBeTruthy();
@@ -81,7 +81,7 @@ describe("PolicyProof workspace interactions", () => {
     const confirm = within(focused).getByRole("button", { name: "Confirm" });
     await user.click(confirm);
     expect(confirm.getAttribute("aria-pressed")).toBe("true");
-    await user.click(within(focused).getByRole("button", { name: "Rerun deterministic checks" }));
+    await user.click(within(focused).getByRole("button", { name: "Re-run checks" }));
     expect(await within(focused).findByText("Same inputs and conclusions reproduced")).toBeTruthy();
     expect(within(focused).getByText("7 of 7 conclusions reproduced identically")).toBeTruthy();
     expect(within(focused).getByText("Review fingerprint unchanged")).toBeTruthy();
@@ -91,7 +91,7 @@ describe("PolicyProof workspace interactions", () => {
     const threshold = within(focused).getByRole("spinbutton", { name: "Approval threshold in EUR" });
     await user.clear(threshold);
     await user.type(threshold, "15000");
-    await user.click(within(focused).getByRole("button", { name: "Rerun deterministic checks" }));
+    await user.click(within(focused).getByRole("button", { name: "Re-run checks" }));
     expect(await within(focused).findByText("Review content changed")).toBeTruthy();
     expect(within(focused).getByText("Changed conclusion: CTRL-01: FAIL → PASS")).toBeTruthy();
     expect(within(focused).getByText("Unchanged: 6 controls")).toBeTruthy();
@@ -110,8 +110,8 @@ describe("PolicyProof workspace interactions", () => {
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
     renderWorkspace();
 
-    expect(screen.getByText(/The deterministic demo makes no AI request/)).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Load demo case" }));
+    expect(screen.getByText(/This deterministic demo uses fictional data and makes no model request/)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Load Northstar case" }));
     await runReviewFromControls(user);
 
     const approval = screen.getByRole("button", { name: "Inspect Approval threshold" });
@@ -358,7 +358,7 @@ describe("PolicyProof workspace interactions", () => {
   it("uses Judge Mode as guidance without running GPT or recording a decision", async () => {
     const user = userEvent.setup();
     renderWorkspace();
-    await user.click(screen.getByRole("button", { name: "Enter Judge Mode" }));
+    await user.click(screen.getByRole("button", { name: "Judge guide" }));
     const judge = screen.getByRole("region", { name: "Judge Mode sequence" });
     expect(within(judge).getByText("Run the review")).toBeTruthy();
     expect(within(judge).getByText(/1\/4/)).toBeTruthy();
@@ -369,7 +369,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(screen.getByText(/Policy interpretation and structured fact/)).toBeTruthy();
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
     expect(screen.queryByLabelText("Decision receipt")).toBeNull();
-    await user.click(screen.getByRole("button", { name: "Exit Judge Mode" }));
+    await user.click(screen.getByRole("button", { name: "Close guide" }));
     expect(screen.queryByRole("region", { name: "Judge Mode sequence" })).toBeNull();
   });
 
@@ -425,7 +425,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(await screen.findByText("Proposal received")).toBeTruthy();
     expect(screen.getByText("Awaiting human approval")).toBeTruthy();
     await user.type(screen.getByLabelText("Control title CTRL-MOCK"), " edited");
-    expect(screen.getByText("Edited — approval required")).toBeTruthy();
+    expect(screen.getByText("Edited. Approval required")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Reject proposal" }));
     const rejectedState = screen.getByText("Rejected by reviewer");
     expect(rejectedState).toBeTruthy();

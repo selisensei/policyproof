@@ -27,7 +27,7 @@ The first working version supports one fictional procurement and vendor-change p
 7. Use deterministic TypeScript logic for supported calculations and comparisons.
 8. Display Pass, Fail, Missing, or Warning with exact evidence or an explicit missing-evidence explanation.
 9. Rerun deterministic checks and compare normalized conclusions and the versioned Review Fingerprint.
-10. Derive review intelligence—outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison—from the same structured review state.
+10. Derive outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison from the same structured review state.
 11. Prioritize unresolved controls for human attention without inventing a composite risk score.
 12. Let the user confirm, reject, or accept an exception while preserving the original result.
 13. Generate a local decision receipt that binds the Review Fingerprint to outcomes, exact evidence references, human decisions, comments, safe audit metadata, language, identifier, and timestamp with a versioned Receipt Integrity Hash.

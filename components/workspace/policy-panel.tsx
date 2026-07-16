@@ -67,7 +67,7 @@ export function PolicyPanel({
             </ol>
           )}
           {!expanded && requirements.length > visibleRequirements.length && <button type="button" className="folio-more" onClick={onToggleExpanded}>{locale === "fr" ? `Afficher ${requirements.length - visibleRequirements.length} exigences supplémentaires` : `Show ${requirements.length - visibleRequirements.length} more requirements`}</button>}
-          <footer className="folio-footer">{locale === "fr" ? "Chaque exigence compile exactement un contrôle" : "Each requirement compiles into exactly one control"} — R-01 → CTRL-01 ··· R-07 → CTRL-07</footer>
+          <footer className="folio-footer">{locale === "fr" ? "Chaque exigence compile exactement un contrôle" : "Each requirement compiles into exactly one control"} : R-01 → CTRL-01 ··· R-07 → CTRL-07</footer>
         </article>
 
         <aside className="compilation-panel" aria-label={locale === "fr" ? "Compilation de la politique" : "Policy compilation"}>

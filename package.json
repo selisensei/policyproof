@@ -20,6 +20,7 @@
     "demo:verify": "pnpm eval:competition && vitest run tests/evaluation/competition-evaluation.test.ts tests/evaluation/business-rule-mutations.test.ts tests/evaluation/adversarial-corpus.test.ts --reporter=dot && tsc --noEmit && node scripts/print-demo-verification.mjs",
     "release:docs": "node scripts/check-doc-links.mjs",
     "release:hygiene": "node scripts/check-release-hygiene.mjs",
+    "release:copy": "node scripts/check-human-copy.mjs",
     "release:clean-room": "node scripts/clean-room-verify.mjs",
     "release:verify": "node scripts/release-verify.mjs"
   },

@@ -29,7 +29,7 @@ async function openFullWorkspace(page: Page) {
 test("captures the complete Proofroom visual comparison matrix", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await openFullWorkspace(page);
-  await page.getByRole("button", { name: "Load demo case" }).first().click();
+  await page.getByRole("button", { name: "Load Northstar case" }).first().click();
   const dismissGuide = page.getByRole("button", { name: "Dismiss guided demo" });
   if (await dismissGuide.isVisible()) await dismissGuide.click();
 

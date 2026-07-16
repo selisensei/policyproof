@@ -67,7 +67,7 @@ test("keeps Judge Mode manual, bilingual, keyboard usable, and responsive", asyn
   await meridian.focus();
   await page.keyboard.press("Enter");
   await expect(meridian).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Enter Judge Mode" }).click();
+  await page.getByRole("button", { name: "Judge guide" }).click();
   const judge = page.getByRole("region", { name: "Judge Mode sequence" });
   await expect(judge).toContainText("Run the review");
   await expect(judge).toContainText(/no action or decision is automated/i);
@@ -115,7 +115,7 @@ test("captures the competition hardening visual review matrix", async ({ page })
   await page.screenshot({ path: `${captures}/audit-trail.png` });
   await audit.click();
 
-  await page.getByRole("button", { name: "Enter Judge Mode" }).click();
+  await page.getByRole("button", { name: "Judge guide" }).click();
   await expect(page.getByRole("region", { name: "Judge Mode sequence" })).toBeVisible();
   await page.waitForTimeout(250);
   await page.screenshot({ path: `${captures}/judge-mode-desktop-1280x720.png` });

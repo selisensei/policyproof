@@ -6,12 +6,12 @@ import { useLocale } from "@/src/i18n/locale-context";
 
 function documentDate(document: CaseDocument): string {
   const fact = document.facts.find((candidate) => candidate.key.toLocaleLowerCase().includes("date"));
-  return typeof fact?.value === "string" ? fact.value : "—";
+  return typeof fact?.value === "string" ? fact.value : "N/A";
 }
 
 function documentParty(document: CaseDocument): string {
   const fact = document.facts.find((candidate) => candidate.key === "supplierName");
-  return typeof fact?.value === "string" ? fact.value : document.type === "WORKFLOW" ? "Internal" : "—";
+  return typeof fact?.value === "string" ? fact.value : document.type === "WORKFLOW" ? "Internal" : "N/A";
 }
 
 export function DocumentsPanel({
@@ -45,7 +45,7 @@ export function DocumentsPanel({
     <SectionShell
       id="documents"
       step={t("step.label", { number: 3 })}
-      title={`${locale === "fr" ? "Dossier" : "Case file"} — ${caseName}`}
+      title={`${locale === "fr" ? "Dossier" : "Case file"} : ${caseName.replaceAll("\u2014", ":").replaceAll("\u2013", ":")}`}
       description={isLive ? t("documents.help.live") : `${demoDocuments.length} ${locale === "fr" ? "documents fictifs" : "fixture documents"} · ${factCount} ${locale === "fr" ? "faits extraits" : "extracted facts"}`}
       action={<div className="heading-actions">{isLive && <button type="button" onClick={onLoadDemo} className="primary-button">{t("action.loadDemo")}</button>}{!isLive && <button type="button" onClick={onResetDemo} className="secondary-button">{t("action.resetDemo")}</button>}</div>}
     >
@@ -86,7 +86,7 @@ export function DocumentsPanel({
           <footer className="register-footer">{demoDocuments.length} {locale === "fr" ? "documents versionnés · contenu affiché comme texte inerte" : "version-controlled documents · content rendered as inert text"}</footer>
         </div>
       )}
-      {!isLive && <div className="file-dropzone is-disabled-note"><div><strong>{locale === "fr" ? "Ajouter des preuves au dossier" : "Add evidence to this case file"}</strong><p>{locale === "fr" ? "Passez au mode GPT-5.6 en direct pour sélectionner des fichiers fictifs locaux." : "Switch to Live GPT-5.6 to select fictional local files."}</p><span>TXT · MD · JSON — MAX 1 MB</span></div></div>}
+      {!isLive && <div className="file-dropzone is-disabled-note"><div><strong>{locale === "fr" ? "Ajouter des preuves au dossier" : "Add evidence to this case file"}</strong><p>{locale === "fr" ? "Passez au mode GPT-5.6 en direct pour sélectionner des fichiers fictifs locaux." : "Switch to Live GPT-5.6 to select fictional local files."}</p><span>TXT · MD · JSON. MAX 1 MB</span></div></div>}
     </SectionShell>
   );
 }

@@ -408,3 +408,7 @@ Three environmental failures were retained in the release record rather than hid
 `pnpm release:verify` is intentionally run from the clean final commit because it requires both staged and unstaged Git cleanliness. Its final post-commit result is recorded in the release handoff. The registry-dependent production audit and the slower clean-room reconstruction remain separately documented gates.
 
 No live or paid OpenAI request was made. `.env.local` was not opened or read. No API key was displayed. No push, deployment, merge, publication, repository creation, video upload, or Devpost submission occurred.
+
+## Final human-copy gate
+
+Run `pnpm release:copy` after changing visible English or French copy, the public README, or the principal submission documents. The dependency-free checker rejects long dashes, a narrow list of generic AI-marketing phrases, repeated punctuation in audited Markdown, and obvious placeholder copy. `pnpm release:verify` runs this check after documentation-link validation. The allowlist is structural: technical identifiers, code syntax, command flags, hashes, and diagrammatic arrows are outside the audited prose rules.

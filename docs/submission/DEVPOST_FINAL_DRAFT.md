@@ -1,4 +1,4 @@
-# PolicyProof — Final Devpost Draft
+# PolicyProof: Final Devpost Draft
 
 ## One-line pitch
 
@@ -84,7 +84,7 @@ The hardest challenge was preserving trust while combining model interpretation 
 
 ## What we learned
 
-A useful AI review product does not need to hide uncertainty. Separating semantic extraction from deterministic calculations makes the workflow easier to test and explain. Evidence coverage and integrity are more useful than an unsupported confidence score, and human judgment should be stored beside—not on top of—the machine result.
+A useful review product states uncertainty clearly. Separating semantic extraction from deterministic calculations makes the workflow easier to test and explain. Evidence coverage and integrity are more useful than an unsupported confidence score. Human judgment is stored beside the automated result.
 
 ## Limitations
 

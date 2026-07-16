@@ -19,7 +19,7 @@ const coverageGlyph: Record<EvidenceCoverageState, string> = {
   SUPPORTING: "+",
   CONTRADICTORY: "×",
   MISSING: "○",
-  NOT_APPLICABLE: "—",
+  NOT_APPLICABLE: "·",
 };
 
 function methodName(mode: "DETERMINISTIC_DEMO" | "LIVE_GPT_5_6", locale: "en" | "fr") {
@@ -80,7 +80,7 @@ export function ReviewIntelligencePanels({ results, documents, controls, summary
           <div><dt>{locale === "fr" ? "Périmètre" : "Scope"}</dt><dd>{summary.total} {locale === "fr" ? "contrôles" : "controls"} · {documents.length} {locale === "fr" ? "documents" : "documents"}</dd></div>
           <div><dt>{locale === "fr" ? "Méthode" : "Method"}</dt><dd>{methodName(mode, locale)}</dd></div>
           <div><dt>{locale === "fr" ? "Seuil" : "Threshold"}</dt><dd>{threshold.toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} EUR</dd></div>
-          <div><dt>{locale === "fr" ? "Exécution" : "Run"}</dt><dd>{currentRun ? new Date(currentRun.generatedAt).toLocaleTimeString(locale === "fr" ? "fr-FR" : "en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}</dd></div>
+          <div><dt>{locale === "fr" ? "Exécution" : "Run"}</dt><dd>{currentRun ? new Date(currentRun.generatedAt).toLocaleTimeString(locale === "fr" ? "fr-FR" : "en-GB", { hour: "2-digit", minute: "2-digit" }) : "N/A"}</dd></div>
         </dl>
       </section>
 

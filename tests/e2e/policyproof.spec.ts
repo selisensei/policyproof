@@ -29,7 +29,7 @@ test("completes the deterministic workspace path with traceable evidence and a r
   await capture(page, "test-results/01-english-policy-1440.png");
 
   // 2. Load the version-controlled Northstar case.
-  await page.getByRole("button", { name: "Load demo case" }).first().click();
+  await page.getByRole("button", { name: "Load Northstar case" }).first().click();
   await expect(page.getByRole("status")).toContainText("Demo case loaded");
   // 3. Review the complete policy source.
   await page.getByRole("button", { name: "Expand policy", exact: true }).click();
