@@ -1,23 +1,13 @@
 import type { ControlResult } from "@/src/domain/schemas";
-
-const knownControlOrder = [
-  "CTRL-APPROVAL",
-  "CTRL-TIMING",
-  "CTRL-AMOUNT",
-  "CTRL-CURRENCY",
-  "CTRL-DELIVERY",
-  "CTRL-BANK",
-  "CTRL-SOD",
-] as const;
+import { CONTROL_REFERENCE_REGISTRY, resolveControlReference } from "@/src/domain/control-references";
 
 export function sequenceForControl(controlId: string): number | null {
-  const index = knownControlOrder.indexOf(controlId as (typeof knownControlOrder)[number]);
+  const index = CONTROL_REFERENCE_REGISTRY.findIndex((entry) => entry.controlId === controlId);
   return index === -1 ? null : index + 1;
 }
 
 export function controlRef(controlId: string): string {
-  const sequence = sequenceForControl(controlId);
-  return sequence ? `CTRL-${String(sequence).padStart(2, "0")}` : controlId;
+  return resolveControlReference(controlId).displayReference;
 }
 
 export function requirementRef(controlId: string): string {

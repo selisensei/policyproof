@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ControlStatusSchema, ReviewDecisionStateSchema, type ControlResult } from "@/src/domain/schemas";
 import { AuditEventSchema, type AuditEvent } from "@/src/lib/audit-trail";
+import { resolveControlReference } from "@/src/domain/control-references";
 
 export const REVIEW_DISCLAIMER =
   "PolicyProof is a review aid. This receipt is not legal advice, a compliance certification, or payment approval.";
@@ -26,6 +27,7 @@ export const DecisionReceiptSchema = z.object({
   outcomes: z.array(
     z.object({
       controlId: z.string().min(1),
+      displayReference: z.string().min(1),
       title: z.string().min(1),
       status: ControlStatusSchema,
       reviewerDecision: ReviewDecisionStateSchema,
@@ -75,6 +77,7 @@ export function createDecisionReceipt(input: {
     summary: counts,
     outcomes: input.results.map((result) => ({
       controlId: result.controlId,
+      displayReference: resolveControlReference(result.controlId).displayReference,
       title: result.title,
       status: result.status,
       reviewerDecision: result.reviewerDecision.state,

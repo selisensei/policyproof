@@ -1,5 +1,7 @@
 # Review Fingerprint Model
 
+Control identity inside the fingerprint uses the stable technical `controlId`, such as `CTRL-APPROVAL`. Human-readable references such as `CTRL-01` are derived from the shared control-reference registry and deliberately excluded from the canonical payload. This keeps the existing review semantics and fingerprint stable while user-facing receipts and exports can preserve both fields.
+
 ## 1. Purpose
 
 The Review Fingerprint lets PolicyProof demonstrate that the same normalized policy, controls, source records, extracted facts, evidence references, and deterministic conclusions produce the same compact digest. It supports reproducibility checks; it does not replace the human decision or receipt.

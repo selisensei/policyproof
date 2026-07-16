@@ -20,6 +20,8 @@ Each deterministic run produces a versioned Review Fingerprint: a lowercase SHA-
 
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
+The live-validation evidence is preserved by commit `eb120feaca78bf3cdbc71b7b7198045f86a44852` (`test: validate live GPT-5.6 evidence pipeline`). Commit `76c6ce62a0fdbefa721e40d6f321fcea4b9e8db4` is the preceding judge-experience redesign, not the validation commit. Release ancestry can be checked with `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD`.
+
 ## Screenshots
 
 Local Playwright runs generate ignored English and French screenshots at desktop and mobile widths. The Proofroom integration and review-intelligence workspace were inspected through repeated desktop, tablet, mobile, component, decision, receipt, threshold-change, run-comparison, print, loading, and safely mocked provider-error captures. The builder will select production captures for the public repository after deployment so the README does not publish development-only images or local paths.

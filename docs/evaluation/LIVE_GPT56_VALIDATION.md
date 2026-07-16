@@ -10,7 +10,8 @@ This result validates one narrow demonstration case. It does not prove general m
 
 - Date: 2026-07-14
 - Branch: `feat/live-gpt-validation`
-- Baseline commit: `76c6ce62a0fdbefa721e40d6f321fcea4b9e8db4`
+- Validation commit: `eb120feaca78bf3cdbc71b7b7198045f86a44852` (`test: validate live GPT-5.6 evidence pipeline`)
+- Application baseline used for the supervised run: `76c6ce62a0fdbefa721e40d6f321fcea4b9e8db4` (`feat: redesign PolicyProof judge experience`)
 - Model: `gpt-5.6`
 - Reasoning effort: `low`
 - SDK retries: `0`

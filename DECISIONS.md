@@ -363,3 +363,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Define `policyproof.review-fingerprint.v1` as a strict Zod payload containing normalized policy content, enabled controls and parameters, source documents and structured facts, deterministic results, exact evidence references, and validation state. Canonically sort documented semantic collections, normalize line endings and finite numbers, preserve Unicode code points, and compute a lowercase SHA-256 digest with Web Crypto. Exclude all presentation state, timestamps, audit events, human decisions, comments, and receipt metadata.
 - **Rationale:** This boundary makes identical deterministic review semantics reproducible while keeping the fingerprint independent from the future receipt-integrity model.
 - **Consequences:** A same-input rerun compares normalized inputs, conclusions, and the fingerprint without replacing current results or decisions. A parameter change uses the existing decision reset and produces an explicit diff. Unexpected same-input divergence preserves both result sets for human inspection. The digest is not a signature, proof of identity, authorship, or trusted time.
+
+## D040 - Separate stable control IDs from display references
+
+- **Date:** 2026-07-16
+- **Status:** Accepted
+- **Context:** The deterministic engine uses semantic IDs such as `CTRL-APPROVAL`, while the Proofroom interface presents ordered references such as `CTRL-01`. Receipts and exports must not make these look like different controls.
+- **Decision:** Keep `controlId` as the stable technical join key, derive `displayReference` through one typed registry, and preserve both values in JSON, Markdown, CSV, print receipts, and safe control-specific audit events. Known deterministic mappings must be unique. Unregistered live control IDs use their stable ID as a visibly unmapped fallback rather than being renamed or rejected by the application.
+- **Rationale:** An explicit mapping layer improves human traceability without migrating validated fixtures, changing engine joins, or altering Review Fingerprint semantics.
+- **Consequences:** `CTRL-APPROVAL` remains the technical ID and `CTRL-01` remains its display reference. The Review Fingerprint continues to hash stable IDs only. Receipt-integrity payloads may include both fields because they protect one exact serialized receipt instance.

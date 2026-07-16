@@ -34,7 +34,7 @@ describe("competition hardening contracts", () => {
     const first = results[0];
     const reviewed = { ...first, title: 'Approval, "independent"', reviewerDecision: { state: "CONFIRMED" as const, comment: "Vérifié, ligne 1\nligne 2" } };
     const csv = serializeEvidenceMatrixCsv({ caseName: "Meridian — dossier", results: [reviewed], locale: "fr" });
-    expect(csv.startsWith("\uFEFFCas,ID du contrôle")).toBe(true);
+    expect(csv.startsWith("\uFEFFCas,Référence du contrôle,ID technique du contrôle")).toBe(true);
     expect(csv).toContain('"Approval, ""independent"""');
     expect(csv).toContain('"Vérifié, ligne 1\nligne 2"');
     expect(csv).toContain("CONFIRMED");

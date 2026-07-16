@@ -14,7 +14,9 @@ Traditional checklists capture an answer but often lose the chain that produced 
 
 PolicyProof makes the review chain explicit:
 
-**Policy → Control → Evidence → Conclusion → Human decision → Verifiable receipt**
+**Policy → Control → Evidence → Conclusion → Human decision → Decision receipt**
+
+The current prototype provides a Review Fingerprint for deterministic review semantics. Receipt-integrity hashing and local receipt verification are introduced separately from that review-level proof.
 
 GPT-5.6 interprets policy language and extracts structured facts and exact excerpts. A human approves the proposed controls. TypeScript performs supported calculations. The workspace then shows PASS, FAIL, MISSING, or WARNING with traceable evidence and asks the reviewer to confirm, reject, or accept an exception.
 

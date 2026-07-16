@@ -324,3 +324,17 @@ Focused Playwright coverage proves the Northstar-first presentation, exact evide
 The first final `typecheck` and the following build attempt failed because an old PolicyProof `next start` process and a previously generated `.next/dev/types` directory shared the same Next.js cache. Inspection found duplicated and truncated generated declarations, not a source-code error. The identified port 3200 process chain was stopped, the corrupted generated directory was preserved under an ignored diagnostic name, and the official build regenerated a clean cache. The subsequent build, standalone typecheck, lint, Playwright run, and production smoke test all passed.
 
 No authenticated or paid OpenAI request was made. Provider behavior remained mocked, the same-input rerun remained inside the deterministic TypeScript boundary, `.env.local` was not opened or read, and generated screenshots and smoke logs remain ignored under `test-results/focused-verifiability/`.
+
+## Verifiable-receipt phase baseline — 2026-07-16
+
+- `pnpm test`: PASS — 18 files, 133 tests, 55.58 s.
+- `pnpm typecheck`: PASS — no TypeScript errors, 31.1 s command wall time.
+- `pnpm lint`: PASS — no ESLint errors or warnings, 91.0 s command wall time.
+- `pnpm build`: PASS — compiled in 26.6 s and produced the expected five routes, 53.6 s command wall time.
+- `pnpm test:e2e`: PASS — 19 Chromium tests, 95.1 s command wall time.
+- `pnpm audit --prod`: PASS — no known vulnerabilities.
+- Production smoke: PASS — root and status route returned 200; PolicyProof, `gpt-5.6`, boolean availability, `nosniff`, and `DENY` were verified; the temporary port 3400 server was stopped.
+- Ancestry: PASS — `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD` returned success.
+- Safety scans: PASS — 139 tracked text files, zero potential secret-pattern files, zero personal absolute-path files, zero forbidden generated paths tracked, and all required generated paths ignored.
+
+No live OpenAI request was made and `.env.local` was not read. These are baseline results; final phase results are recorded only after the receipt-integrity implementation and browser paths are complete.

@@ -112,3 +112,12 @@ Controls, documents, facts, results, evidence, and missing requirements use docu
 ## Presentation rules
 
 Stable IDs and exact excerpts are never translated. Interface labels, explanations, statuses, and receipt structure are localized. Evidence coverage states are supporting, contradictory, missing, and not applicable; they are relationships, not confidence scores.
+# Control identity contract
+
+PolicyProof keeps three control identity concepts separate:
+
+- `controlId` is the stable technical identifier used by the engine, evidence relationships, Review Fingerprint, audit metadata, and joins. Example: `CTRL-APPROVAL`.
+- `displayReference` is the human-readable reference shown in the interface and preserved beside the stable ID in receipts and exports. Example: `CTRL-01`.
+- `title` is the localized user-facing label. Example: `Approval threshold` or `Seuil d’approbation`.
+
+The shared mapping is defined in `src/domain/control-references.ts`. The seven deterministic controls have unique registered display references. A provider-generated or otherwise unregistered control safely uses its stable ID as its display reference and is marked as an unmapped fallback by the resolver. No technical ID is renamed. The Review Fingerprint continues to hash stable IDs; derived display references do not change its semantic payload.

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resolveControlReference } from "@/src/domain/control-references";
 
 export const AuditActionSchema = z.enum([
   "SCENARIO_LOADED",
@@ -18,6 +19,7 @@ export const AuditEventSchema = z.object({
   action: AuditActionSchema,
   scenarioId: z.string().regex(/^[a-z0-9-]+$/),
   controlId: z.string().min(1).nullable(),
+  displayReference: z.string().min(1).nullable(),
   description: z.string().min(1).max(180),
 });
 
@@ -36,12 +38,14 @@ export function createAuditEvent(input: {
   description: string;
   timestamp: string;
 }): AuditEvent {
+  const reference = input.controlId ? resolveControlReference(input.controlId) : null;
   return AuditEventSchema.parse({
     id: `${input.timestamp}-${input.action}-${input.controlId ?? "case"}`,
     timestamp: input.timestamp,
     action: input.action,
     scenarioId: input.scenarioId,
-    controlId: input.controlId ?? null,
+    controlId: reference?.controlId ?? null,
+    displayReference: reference?.displayReference ?? null,
     description: safeDescription(input.description),
   });
 }
