@@ -22,7 +22,7 @@ import type { ReviewFingerprintPayload } from "@/src/domain/review-fingerprint-s
 import { defaultScenarioId, reviewScenarios } from "@/src/fixtures/scenarios";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, type TranslationKey } from "@/src/i18n/translations";
-import { createDecisionReceipt } from "@/src/lib/decision-receipt";
+import { createDecisionReceipt, type DecisionReceipt } from "@/src/lib/decision-receipt";
 import { appendAuditEvent, createAuditEvent, type AuditAction, type AuditEvent } from "@/src/lib/audit-trail";
 import { LocalDocumentError, readLocalDocuments, type LocalDocument } from "@/src/lib/local-documents";
 import { recordReviewDecision } from "@/src/lib/review-decision";
@@ -31,6 +31,7 @@ import { filterResults, summarizeResults, type ResultFilter } from "@/src/lib/re
 import { assessEvidenceIntegrity, createRunSnapshot } from "@/src/lib/review-intelligence";
 import { advanceRunHistory, loadRunHistory, persistRunHistory, removeRunHistory, type RunHistory } from "@/src/lib/review-run-history";
 import { buildReviewFingerprintPayload, compareReviewFingerprintPayloads, computeReviewFingerprint, type ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
+import { attachReceiptIntegrity, buildReceiptIntegrityPayload, verifyReceiptIntegrity, type ReceiptVerificationResult, type VerifiableDecisionReceipt } from "@/src/lib/receipt-integrity";
 import { toCaseDocuments, toDeterministicControls } from "@/src/openai/mappers";
 
 const steps: WorkflowStep[] = ["policy", "controls", "documents", "review", "decision"];
@@ -106,6 +107,10 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   const [fingerprintComparison, setFingerprintComparison] = useState<ReviewFingerprintComparison | null>(null);
   const [divergenceCandidateResults, setDivergenceCandidateResults] = useState<ControlResult[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [generatedDecisionReceipt, setGeneratedDecisionReceipt] = useState<DecisionReceipt | null>(null);
+  const [verifiableReceipt, setVerifiableReceipt] = useState<VerifiableDecisionReceipt | null>(null);
+  const [receiptVerification, setReceiptVerification] = useState<ReceiptVerificationResult | null>(null);
+  const [isGeneratingReceipt, setIsGeneratingReceipt] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,6 +184,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
     setFingerprintComparison(null);
     setDivergenceCandidateResults([]);
     setIsVerifying(false);
+    setGeneratedDecisionReceipt(null);
+    setVerifiableReceipt(null);
+    setReceiptVerification(null);
     setNotice(nextNotice);
   }
 
@@ -249,6 +257,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
     const amount = Number(value);
     setThresholdInvalid(value.trim() === "" || !Number.isFinite(amount) || amount < 0);
     setChangedControlId(null);
+    setGeneratedDecisionReceipt(null);
+    setVerifiableReceipt(null);
+    setReceiptVerification(null);
     if (results.length) setNotice({ key: "notice.settingsChanged" });
     if (Number(value) === 15_000) completeGuide("THRESHOLD_UPDATED");
   }
@@ -515,6 +526,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   function updateCommentFor(controlId: string, comment: string) {
     setResults((current) => current.map((result) => result.controlId === controlId ? { ...result, reviewerDecision: { ...result.reviewerDecision, comment } } : result));
     setReviewError("");
+    setGeneratedDecisionReceipt(null);
+    setVerifiableReceipt(null);
+    setReceiptVerification(null);
   }
 
   function updateComment(comment: string) {
@@ -535,6 +549,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
         return next;
       });
       setReviewError("");
+      setGeneratedDecisionReceipt(null);
+      setVerifiableReceipt(null);
+      setReceiptVerification(null);
       setNotice({ key: "notice.decisionSaved", controlId: target.controlId, fallbackTitle: target.title, decisionState: state });
       completeGuide("DECISION_RECORDED");
       audit("REVIEWER_DECISION_SAVED", `Saved reviewer decision ${state}.`, reviewed.controlId);
@@ -558,6 +575,55 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
     setRunHistory(emptyRunHistory);
   }
 
+  async function generateVerifiableReceipt() {
+    if (!runGeneratedAt || !results.length || !reviewFingerprintPayload || !reviewFingerprint) return;
+    setIsGeneratingReceipt(true);
+    setReceiptVerification(null);
+    try {
+      const generatedAt = new Date().toISOString();
+      const generatedEvent = createAuditEvent({
+        action: "RECEIPT_GENERATED",
+        scenarioId: activeScenario.id,
+        description: "Generated a versioned decision receipt integrity snapshot.",
+        timestamp: generatedAt,
+      });
+      const nextAuditTrail = appendAuditEvent(auditTrail, generatedEvent);
+      const decisionReceipt = createDecisionReceipt({
+        results,
+        policyName: activeScenario.policy.title,
+        policyVersion: activeScenario.policy.version,
+        caseName: mode === "DETERMINISTIC_DEMO" ? activeScenario.caseName[locale] : "Local fictional document review",
+        selectedLanguage: locale,
+        runMode: mode,
+        generatedAt,
+        enabledControlCount,
+        auditTrail: nextAuditTrail,
+      });
+      const payload = buildReceiptIntegrityPayload({
+        decisionReceipt,
+        reviewFingerprintPayload,
+        reviewFingerprint,
+        auditTrail: nextAuditTrail,
+      });
+      const protectedReceipt = await attachReceiptIntegrity(payload);
+      setAuditTrail(nextAuditTrail);
+      setGeneratedDecisionReceipt(decisionReceipt);
+      setVerifiableReceipt(protectedReceipt);
+      completeGuide("RECEIPT_REVIEWED");
+    } catch (error) {
+      setWorkspaceError(error instanceof Error ? error.message : "Receipt generation failed.");
+    } finally {
+      setIsGeneratingReceipt(false);
+    }
+  }
+
+  async function verifyCurrentReceipt() {
+    if (!verifiableReceipt) return;
+    const result = await verifyReceiptIntegrity(verifiableReceipt);
+    setReceiptVerification(result);
+    if (result.status === "VALID") audit("RECEIPT_VERIFIED", "Verified the current receipt integrity locally.");
+  }
+
   const panel = currentStep === "policy" ? (
     <PolicyPanel mode={mode} ai={ai} policyText={policyText} expanded={policyExpanded} isCompiling={isCompiling} compilationError={compilationError} onPolicyTextChange={(value) => { setPolicyText(value); setProposalsApproved(false); }} onToggleExpanded={() => { setPolicyExpanded((current) => !current); completeGuide("POLICY_REVIEWED"); }} onCompile={compilePolicy} onOpenControls={() => navigate("controls")} />
   ) : currentStep === "controls" ? (
@@ -567,7 +633,7 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
   ) : currentStep === "review" ? (
     <ReviewPanel results={results} visibleResults={visibleResults} summary={summary} filter={filter} selectedResult={selectedResult} threshold={threshold} mode={mode} documents={reviewDocuments} controls={controls} policyText={activeScenario.policy.text} caseName={activeScenario.caseName[locale]} caseReference={activeScenario.caseReference} documentTypes={documentTypes} changedControlId={changedControlId} currentRun={runHistory.latest} previousRun={runHistory.previous} fingerprint={reviewFingerprint} fingerprintComparison={fingerprintComparison} divergenceCandidateResults={divergenceCandidateResults} isVerifying={isVerifying} onRerun={() => void rerunDeterministicChecks()} onFilterChange={changeFilter} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); if (controlId === activeScenario.guidedDemo.defaultSelectedControlId) completeGuide("CONTRADICTION_INSPECTED"); }} onClearHistory={clearRunHistory} onGoDecision={() => navigate("decision")} />
   ) : (
-    <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={receipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} onExport={(format) => audit("RECEIPT_EXPORTED", `Exported the review receipt as ${format}.`)} />
+    <DecisionPanel results={results} documents={reviewDocuments} selectedResult={selectedResult} summary={summary} receipt={generatedDecisionReceipt ?? receipt} verifiableReceipt={verifiableReceipt} receiptVerification={receiptVerification} reviewFingerprint={reviewFingerprint} isGeneratingReceipt={isGeneratingReceipt} reviewError={reviewError} threshold={threshold} policyReference={activeScenario.policyReference} onSelectResult={(controlId) => { setSelectedControlId(controlId); setReviewError(""); }} onCommentChange={updateComment} onDecision={applyDecision} onReopenEvidence={() => navigate("review")} onGenerateReceipt={() => void generateVerifiableReceipt()} onVerifyReceipt={() => void verifyCurrentReceipt()} onExport={(format) => audit("RECEIPT_EXPORTED", `Exported the review receipt as ${format}.`)} />
   );
 
   const workspacePrimaryLabel = currentStep === "policy"
@@ -624,6 +690,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
           fingerprint={reviewFingerprint}
           fingerprintComparison={fingerprintComparison}
           divergenceCandidateResults={divergenceCandidateResults}
+          verifiableReceipt={verifiableReceipt}
+          receiptVerification={receiptVerification}
+          isGeneratingReceipt={isGeneratingReceipt}
           onRunReview={() => void runReview()}
           onRerun={() => void rerunDeterministicChecks()}
           onThresholdChange={updateThreshold}
@@ -631,6 +700,9 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
           onOpenDecision={() => { setPresentationLevel("FULL_WORKSPACE"); navigate("decision"); }}
           onCommentChange={updateCommentFor}
           onDecision={applyDecisionFor}
+          onGenerateReceipt={() => void generateVerifiableReceipt()}
+          onVerifyReceipt={() => void verifyCurrentReceipt()}
+          onExportReceipt={() => audit("RECEIPT_EXPORTED", "Exported the integrity-protected receipt as JSON.")}
           />
           <CompetitionTools compact judgeMode={judgeMode} judgeStep={judgeStep} completed={completedScenarios} scenarios={reviewScenarios} auditTrail={auditTrail} onEnterJudgeMode={enterJudgeMode} onExitJudgeMode={() => setJudgeMode(false)} onJudgeStep={setJudgeStep} onSelectScenario={(scenarioId) => { if (scenarioId === activeScenario.id && results.length) navigate("review"); else selectScenario(scenarioId); }} onClearAudit={() => setAuditTrail([])} />
         </div>

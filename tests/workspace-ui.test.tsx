@@ -302,7 +302,10 @@ describe("PolicyProof workspace interactions", () => {
     expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/^PP-/));
     await user.click(screen.getByRole("button", { name: "Copy summary" }));
     expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining("3 PASS, 2 FAIL, 1 MISSING, 1 WARNING"));
-    await user.click(screen.getByRole("button", { name: "Download JSON" }));
+    await user.click(screen.getByRole("button", { name: "Generate receipt" }));
+    await user.click(await screen.findByRole("button", { name: "Verify receipt integrity" }));
+    expect(await screen.findByText("Receipt integrity verified")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Export receipt JSON" }));
     await user.click(screen.getByRole("button", { name: "Download Markdown" }));
     await user.click(screen.getByRole("button", { name: "Download CSV" }));
     expect(createObjectURL).toHaveBeenCalled();

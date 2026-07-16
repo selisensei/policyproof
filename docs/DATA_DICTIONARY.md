@@ -121,3 +121,19 @@ PolicyProof keeps three control identity concepts separate:
 - `title` is the localized user-facing label. Example: `Approval threshold` or `Seuil d’approbation`.
 
 The shared mapping is defined in `src/domain/control-references.ts`. The seven deterministic controls have unique registered display references. A provider-generated or otherwise unregistered control safely uses its stable ID as its display reference and is marked as an unmapped fallback by the resolver. No technical ID is renamed. The Review Fingerprint continues to hash stable IDs; derived display references do not change its semantic payload.
+
+## Verifiable receipt fields
+
+| Field | Meaning |
+| --- | --- |
+| `integrity.version` | Receipt integrity contract; currently `policyproof.receipt-integrity.v1`. |
+| `integrity.algorithm` | Native unkeyed `SHA-256`. |
+| `integrity.hash` | Lowercase 64-character digest, stored outside the hashed payload. |
+| `receipt.receiptFormatVersion` | Exact receipt serialization contract; currently `policyproof.decision-receipt.v1`. |
+| `receipt.reviewFingerprint` | Version and digest of stable semantic review content. |
+| `receipt.controls` | Stable technical ID, display reference, and title for each control. |
+| `receipt.results` | Normalized deterministic conclusions and exact evidence references. |
+| `receipt.humanDecisions` | Decision state and exact reviewer comment for each control. |
+| `receipt.decisionStatus` | `IN_PROGRESS` while any control is pending; otherwise `COMPLETE`. |
+| `receipt.auditTrail` | At most 100 strict safe metadata events; never document bodies or provider payloads. |
+| `receipt.generatedAt` | UTC generation time; intentionally changes the receipt hash. |

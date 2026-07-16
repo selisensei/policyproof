@@ -22,6 +22,8 @@ The default presentation is a Northstar-first Focused Demo over the same applica
 
 A versioned Review Fingerprint makes reproducibility concrete. It is a native SHA-256 digest of normalized policy, controls, parameters, source documents, structured facts, exact evidence, and deterministic conclusions. An unchanged rerun reproduces 7/7 conclusions and the same digest without a model call. Raising the approval threshold to EUR 15,000 changes `CTRL-01` from FAIL to PASS, leaves six controls unchanged, and changes the digest. It is not a signature, identity proof, or trusted timestamp.
 
+A separate versioned Receipt Integrity Hash protects one exact decision-receipt instance. It binds the Review Fingerprint to normalized results and evidence, human decisions and comments, safe audit metadata, language, receipt ID, and generation time. The current or exported JSON receipt is verified entirely in the browser with native SHA-256. This detects changes to included content; it is not proof of identity, authorship, legal signature, or trusted time.
+
 The Review workspace adds evidence-led intelligence without becoming a generic dashboard. It shows case outcome composition, evidence coverage, an event chronology, threshold sensitivity, a prioritized reviewer queue, and a comparison with the previous local run. Search and filters narrow the same underlying results. Selecting a visual always leads back to a control or its exact evidence.
 
 The three profiles use the same strict scenario schema, policy, seven control kinds, deterministic engine, evidence inspector, and human-decision receipt. Northstar produces a mixed 3/2/1/1 profile, Meridian produces seven supported passes, and Atlas produces one approval failure plus two explicit missing-evidence outcomes. These results are calculated at runtime from each case's documents. Fixture expectations exist only as regression assertions.
@@ -35,6 +37,8 @@ At the default EUR 10,000 threshold, the deterministic demonstration produces 3 
 PolicyProof is a single Next.js and React application written in strict TypeScript. Zod validates runtime data, the official OpenAI JavaScript SDK implements the optional server-only GPT-5.6 workflow, Vitest and Testing Library protect the domain and interface, and Playwright verifies the complete browser journey. There is no database, authentication layer, external document service, or multi-agent application architecture.
 
 The Review Fingerprint uses a strict versioned Zod payload, recursively canonical JSON, deterministic semantic collection ordering, `TextEncoder`, and browser-compatible Web Crypto SHA-256. It adds no hashing package. The dedicated rerun calls the shared TypeScript engine and cannot enter the OpenAI path.
+
+Receipt integrity reuses the same safe canonical-value rules through a separate strict schema and receipt-specific ordering. The stored hash is outside the hashed payload. Imported JSON stays local, never uploads to a server, and never replaces active review state.
 
 GPT-5.6 handles semantic work that benefits from a language model:
 
@@ -70,6 +74,7 @@ The hardest challenge was preserving trust while combining model interpretation 
 - Accessible keyboard navigation, reduced-motion behavior, print output, JSON, Markdown, and UTF-8 CSV exports.
 - A meaningful threshold rerun and previous-run comparison derived from real state.
 - Same-input 7/7 deterministic reproduction with a versioned Review Fingerprint and explicit change/divergence handling.
+- Local current/exported JSON receipt verification with explicit valid, modified, unsupported, malformed, and missing-integrity states.
 - A focused judge path with the full advanced workspace preserved behind one state-safe action.
 - Three controlled case profiles processed by one shared engine and interface.
 - Manual Judge Mode, current-session comparison, architecture, evidence-trust, and safe audit surfaces.

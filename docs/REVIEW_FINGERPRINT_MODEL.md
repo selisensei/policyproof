@@ -64,4 +64,4 @@ The model uses only current local application state and fictional controlled dat
 
 ## 16. Production improvements
 
-A production version could store immutable schema documentation, publish cross-runtime test vectors, bind canonical source-file digests to an ingestion pipeline, isolate worker execution, add durable access-controlled audit storage, and independently verify receipt integrity. Those changes require a separate threat model and are outside this prototype phase.
+Receipt integrity is now implemented separately by `policyproof.receipt-integrity.v1`; it binds this fingerprint to one exact receipt instance without changing Review Fingerprint semantics. Future production work could publish cross-runtime test vectors, bind canonical source-file digests to a hardened ingestion pipeline, isolate worker execution, add durable access-controlled audit storage, public-key signatures, and trusted timestamping. Those changes require a separate threat model and remain outside this prototype.

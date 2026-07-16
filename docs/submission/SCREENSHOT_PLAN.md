@@ -18,6 +18,9 @@
 | Changed-input comparison | EUR 10,000 → EUR 15,000; only Approval changes; fingerprints differ | Causal-change story |
 | Evidence inspector | Selected-row bridge, exact EUR and USD excerpts, and currency comparison visible | Main differentiation |
 | Decision receipt | Rejected currency result with fictional comment | Human oversight and export story |
+| Verified receipt | Decision and evidence remain primary; abbreviated hash, integrity version, and **Receipt integrity verified** visible | Local verification story |
+| Modified receipt | Local verification input changed by one character; **Receipt content has changed** visible without a stack trace | Tamper-detection proof |
+| Control identity export | JSON or receipt detail shows `CTRL-APPROVAL` beside `CTRL-01` | Stable/display ID traceability |
 | French workspace | French Review or Decision step with preserved evidence | Bilingual capability |
 | Mobile workspace | English or French Review with selected inline evidence and no overflow | Responsive proof |
 
@@ -53,3 +56,13 @@ All development captures remain ignored under `test-results/focused-verifiabilit
 3. **Pass 3 — resilience:** 1440, 1280, 1024, 768, and 390 px; English and French; effective 200% zoom; and keyboard focus.
 
 Use Focused Demo as the public hero. Full Workspace, Case Library, Meridian, Atlas, exports, and architecture are supporting images, not the opening proof. Recreate every public candidate from the deployed production build and inspect it independently.
+
+## Verifiable-receipt passes
+
+All development captures remain ignored under `test-results/verifiable-receipt/`:
+
+1. **Pass 1 — hierarchy:** Focused decision, generated receipt with abbreviated hash, expanded technical details, and Full Workspace receipt at 1280 × 720 and 1440 × 900.
+2. **Pass 2 — states:** valid, modified, unsupported-version, malformed, and missing-integrity states with text and icon/border treatment, no stack trace, and no legal overclaim.
+3. **Pass 3 — responsive/bilingual:** 1280 × 720, 1440 × 900, 1024 × 768, 390 × 844 English and French, effective 200% zoom, keyboard focus, and reduced motion.
+
+Inspect that the human decision remains visually primary, verification is reachable, the hash is secondary and readable, no horizontal overflow appears, and every new visible string is translated.

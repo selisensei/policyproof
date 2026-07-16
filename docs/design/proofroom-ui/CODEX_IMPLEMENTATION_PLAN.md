@@ -13,7 +13,7 @@ and "Proofroom.dc.html" (boards incl. tablet/mobile frames and full state librar
 5. **Controls screen** — ControlRegister, ControlRow (expand one-at-a-time), ControlParameterEditor with clamped threshold + effect note computed from fixture amount (12,480 EUR).
 6. **Documents screen** — DocumentRegister + FileDropzone (TXT/MD/JSON, 2MB) with the full validation-error matrix; rejected rows persist until removed.
 7. **Review screen** — ResultLedger + filters + EvidenceInspector + CurrencyComparison. Implement selection bridge (absolute 26px rule + node, desktop split only), inspector remount key = `${controlId}-${runId}-${language}`, chain entrance stagger. THEN the threshold-change effect exactly per MOTION_SPEC (pp-flash only on changed row; pass banner text).
-8. **Decision screen** — DecisionQueue + DecisionPaper + ReviewerComment with client+server comment validation for overrides; decisions recorded alongside immutable conclusions.
+8. **Decision screen** — DecisionQueue + DecisionPaper + ReviewerComment with client+server comment validation for overrides; decisions recorded alongside preserved automated conclusions.
 9. **Receipt** — DecisionReceipt + ReceiptActions; @media print hides shell, print-color-adjust exact; JSON export mirrors the sheet.
 10. **GuidedDemo** — 9-step auto-checking checklist panel; dismissible; bilingual; state-preserving.
 11. **Live GPT-5.6 pipeline states** — API route wrapping GPT-5.6: map every failure (missing key, 401, 403, 429, quota, timeout, connection, 5xx, schema, refusal, malformed) to SafeErrorState copy; excerpt validation gate (exact substring match against source, else "blocked" state); safe fallback CTA to deterministic mode everywhere.
@@ -22,7 +22,7 @@ and "Proofroom.dc.html" (boards incl. tablet/mobile frames and full state librar
 14. **QA against the final quality test** (DESIGN_HANDOFF §quality) + forbidden-pattern sweep.
 
 ## Invariants (behavior that must be preserved)
-- Conclusions immutable; human decisions recorded alongside; overrides require non-empty comment (client AND server).
+- Automated conclusions remain preserved; human decisions are recorded alongside; overrides require a non-empty comment (client AND server).
 - Deterministic demo performs zero AI requests; live mode degrades safely; compilation failure leaves state untouched.
 - References stable for the life of a review file; excerpts verbatim, untranslated, no invented locations.
 - Language switch preserves: step, threshold, documents, selection, filters, results, decisions, guide progress.

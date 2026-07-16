@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { CaseDocument, ControlResult, ReviewDecision } from "@/src/domain/schemas";
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
-import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown, serializeEvidenceMatrixCsv } from "@/src/lib/receipt-export";
+import { createConciseReviewSummary, serializeDecisionReceiptMarkdown, serializeEvidenceMatrixCsv } from "@/src/lib/receipt-export";
 import type { ResultSummary } from "@/src/lib/review-summary";
 import { controlRef, decisionGlyph, decisionRef, requirementRef } from "@/components/workspace/presentation";
 import { SectionShell } from "@/components/workspace/section-shell";
@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/workspace/status-badge";
 import { useLocale } from "@/src/i18n/locale-context";
 import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
 import { assessEvidenceIntegrity, buildReviewerQueue } from "@/src/lib/review-intelligence";
+import { ReceiptIntegrityPanel } from "@/components/workspace/receipt-integrity-panel";
+import type { ReceiptVerificationResult, VerifiableDecisionReceipt } from "@/src/lib/receipt-integrity";
 
 export function formatDecisionEvidenceRecap(result: ControlResult, locale: "en" | "fr"): string {
   if (result.controlId === "CTRL-CURRENCY") {
@@ -21,12 +23,16 @@ export function formatDecisionEvidenceRecap(result: ControlResult, locale: "en" 
   return `${count} ${locale === "fr" ? "éléments probants" : "evidence items"}`;
 }
 
-export function DecisionPanel({ results, documents, selectedResult, summary, receipt, reviewError, threshold, policyReference, onSelectResult, onCommentChange, onDecision, onReopenEvidence, onExport }: {
+export function DecisionPanel({ results, documents, selectedResult, summary, receipt, verifiableReceipt, receiptVerification, reviewFingerprint, isGeneratingReceipt, reviewError, threshold, policyReference, onSelectResult, onCommentChange, onDecision, onReopenEvidence, onGenerateReceipt, onVerifyReceipt, onExport }: {
   results: ControlResult[];
   documents: CaseDocument[];
   selectedResult: ControlResult | null;
   summary: ResultSummary;
   receipt: DecisionReceipt | null;
+  verifiableReceipt: VerifiableDecisionReceipt | null;
+  receiptVerification: ReceiptVerificationResult | null;
+  reviewFingerprint: string;
+  isGeneratingReceipt: boolean;
   reviewError: string;
   threshold: string;
   policyReference: string;
@@ -34,6 +40,8 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
   onCommentChange: (comment: string) => void;
   onDecision: (state: ReviewDecision["state"]) => void;
   onReopenEvidence: () => void;
+  onGenerateReceipt: () => void;
+  onVerifyReceipt: () => void;
   onExport: (format: "print" | "json" | "markdown" | "csv" | "clipboard") => void;
 }) {
   const { locale, t } = useLocale();
@@ -59,18 +67,6 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
     } catch {
       setExportNotice(t("action.copyFailed"));
     }
-  }
-
-  function downloadReceipt() {
-    if (!receipt) return;
-    const url = URL.createObjectURL(new Blob([serializeDecisionReceipt(receipt)], { type: "application/json" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${receipt.reviewId}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setExportNotice(t("receipt.downloadSuccess"));
-    onExport("json");
   }
 
   function downloadMarkdownReceipt() {
@@ -168,13 +164,22 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
           </div>
 
           {summary.reviewed > 0 && <section className="receipt-section">
+            <ReceiptIntegrityPanel
+              receipt={verifiableReceipt}
+              reviewFingerprint={reviewFingerprint}
+              verification={receiptVerification}
+              isGenerating={isGeneratingReceipt}
+              onGenerate={onGenerateReceipt}
+              onVerifyCurrent={onVerifyReceipt}
+              onExport={() => onExport("json")}
+            />
             <div className="receipt-toolbar">
-              <button type="button" onClick={() => { onExport("print"); window.print(); }} className="receipt-primary-action">{t("action.print")}</button>
-              <button type="button" onClick={downloadReceipt}>{t("action.downloadJson")}</button>
-              <button type="button" onClick={downloadMarkdownReceipt}>{locale === "fr" ? "Télécharger Markdown" : "Download Markdown"}</button>
-              <button type="button" onClick={downloadEvidenceCsv}>{locale === "fr" ? "Télécharger CSV" : "Download CSV"}</button>
-              <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(receipt.reviewId); }}>{t("action.copyReceiptId")}</button>
-              <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(createConciseReviewSummary(receipt)); }}>{t("action.copySummary")}</button>
+              <details className="receipt-more-exports"><summary>{locale === "fr" ? "Autres exports" : "More exports"}</summary><div>
+                <button type="button" onClick={downloadMarkdownReceipt}>{locale === "fr" ? "Télécharger Markdown" : "Download Markdown"}</button>
+                <button type="button" onClick={downloadEvidenceCsv}>{locale === "fr" ? "Télécharger CSV" : "Download CSV"}</button>
+                <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(receipt.reviewId); }}>{t("action.copyReceiptId")}</button>
+                <button type="button" onClick={() => { onExport("clipboard"); void copyReceiptContent(createConciseReviewSummary(receipt)); }}>{t("action.copySummary")}</button>
+              </div></details>
               <span>{receipt.reviewId}.json</span>
             </div>
             <p aria-live="polite" className="receipt-export-notice">{exportNotice}</p>

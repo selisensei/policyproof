@@ -7,12 +7,14 @@ import { useLocale } from "@/src/i18n/locale-context";
 import { StatusBadge } from "@/components/workspace/status-badge";
 import { ReviewFingerprintPanel } from "@/components/workspace/review-fingerprint-panel";
 import type { ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
+import { ReceiptIntegrityPanel } from "@/components/workspace/receipt-integrity-panel";
+import type { ReceiptVerificationResult, VerifiableDecisionReceipt } from "@/src/lib/receipt-integrity";
 
 function evidenceForDocument(evidence: EvidenceReference[], fragment: string) {
   return evidence.find((item) => item.documentId.includes(fragment)) ?? null;
 }
 
-export function FocusedDemo({ scenario, results, summary, threshold, enabledControlCount, isRunning, isVerifying, reviewError, fingerprint, fingerprintComparison, divergenceCandidateResults, onRunReview, onRerun, onThresholdChange, onOpenFullWorkspace, onOpenDecision, onCommentChange, onDecision }: {
+export function FocusedDemo({ scenario, results, summary, threshold, enabledControlCount, isRunning, isVerifying, reviewError, fingerprint, fingerprintComparison, divergenceCandidateResults, verifiableReceipt, receiptVerification, isGeneratingReceipt, onRunReview, onRerun, onThresholdChange, onOpenFullWorkspace, onOpenDecision, onCommentChange, onDecision, onGenerateReceipt, onVerifyReceipt, onExportReceipt }: {
   scenario: ReviewScenario;
   results: ControlResult[];
   summary: ResultSummary;
@@ -24,6 +26,9 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
   fingerprint: string;
   fingerprintComparison: ReviewFingerprintComparison | null;
   divergenceCandidateResults: ControlResult[];
+  verifiableReceipt: VerifiableDecisionReceipt | null;
+  receiptVerification: ReceiptVerificationResult | null;
+  isGeneratingReceipt: boolean;
   onRunReview: () => void;
   onRerun: () => void;
   onThresholdChange: (value: string) => void;
@@ -31,6 +36,9 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
   onOpenDecision: () => void;
   onCommentChange: (controlId: string, comment: string) => void;
   onDecision: (controlId: string, state: ReviewDecision["state"]) => void;
+  onGenerateReceipt: () => void;
+  onVerifyReceipt: () => void;
+  onExportReceipt: () => void;
 }) {
   const { locale, t } = useLocale();
   const currencyResult = results.find((result) => result.controlId === "CTRL-CURRENCY") ?? null;
@@ -118,6 +126,19 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
                 <button type="button" className="primary-button" onClick={onOpenDecision}>{currencyResult.reviewerDecision.state === "PENDING" ? (locale === "fr" ? "Ouvrir la décision complète" : "Open full decision") : (locale === "fr" ? "Ouvrir le reçu" : "Open receipt")} →</button>
               </div>
             </section>
+          )}
+
+          {summary.reviewed > 0 && fingerprint && (
+            <ReceiptIntegrityPanel
+              compact
+              receipt={verifiableReceipt}
+              reviewFingerprint={fingerprint}
+              verification={receiptVerification}
+              isGenerating={isGeneratingReceipt}
+              onGenerate={onGenerateReceipt}
+              onVerifyCurrent={onVerifyReceipt}
+              onExport={onExportReceipt}
+            />
           )}
         </>
       )}

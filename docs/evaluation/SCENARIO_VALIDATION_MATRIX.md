@@ -43,6 +43,7 @@ Every fixture fact excerpt must occur verbatim in its source document. Scenario 
 - Existing mocked OpenAI suites protect compilation, extraction, exact evidence, and safe provider failure behavior without a live request.
 - `tests/review-fingerprint.test.ts` verifies canonical ordering, date and line-ending handling, Unicode preservation, unsupported-value rejection, semantic mutations, 64-character SHA-256 output, 7/7 same-input reproduction, one-control threshold change, and divergence classification.
 - `tests/review-fingerprint-panel.test.tsx` verifies safe unexpected-divergence disclosure with current and candidate conclusions.
+- `tests/receipt-integrity.test.ts` verifies the strict versioned receipt schema, control cross-references, canonical ordering, line endings, Unicode, native SHA-256 stability, decision/comment/timestamp/audit/result/evidence tampering, unsupported and malformed inputs, missing integrity, no-network verification, and separation from the Review Fingerprint.
 - `tests/e2e/focused-verifiability.spec.ts` verifies Focused Demo, exact EUR/USD evidence, unchanged and changed fingerprints, decision preservation/reset, Full Workspace state, four-stage Judge Mode, English/French, mobile, keyboard, reduced motion, zoom reflow, and no provider analysis or policy request.
 
 ## Manual checks

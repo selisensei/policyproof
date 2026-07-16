@@ -55,6 +55,8 @@ The default presentation removes dashboard competition from the first fifteen se
 
 The versioned Review Fingerprint makes the reproducibility claim testable. Identical normalized policy, controls, documents, facts, evidence, and conclusions produce the same SHA-256 digest. Changing the approval threshold changes one conclusion and the digest. Human decisions and receipt metadata are deliberately excluded; the digest is not a signature or identity proof.
 
+The separate Receipt Integrity Hash makes one generated decision receipt locally checkable. It binds the Review Fingerprint to the receipt's human decisions, exact comments, safe audit metadata, language, identifier, and generation timestamp. Current or exported JSON can be verified without a server. This is tamper-evident content checking, not proof of identity, authorship, legal signature, custody, or trusted time.
+
 ## Why GPT-5.6 matters
 
 Policy and document language vary. GPT-5.6 provides the semantic layer that proposes structured controls and extracts facts with exact excerpts. Strict Zod schemas validate the structure, source checks reject excerpts that do not occur in the submitted fictional text, and deterministic code handles supported calculations. GPT-5.6 never approves a payment or issues a compliance certification.

@@ -242,7 +242,7 @@ The gutter bridge renders only when panes are side-by-side.
 
 ## 7. Behaviour that must be preserved
 
-- Automated conclusions are immutable; human decisions are recorded alongside, never overwrite.
+- Automated conclusions remain preserved; human decisions are recorded alongside and never overwrite them.
 - Reject / Accept exception cannot be recorded without a non-empty comment (server + client validation).
 - Deterministic demo makes zero AI requests; Live mode without `OPENAI_API_KEY` shows the configuration notice
   and keeps demo mode fully available (board 2J).

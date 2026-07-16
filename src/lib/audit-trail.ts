@@ -10,6 +10,8 @@ export const AuditActionSchema = z.enum([
   "RUN_COMPARISON_CREATED",
   "DETERMINISTIC_RERUN_VERIFIED",
   "DETERMINISTIC_DIVERGENCE_DETECTED",
+  "RECEIPT_GENERATED",
+  "RECEIPT_VERIFIED",
   "RECEIPT_EXPORTED",
 ]);
 
@@ -21,7 +23,7 @@ export const AuditEventSchema = z.object({
   controlId: z.string().min(1).nullable(),
   displayReference: z.string().min(1).nullable(),
   description: z.string().min(1).max(180),
-});
+}).strict();
 
 export const AuditTrailSchema = z.array(AuditEventSchema).max(100);
 export type AuditAction = z.infer<typeof AuditActionSchema>;

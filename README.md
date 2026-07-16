@@ -18,6 +18,8 @@ The default **Focused Demo** presents the same production state through a Norths
 
 Each deterministic run produces a versioned Review Fingerprint: a lowercase SHA-256 digest of canonical policy, controls, parameters, source documents, structured facts, exact evidence, and deterministic conclusions. A same-input rerun reproduces 7/7 Northstar conclusions and the same digest without replacing human state. A EUR 10,000 → EUR 15,000 change makes only `CTRL-01` pass, leaves six controls unchanged, and changes the digest. The fingerprint is not a signature, identity proof, authorship proof, or trusted timestamp.
 
+After a human decision, PolicyProof can generate a versioned, integrity-protected JSON decision receipt. `policyproof.receipt-integrity.v1` binds that Review Fingerprint to the exact decisions, comments, safe audit metadata, receipt identifier, language, and generation timestamp using native SHA-256. Current or exported JSON receipts can be verified entirely in the browser. A matching hash detects unchanged included content; it does not establish identity, authorship, legal signature, source authenticity, or trusted time. See `docs/VERIFIABLE_RECEIPT_MODEL.md`.
+
 The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
 
 The live-validation evidence is preserved by commit `eb120feaca78bf3cdbc71b7b7198045f86a44852` (`test: validate live GPT-5.6 evidence pipeline`). Commit `76c6ce62a0fdbefa721e40d6f321fcea4b9e8db4` is the preceding judge-experience redesign, not the validation commit. Release ancestry can be checked with `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD`.
@@ -34,7 +36,7 @@ Mocked provider-error captures remain local-only and are not public product scre
 2. Review, edit, enable, or disable controls.
 3. Load the bundled demo case or select fictional local text documents.
 4. Run the deterministic review; use outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and filters to direct attention.
-5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, and print or export the decision receipt as JSON, Markdown, or a UTF-8 CSV evidence matrix.
+5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, generate and locally verify the receipt, then print or export integrity-protected JSON; Markdown and UTF-8 CSV remain available under secondary exports.
 
 The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. The previous run is stored as one minimal, versioned local snapshot when browser storage is available; blocked storage never prevents the current review. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
 

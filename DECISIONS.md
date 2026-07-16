@@ -372,3 +372,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Keep `controlId` as the stable technical join key, derive `displayReference` through one typed registry, and preserve both values in JSON, Markdown, CSV, print receipts, and safe control-specific audit events. Known deterministic mappings must be unique. Unregistered live control IDs use their stable ID as a visibly unmapped fallback rather than being renamed or rejected by the application.
 - **Rationale:** An explicit mapping layer improves human traceability without migrating validated fixtures, changing engine joins, or altering Review Fingerprint semantics.
 - **Consequences:** `CTRL-APPROVAL` remains the technical ID and `CTRL-01` remains its display reference. The Review Fingerprint continues to hash stable IDs only. Receipt-integrity payloads may include both fields because they protect one exact serialized receipt instance.
+
+## D041 - Protect one receipt instance with a separate unkeyed integrity hash
+
+- **Date:** 2026-07-16
+- **Status:** Accepted
+- **Context:** The Review Fingerprint intentionally excludes human decisions, comments, audit metadata, language, identifiers, and timestamps. It therefore cannot detect changes to one exported decision receipt.
+- **Decision:** Define strict `policyproof.receipt-integrity.v1` and `policyproof.decision-receipt.v1` schemas. Canonicalize one receipt payload with the established deterministic-value rules, explicit semantic collection ordering, UTC timestamps, LF line endings, and native Web Crypto SHA-256. Store the digest in a separate `integrity` block. Verify current or locally selected/pasted JSON only in the browser and keep imported data isolated from active review state.
+- **Rationale:** A second, clearly scoped hash makes receipt changes locally detectable without changing Review Fingerprint semantics, adding a dependency, uploading data, or claiming identity assurance.
+- **Consequences:** Decisions, comments, included audit events, language, receipt ID, and generation time change the receipt hash but not the Review Fingerprint. The unkeyed hash is not a signature or trusted timestamp; someone able to replace both content and hash can create a new internally consistent digest.

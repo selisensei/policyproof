@@ -25,9 +25,11 @@ This runbook gives the builder a repeatable, low-risk path for the public demo a
 3. **Exact evidence:** open Currency consistency and show EUR in the purchase order versus USD in the invoice.
 4. **Same inputs:** record the fingerprint, choose **Rerun deterministic checks**, and verify 7/7 unchanged plus the same fingerprint.
 5. **Causal change:** change the approval threshold to EUR 15,000, rerun, and verify only `CTRL-APPROVAL` changes from FAIL to PASS while the fingerprint changes.
-6. **Decision:** record a fictional decision and show the preserved automated result.
-7. **Full Workspace:** open it and confirm policy, controls, documents, review, decision, and export state are preserved.
-8. **Architecture:** show GPT-5.6 → TypeScript → Human and state that the deterministic public path makes no provider request.
+6. **Decision:** record a fictional decision and comment; show the preserved automated result.
+7. **Receipt:** generate the receipt, show both hashes and `policyproof.receipt-integrity.v1`, then verify the current receipt locally.
+8. **Export:** export JSON, open the local verifier, paste or select the exported content, and confirm it verifies. In a rehearsal copy, change one comment character and confirm **Receipt content has changed**.
+9. **Full Workspace:** open it and confirm policy, controls, documents, review, decision, receipt, verification, and secondary export state are preserved.
+10. **Architecture:** state that GPT-5.6 reads and locates, TypeScript checks, and a human decides; the deterministic public path makes no provider request.
 
 ## Exact Northstar checkpoints
 
@@ -70,6 +72,10 @@ Stop the public sequence and preserve both the current and candidate fingerprint
 
 Reject and Accept exception require a comment. Enter a short fictional rationale. Confirm does not require one.
 
+### Receipt integrity cannot be verified
+
+Confirm a human decision exists, choose **Generate receipt**, and then **Verify receipt integrity**. A modified hash or receipt must not be repaired; regenerate only from the known active review. Unsupported, malformed, and missing-integrity JSON are explicit non-valid states. Local JSON verification never uploads or replaces the active case.
+
 ### Live GPT-5.6 is unavailable
 
 Do not retry during the public demo. Switch to Deterministic demo and continue. Explain that the repository contains one sanitized supervised live validation and that the fallback makes no API request.
@@ -83,6 +89,7 @@ Return browser zoom to 100%. At narrow widths, use the horizontal step strip and
 - **Where does GPT-5.6 add value?** Policy interpretation and structured evidence extraction.
 - **What is deterministic?** Comparisons, date order, document presence, result calculations, summaries, and receipts.
 - **What does the fingerprint prove?** It shows whether the normalized review inputs and deterministic conclusions are identical; it is not a signature, identity proof, or trusted timestamp.
+- **What does receipt verification prove?** It confirms that the included receipt content matches its stored generation-time digest. It does not prove identity, authorship, legal signature, source authenticity, custody, or trusted time.
 - **How is hallucinated evidence prevented?** Source IDs and exact excerpts are validated against submitted fictional documents; invalid evidence fails closed.
 - **Who makes the final decision?** The human reviewer; original results are preserved.
 - **Is this a compliance certification?** No, it is a focused prototype and review aid.

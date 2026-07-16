@@ -73,7 +73,9 @@ The queue prioritizes unresolved FAIL, MISSING, WARNING, then PASS results; seve
 
 ## Decision and receipt
 
-The reviewer can confirm, reject, or accept an exception. Overrides require a comment. The receipt preserves original conclusions, reviewer decisions, comments, counts, mode, language, timestamp, and disclaimer. It supports print, JSON download, Markdown download, receipt-ID copy, and concise-summary copy.
+The reviewer can confirm, reject, or accept an exception. Overrides require a comment. After a decision, **Generate receipt** creates an exact integrity-protected snapshot containing the Review Fingerprint, normalized result/evidence references, decisions, comments, safe audit events, language, identifier, and timestamp. **Verify receipt integrity** recalculates native SHA-256 locally. Integrity-protected JSON and print are primary actions; Markdown, CSV, receipt-ID copy, and concise-summary copy remain under **More exports / Autres exports** in Full Workspace.
+
+A local JSON file or pasted JSON can be checked without upload and without replacing the active case. PolicyProof distinguishes valid, modified, unsupported-version, malformed, and missing-integrity states. The hash detects changes to included receipt content but is not a signature, identity proof, or trusted timestamp.
 
 ## Safe feedback
 

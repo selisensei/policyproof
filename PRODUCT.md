@@ -30,9 +30,10 @@ The first working version supports one fictional procurement and vendor-change p
 10. Derive review intelligence—outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and one-run comparison—from the same structured review state.
 11. Prioritize unresolved controls for human attention without inventing a composite risk score.
 12. Let the user confirm, reject, or accept an exception while preserving the original result.
-13. Produce a local decision receipt with the outcomes, human decisions, comments, timestamp, and disclaimer.
-14. Switch presentation level or language without resetting the review.
-15. Follow optional four-stage Judge Mode guidance and export the current structured receipt through print, JSON, Markdown, CSV, or copy actions.
+13. Generate a local decision receipt that binds the Review Fingerprint to outcomes, exact evidence references, human decisions, comments, safe audit metadata, language, identifier, and timestamp with a versioned Receipt Integrity Hash.
+14. Verify the current or exported JSON receipt locally without uploading it or replacing the active case.
+15. Switch presentation level or language without resetting the review.
+16. Follow optional four-stage Judge Mode guidance and export the current structured receipt through print, integrity-protected JSON, Markdown, CSV, or copy actions.
 
 ## Status definitions
 
