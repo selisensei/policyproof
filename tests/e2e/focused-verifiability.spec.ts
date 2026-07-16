@@ -2,9 +2,11 @@ import { mkdirSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 const captureRoot = "test-results/focused-verifiability";
+const finalCaptureRoot = "test-results/final-human-review/final";
 mkdirSync(`${captureRoot}/pass-1`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-2`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-3`, { recursive: true });
+mkdirSync(finalCaptureRoot, { recursive: true });
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -30,6 +32,8 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await expect(focused).toContainText("7 enabled");
   await expect(focused.getByText("Review results")).toHaveCount(0);
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-landing-1440x900.png`, fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.screenshot({ path: `${finalCaptureRoot}/01-focused-initial-1280x720.png`, fullPage: true });
 
   await runFocusedReview(page);
   await expect(focused.locator('.focused-outcomes [data-status="PASS"]')).toContainText(/3\s*PASS/);
@@ -41,12 +45,17 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await expect(focused.getByText("✓ Exact excerpts verified")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-reviewed-1280x720.png`, fullPage: true });
+  await page.screenshot({ path: `${finalCaptureRoot}/02-northstar-completed-1280x720.png`, fullPage: true });
+  await focused.locator(".focused-exception").screenshot({ path: `${finalCaptureRoot}/03-currency-evidence-1280x720.png` });
+  await focused.locator(".focused-human-decision").screenshot({ path: `${finalCaptureRoot}/04-reviewer-decision-1280x720.png` });
 
   await focused.getByRole("button", { name: "Open full workspace" }).click();
   await expect(page.getByRole("navigation", { name: "Review progress" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Case overview" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evidence coverage map" })).toBeVisible();
   await page.screenshot({ path: `${captureRoot}/pass-1/full-workspace-1280x720.png`, fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: `${finalCaptureRoot}/06-full-workspace-1440x900.png`, fullPage: true });
 
   await page.getByRole("button", { name: "Return to focused demo" }).click();
   await page.getByRole("button", { name: "Demo guide" }).click();
@@ -123,6 +132,7 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
     await page.setViewportSize({ width, height });
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: `${captureRoot}/pass-3/${name}.png`, fullPage });
+    if (name === "focused-en-390x844") await page.screenshot({ path: `${finalCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
   }
 
   await page.getByRole("button", { name: "Français" }).click();
@@ -132,16 +142,19 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
   await expect(focusedFr.getByRole("button", { name: "Relancer les contrôles" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/focused-fr-390x844.png`, fullPage: true });
+  await page.screenshot({ path: `${finalCaptureRoot}/08-mobile-french-390x844.png`, fullPage: true });
 
   await page.getByRole("button", { name: "English" }).click();
   await page.setViewportSize({ width: 640, height: 360 });
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/effective-zoom-200.png`, fullPage: true });
+  await page.screenshot({ path: `${finalCaptureRoot}/09-effective-200-percent-zoom.png`, fullPage: true });
 
   const rerun = focused.getByRole("button", { name: "Re-run checks" });
   await rerun.focus();
   await expect(rerun).toBeFocused();
   await page.screenshot({ path: `${captureRoot}/pass-3/keyboard-focus.png`, fullPage: true });
+  await page.screenshot({ path: `${finalCaptureRoot}/10-keyboard-focus.png`, fullPage: true });
   const motion = await focused.locator(".review-fingerprint").evaluate((element) => {
     const style = getComputedStyle(element);
     return { animationDuration: style.animationDuration, transitionDuration: style.transitionDuration };

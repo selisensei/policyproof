@@ -76,7 +76,7 @@ test("keeps Judge Mode manual, bilingual, keyboard usable, and responsive", asyn
   const dimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
   await page.screenshot({ path: `${captures}/judge-mode-mobile-fr.png`, fullPage: true });
-  await page.getByRole("button", { name: "Quitter le mode jury" }).click();
+  await page.getByRole("button", { name: "Fermer le guide" }).click();
   await expect(page.getByRole("region", { name: "Séquence du mode jury" })).toHaveCount(0);
 });
 
@@ -119,7 +119,7 @@ test("captures the competition hardening visual review matrix", async ({ page })
   await expect(page.getByRole("region", { name: "Judge Mode sequence" })).toBeVisible();
   await page.waitForTimeout(250);
   await page.screenshot({ path: `${captures}/judge-mode-desktop-1280x720.png` });
-  await page.getByRole("button", { name: "Exit Judge Mode" }).click();
+  await page.getByRole("button", { name: "Close guide" }).click();
 
   await page.getByRole("button", { name: "Decision", exact: true }).click();
   await page.getByRole("button", { name: "Confirm", exact: true }).click();

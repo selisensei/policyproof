@@ -17,7 +17,7 @@ This document records indicative local release evidence. It is not a public late
 | Check | Local evidence |
 | --- | --- |
 | Production build | Successful; 5 application routes reported |
-| Vitest | 201 tests across 27 files; final duration recorded in the release report |
+| Vitest | 202 tests across 27 files; final duration recorded in the release report |
 | Playwright | 23 Chromium tests; final duration recorded in the release report |
 | Competition evaluation | 3 scenarios, 21 conclusions; deterministic PASS |
 | Demo verification | Provider-free PASS |

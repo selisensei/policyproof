@@ -25,7 +25,7 @@ test("completes the deterministic workspace path with traceable evidence and a r
   await page.setViewportSize({ width: 1440, height: 1000 });
   // 1. Open the fictional case workspace.
   await openFullWorkspace(page);
-  await expect(page.getByText(/The deterministic demo makes no AI request/)).toBeVisible();
+  await expect(page.getByText("This deterministic demo uses fictional data and makes no model request.")).toBeVisible();
   await capture(page, "test-results/01-english-policy-1440.png");
 
   // 2. Load the version-controlled Northstar case.
@@ -150,7 +150,7 @@ test("honors reduced motion while keeping evidence available", async ({ page }) 
 test("captures bilingual judge states and a safely mocked provider failure", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await openFullWorkspace(page);
-  await expect(page.getByText("Human review remains required.")).toBeVisible();
+  await expect(page.getByText("The reviewer makes the final decision.")).toBeVisible();
   await capture(page, "test-results/07-api-unavailable-state-1440.png");
 
   await page.getByRole("button", { name: "Controls", exact: true }).click();

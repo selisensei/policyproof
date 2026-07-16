@@ -2,9 +2,11 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 const captureRoot = "test-results/verifiable-receipt";
+const finalCaptureRoot = "test-results/final-human-review/final";
 mkdirSync(`${captureRoot}/pass-1`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-2`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-3`, { recursive: true });
+mkdirSync(finalCaptureRoot, { recursive: true });
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
@@ -47,7 +49,7 @@ test("judge path generates, verifies, exports, imports, and detects one-characte
   const integrity = focused.locator(".receipt-integrity-panel");
   await expect(integrity).toContainText("Review Fingerprint");
   await expect(integrity).toContainText("Receipt integrity hash");
-  await integrity.getByRole("button", { name: "View receipt" }).click();
+  await integrity.getByRole("button", { name: "Technical details" }).click();
   await expect(integrity).toContainText("policyproof.receipt-integrity.v1");
   await expect(integrity).toContainText("SHA-256");
   await integrity.screenshot({ path: `${captureRoot}/pass-1/focused-receipt-expanded-1280x720.png` });
@@ -58,6 +60,7 @@ test("judge path generates, verifies, exports, imports, and detects one-characte
   const requestCountAfterVerification = await page.evaluate(() => performance.getEntriesByType("resource").length);
   expect(requestCountAfterVerification).toBe(requestCountBeforeVerification);
   await integrity.screenshot({ path: `${captureRoot}/pass-2/valid-receipt.png` });
+  await integrity.screenshot({ path: `${finalCaptureRoot}/05-verified-receipt-1280x720.png` });
 
   const downloadPromise = page.waitForEvent("download");
   await integrity.getByRole("button", { name: "Export receipt JSON" }).click();
@@ -79,6 +82,7 @@ test("judge path generates, verifies, exports, imports, and detects one-characte
   await integrity.getByRole("button", { name: "Verify local JSON" }).click();
   await expect(integrity.getByText("Receipt content has changed")).toBeVisible();
   await integrity.screenshot({ path: `${captureRoot}/pass-2/modified-receipt.png` });
+  await integrity.locator(".receipt-local-verifier").screenshot({ path: `${finalCaptureRoot}/11-modified-receipt.png` });
 
   await focused.getByRole("button", { name: "Open full workspace" }).click();
   await page.getByRole("button", { name: "Decision", exact: true }).click();

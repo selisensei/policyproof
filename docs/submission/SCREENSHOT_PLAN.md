@@ -87,3 +87,13 @@ Required final candidates:
 8. One 390 × 844 mobile view.
 
 Optional technical evidence may show the final PASS line from `pnpm demo:verify` or `pnpm release:verify` for only a few seconds. Do not publish ignored clean-room logs or Playwright reports as product screenshots.
+
+## Final human-review captures
+
+The local editorial and visual audit uses ignored captures under `test-results/final-human-review/`:
+
+1. `before/` records the accepted release baseline.
+2. `iterations/` records content hierarchy, visual restraint, language, responsive, and accessibility passes.
+3. `final/` contains the eleven locally accepted states listed in `docs/design/FINAL_HUMAN_PRODUCT_AUDIT.md`.
+
+These images are review evidence only. Recapture the selected public images from the deployed release after checking private navigation, browser chrome, console output, downloads, print, and physical mobile behavior.
