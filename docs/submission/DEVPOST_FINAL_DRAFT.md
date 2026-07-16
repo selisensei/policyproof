@@ -80,6 +80,7 @@ The hardest challenge was preserving trust while combining model interpretation 
 - Manual Judge Mode, current-session comparison, architecture, evidence-trust, and safe audit surfaces.
 - A deterministic fallback that makes no OpenAI request.
 - Automated unit, contract, component, browser, security, and production-build checks.
+- A no-network Competition Evaluation Harness covering 3 controlled scenarios, 21 deterministic conclusions, 7 business-rule mutations, 10 adversarial cases, and one-command repository verification.
 
 ## What we learned
 
@@ -93,6 +94,6 @@ It has no PDF/OCR ingestion, durable collaboration, identity, authorization, ext
 
 ## What's next
 
-Receipt-integrity hashing, local receipt verification, and tamper tests are the next bounded technical phase. They remain separate from the current Review Fingerprint, which deliberately excludes human decision and receipt metadata.
+The next step is code freeze, supervised release preparation, and user validation with finance and control professionals before expanding scope. A production direction would require organization-specific control governance, secure document ingestion, identity and authorization, durable audit records, privacy and retention controls, monitoring, broader model evaluations, and legal and security review.
 
-The next step is user validation with finance and control professionals before expanding scope. A production direction would require organization-specific control governance, secure document ingestion, identity and authorization, durable audit records, privacy and retention controls, monitoring, broader model evaluations, and legal and security review.
+The repository can be checked with `pnpm demo:verify` without an API key or provider request. This controlled harness supports reproducibility; it does not prove universal policy coverage or generalized adversarial safety.

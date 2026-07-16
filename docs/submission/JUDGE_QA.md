@@ -107,3 +107,19 @@ No. It is a transparent, optional, bounded session trail for the prototype. It s
 ## What can be exported?
 
 The receipt can be printed or exported as JSON and Markdown. A UTF-8 CSV evidence matrix contains structured control, evidence, and reviewer fields with correct escaping. JSON includes the concise safe audit trail; no credential or provider payload is exported.
+
+## Can I verify the repository with one command?
+
+Yes. `pnpm demo:verify` runs the controlled scenario, mutation, adversarial, fingerprint, receipt, no-network, and TypeScript gates without an API key, browser, server, or live provider request. `pnpm eval:competition` prints the full 3-scenario / 21-conclusion evaluation and refreshes deterministic tracked reports.
+
+## Is the GPT-5.6 validation rerun by the harness?
+
+No. Northstar's supervised live result is historical evidence at commit `eb120feaca78bf3cdbc71b7b7198045f86a44852` and is labelled `HISTORICAL_EVIDENCE`. The harness executes current deterministic checks only. Meridian and Atlas remain deterministic and mocked.
+
+## Does the adversarial corpus prove prompt-injection safety?
+
+No. It proves only the named PolicyProof boundaries: structured facts drive the local engine, React escapes tested script-like text, and invalid evidence/schema/receipt inputs fail closed. It is not a universal security claim or penetration test.
+
+## Can someone modify both a receipt and its hash?
+
+Yes. This is the **EXPECTED SECURITY BOUNDARY** of an unkeyed hash. Retaining the original hash lets PolicyProof detect changed content, but a party able to replace both content and hash can make a new internally consistent pair. Receipt Integrity proves no origin, identity, authorship, trusted time, or legal signature.

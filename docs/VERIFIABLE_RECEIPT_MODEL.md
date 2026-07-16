@@ -129,3 +129,7 @@ It does not prove identity, authorship, reviewer authority, legal signature, sou
 ## 16. Possible production improvements (future work)
 
 Outside this prototype, a separately authorized threat model could consider server-held signing keys, public-key signatures, a trusted timestamp authority, authenticated access control, and durable secure audit storage. None is implemented or claimed in PolicyProof today.
+
+## 17. Competition evaluation assertion
+
+The no-network Competition Evaluation Harness generates one controlled receipt per scenario, verifies its recorded hash, changes receipt content while retaining the old hash, and requires a `MODIFIED` result. It classifies the following as an **EXPECTED SECURITY BOUNDARY**, not a test failure: a party able to alter both receipt content and its unkeyed hash can create a new internally consistent pair. Receipt Integrity establishes no origin, identity, authorship, trusted time, or legal signature.

@@ -80,6 +80,8 @@
 
 ## Guardrails
 
+The static end frame may add the subtitle `3 controlled scenarios · 21 deterministic conclusions · one-command verification`. Do not add narration or extend the 2:50 duration. Terminal output may appear only for a few seconds and must never replace the EUR/USD evidence moment.
+
 - Do not deeply show analytics, chronology, audit trail, all exports, mobile, French, or cryptographic implementation details.
 - Do not make a live request while recording.
 - Do not show a key, `.env.local`, provider reference, console, local path, or mocked error.

@@ -137,3 +137,13 @@ The shared mapping is defined in `src/domain/control-references.ts`. The seven d
 | `receipt.decisionStatus` | `IN_PROGRESS` while any control is pending; otherwise `COMPLETE`. |
 | `receipt.auditTrail` | At most 100 strict safe metadata events; never document bodies or provider payloads. |
 | `receipt.generatedAt` | UTC generation time; intentionally changes the receipt hash. |
+
+## Competition evaluation entities
+
+| Entity | Version | Purpose |
+| --- | --- | --- |
+| `CompetitionEvaluation` | `policyproof.competition-evaluation.v1` | Stable aggregate of scenario, conclusion, evidence, isolation, fingerprint, receipt, mutation, adversarial, historical-evidence, warning, failure, and overall results. |
+| `BusinessRuleMutationCase` | `policyproof.business-rule-mutation.v1` | One cloned-input business fact change with one expected changed control, six unchanged controls, status transition, evidence expectation, and fingerprint behavior. |
+| `AdversarialCase` | `policyproof.adversarial-corpus.v1` | One fictional hostile or malformed input with explicit validation, engine, evidence, and UI-safe expectations. |
+
+Evaluation statuses distinguish executed deterministic checks from `HISTORICAL_EVIDENCE`. Reports contain no runtime timestamp, local path, environment value, provider payload, or confidence score.

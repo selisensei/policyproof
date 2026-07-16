@@ -92,3 +92,9 @@ The client-safe implementation calls Web Crypto SHA-256 and adds no dependency o
 ## Verifiable receipt boundary
 
 `src/lib/receipt-integrity.ts` defines the strict receipt payload, cross-reference validation, documented collection ordering, deterministic serialization, native SHA-256, outer integrity block, and safe verification states. The receipt snapshot includes the Review Fingerprint plus normalized control/result/evidence references, human decisions and exact comments, bounded safe audit entries, identifier, language, and generation timestamp. `components/workspace/receipt-integrity-panel.tsx` performs current and imported JSON verification locally; it does not call an API or replace workspace state. The application state owner keeps the generated receipt stable across Focused Demo and Full Workspace and invalidates it when relevant review or decision state changes.
+
+## Competition evaluation boundary
+
+`src/evaluation/` is a test-and-release layer, not an application screen. It defines strict evaluation, mutation, and adversarial contracts; imports the existing scenario schemas, deterministic engine, Review Fingerprint, and Receipt Integrity functions; and executes them through the repository's Vitest runtime. It contains no second rule engine.
+
+`pnpm eval:competition` scopes a guard over `fetch` and Node HTTP/HTTPS clients, evaluates all three controlled scenarios and 21 conclusions, runs seven cloned-input mutations and ten private adversarial cases, and writes stable Markdown and JSON reports. `pnpm demo:verify` adds focused test and TypeScript gates. Neither command needs a browser, server, environment file, API key, or provider. The historical Northstar GPT-5.6 result is referenced but never executed by the harness.

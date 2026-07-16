@@ -6,6 +6,8 @@ This runbook gives the builder a repeatable, low-risk path for the public demo a
 
 ## Before the demo
 
+For a technical repository check before opening the browser, run `pnpm demo:verify`. Expect the final line `PolicyProof demo verification: PASS`. This command needs no API key and makes no provider request. Keep terminal output out of the primary evidence path unless a judge asks.
+
 1. Use the deployed production URL or run the production build locally.
 2. Open a clean browser window at 1440 × 900 and 100% zoom.
 3. Close developer tools, password managers, personal tabs, and notifications.

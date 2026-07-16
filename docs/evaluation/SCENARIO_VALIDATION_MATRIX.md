@@ -36,6 +36,9 @@ Every fixture fact excerpt must occur verbatim in its source document. Scenario 
 
 ## Automated checks
 
+- `pnpm eval:competition` executes all three fixtures through the shared engine, compares all 21 expected conclusions and three profiles, validates exact evidence and isolation, reproduces fingerprints, verifies receipts, and runs mutation/adversarial suites with network access blocked.
+- `pnpm demo:verify` provides the focused technical judge gate without an API key, browser, server, or provider request.
+
 - `tests/scenarios.test.ts` validates all three schemas, runtime outcomes, evidence coverage, chronology, receipts, malformed data, and stale-state reset.
 - `tests/review-engine.test.ts` protects the shared rule semantics.
 - `tests/workspace-ui.test.tsx` verifies selection, destructive-switch confirmation, language preservation, Judge Mode, comparison, evidence trust, and receipts.

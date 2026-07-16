@@ -66,3 +66,7 @@ All development captures remain ignored under `test-results/verifiable-receipt/`
 3. **Pass 3 — responsive/bilingual:** 1280 × 720, 1440 × 900, 1024 × 768, 390 × 844 English and French, effective 200% zoom, keyboard focus, and reduced motion.
 
 Inspect that the human decision remains visually primary, verification is reachable, the hash is secondary and readable, no horizontal overflow appears, and every new visible string is translated.
+
+## Competition evaluation evidence
+
+No new product screenshot is required because the harness adds no visible interface. If a technical terminal capture is useful for private review, store `eval:competition` or `demo:verify` output only under ignored `test-results/competition-evaluation/`. Do not replace the EUR/USD product evidence or publish local paths, environment details, or terminal diagnostics.

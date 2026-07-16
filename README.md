@@ -32,6 +32,8 @@ Mocked provider-error captures remain local-only and are not public product scre
 
 The final verifiable-receipt gate passes 20 Vitest files / 161 tests and 23 Chromium Playwright paths, plus typecheck, lint, production build, production dependency audit, local production smoke, secret/path scans, and three ignored visual-review passes. No dependency was added and no live OpenAI request was made during this phase.
 
+The repository now includes a local Competition Evaluation Harness. `pnpm eval:competition` validates all three controlled scenarios, 21 deterministic conclusions, exact evidence, scenario isolation, Review Fingerprints, receipt integrity, seven business-rule mutations, ten adversarial cases, and a strict no-network boundary. `pnpm demo:verify` provides the focused one-command technical gate. Neither command needs an OpenAI API key or makes a live provider request.
+
 ## Product workflow
 
 1. Select one of three controlled fictional cases and review the shared policy.
@@ -90,12 +92,27 @@ From a terminal opened in the cloned repository:
 
 ```shell
 pnpm install
+pnpm demo:verify
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Stop the server with `Ctrl+C`.
 
 Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows dependency build scripts only for `sharp` and `unrs-resolver`.
+
+## One-command repository verification
+
+Run:
+
+```shell
+pnpm demo:verify
+```
+
+The command validates scenario schemas, all 21 expected deterministic conclusions, seven controlled mutations, ten adversarial boundaries, Review Fingerprint reproduction, strict threshold behavior, Receipt Integrity, modification detection, no-network enforcement, and TypeScript. Its final line is `PolicyProof demo verification: PASS` when every selected check succeeds.
+
+`demo:verify` makes no live provider request, does not read `.env.local`, and does not require an OpenAI API key, browser, development server, or deployed site. The separately documented GPT-5.6 validation is historical evidence from Northstar commit `eb120feaca78bf3cdbc71b7b7198045f86a44852`; it is not rerun by either verification command. This evaluation covers one controlled procurement-policy domain. It does not prove universal policy coverage, universal adversarial safety, or cross-industry accuracy.
+
+For the complete report and methodology, see `docs/EVALUATION_HARNESS.md`, `docs/evaluation/COMPETITION_EVALUATION_REPORT.md`, `docs/BUSINESS_RULE_MUTATION_MATRIX.md`, and `docs/ADVERSARIAL_TEST_MATRIX.md`.
 
 ## Deterministic demo instructions
 
@@ -246,7 +263,9 @@ The scope is still intentionally narrow: one fictional procurement policy, three
 - There is no durable persistence, authentication, collaboration, or external business-system integration.
 - Automated keyboard, accessible-name, responsive overflow, and document-language checks pass; a final assistive-technology review remains before submission.
 - A strict Content Security Policy is deferred until it can be verified against the deployed Next.js runtime.
-- The Review Fingerprint detects changes in canonical review content; it does not prove source authenticity, identity, authorship, legal signature, or trusted time. Receipt-integrity verification is a separate planned phase.
+- The Review Fingerprint detects changes in canonical review content; it does not prove source authenticity, identity, authorship, legal signature, or trusted time.
+- Receipt Integrity is locally verifiable, but its unkeyed hash is not a digital signature. **EXPECTED SECURITY BOUNDARY:** a party able to modify both receipt content and its hash can create a new internally consistent pair; the mechanism proves no origin, identity, authorship, trusted time, or legal signature.
+- The Competition Evaluation Harness tests named controlled boundaries; it is not a universal policy-coverage, model-accuracy, penetration-testing, or compliance benchmark.
 
 ## How Codex contributed
 

@@ -360,3 +360,25 @@ Fresh results after the final application, unit, browser, documentation, and scr
 - Ancestry: PASS — `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD` returned success.
 
 No live or paid OpenAI request was made. `.env.local` was not opened or read. Generated screenshots, Playwright traces, build output, dependencies, and smoke logs remain ignored and untracked.
+
+## Competition evaluation phase 3 gate — 2026-07-16
+
+Fresh implementation-gate results before the final documentation commit:
+
+- `pnpm test`: PASS — 25 test files, 188 tests, Vitest duration 24.82 s.
+- `pnpm typecheck`: PASS — no TypeScript errors.
+- `pnpm lint`: PASS — no ESLint errors or warnings.
+- `pnpm build`: PASS — compiled in 4.0 s, completed TypeScript in 7.8 s, and produced the unchanged five routes: static `/` and `/_not-found`; dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`.
+- `pnpm test:e2e`: PASS — 23 Chromium tests in 55.5 s.
+- `pnpm audit --prod`: PASS — no known production vulnerabilities.
+- `pnpm eval:competition`: PASS twice — 3/3 scenarios, 21/21 controls and conclusions, 3/3 profiles, exact evidence, isolation, deterministic reproduction, threshold sensitivity, fingerprints, receipts, 7/7 mutations, 10/10 adversarial cases, zero network calls, zero unexpected failures.
+- `pnpm demo:verify`: PASS twice — full evaluation, 3 targeted files / 23 targeted tests, TypeScript, and exact final line `PolicyProof demo verification: PASS`.
+- Deterministic reports: PASS — Markdown and JSON Git object hashes remained identical across consecutive runs.
+- Production smoke: PASS — `/` and `/api/ai/status` returned 200; `gpt-5.6`, boolean availability, `nosniff`, and `DENY` were verified; port 3400 was released.
+- `git diff --check`: PASS.
+- Dependencies: no package version or lockfile change; only two necessary package scripts were added.
+- Product regression: PASS — Northstar 3/2/1/1 with exact EUR/USD evidence and threshold behavior; Meridian 7 PASS; Atlas 4 PASS / 1 FAIL / 2 MISSING; Focused Demo, Full Workspace, English/French, keyboard, reduced motion, mobile, 200% zoom, print, JSON, Markdown, and CSV paths remain covered by the unchanged 23-test Playwright suite.
+
+The first smoke approach failed before product verification because an extra pnpm argument made Next.js interpret `--port` as a directory. The corrected `Start-Process` server then became ready but was unreachable from the parent PowerShell network context. A same-process Node orchestrator preserved the identical production build, completed both HTTP checks, and released the port. No application change or weakened assertion was required.
+
+No live or paid OpenAI request was made. Historical GPT-5.6 evidence was not rerun. `.env.local` was not opened or read. Evaluation network clients were blocked and recorded zero calls. No new product screen, route, dependency, push, deployment, merge, or publication was introduced.
