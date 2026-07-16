@@ -6,7 +6,7 @@ This runbook gives the builder a repeatable, low-risk path for the public demo a
 
 ## Before the demo
 
-For a technical repository check before opening the browser, run `pnpm demo:verify`. Expect the final line `PolicyProof demo verification: PASS`. This command needs no API key and makes no provider request. Keep terminal output out of the primary evidence path unless a judge asks.
+For a quick technical repository check before opening the browser, run `pnpm demo:verify`. Expect the final line `PolicyProof demo verification: PASS`. For the complete local release gate, run `pnpm release:verify` after installing Chromium. Both paths need no API key and make no live provider request. Keep terminal output out of the primary evidence path unless a judge asks.
 
 1. Use the deployed production URL or run the production build locally.
 2. Open a clean browser window at 1440 × 900 and 100% zoom.
@@ -127,3 +127,11 @@ Northstar has deterministic, mocked, and real GPT-5.6 validation. Meridian and A
 - If a scenario switch confirmation appears, explain that human decisions are protected from accidental loss.
 - If a popup feels dense, close it with its summary and continue through the normal Review surface.
 - If live mode is unavailable, stay in deterministic mode; no live call is required for the public path.
+
+## Release handoff
+
+- Use only a commit reported in `docs/release/RELEASE_MANIFEST.md` and the final Codex handoff.
+- Confirm GitHub Actions before recording the repository segment.
+- Use production captures only after the owner completes the deployment runbook.
+- Never show an API key, `.env.local`, personal tab, private repository control, or provider payload.
+- The `/feedback` Session ID belongs only in the owner-completed Devpost form.

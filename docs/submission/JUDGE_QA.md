@@ -123,3 +123,15 @@ No. It proves only the named PolicyProof boundaries: structured facts drive the 
 ## Can someone modify both a receipt and its hash?
 
 Yes. This is the **EXPECTED SECURITY BOUNDARY** of an unkeyed hash. Retaining the original hash lets PolicyProof detect changed content, but a party able to replace both content and hash can make a new internally consistent pair. Receipt Integrity proves no origin, identity, authorship, trusted time, or legal signature.
+
+## What does `pnpm release:verify` add?
+
+It is the full local release gate: repository hygiene, Markdown links, `demo:verify` and TypeScript, all Vitest tests, lint, production build, all Playwright paths, and Git diff/cleanliness checks. The registry-dependent `pnpm audit --prod` remains a separate online gate. No OpenAI key or live provider is required.
+
+## Was the repository tested outside the development directory?
+
+Yes. `pnpm release:clean-room` exports tracked `HEAD` content into an ignored in-repository directory, verifies excluded local artifacts, installs with the frozen lockfile in offline mode, runs `demo:verify`, builds, and performs a no-key production smoke. The clean copy contains no `.git` or `.env.local` and does not copy `node_modules`.
+
+## Does CI need an OpenAI secret?
+
+No. GitHub Actions uses Node 24, pnpm 11.9.0, frozen installation, deterministic verification, full tests, production build, Chromium, and a separate production dependency audit. It declares read-only repository contents permission and has no deployment job or OpenAI secret reference.

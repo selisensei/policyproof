@@ -29,7 +29,7 @@
 
 **Screen:** Keep the evidence path visible.
 
-**Narration:** “In the validated live path, GPT-5.6 reads the policy and locates structured facts with exact excerpts. Strict schemas and source checks reject unsupported citations. TypeScript calculates the supported comparisons, and a human remains responsible for the decision.”
+**Narration:** “Codex helped me architect, implement, and test PolicyProof under my direction. In the validated live path, GPT-5.6 reads the policy and locates facts with exact excerpts. TypeScript checks supported comparisons, and a human decides.”
 
 ## 1:20–1:42 — Same-input reproducibility
 
@@ -59,7 +59,7 @@
 
 **Action:** Briefly show Meridian and Atlas in the Case Library or prepared supporting frame.
 
-**Narration:** “Meridian and Atlas run through the same policy, engine, evidence, and decision architecture.”
+**Narration:** “Three controlled scenarios produce 21 conclusions through the same engine, and one command verifies the repository without a provider call.”
 
 ## 2:47–2:50 — End frame
 

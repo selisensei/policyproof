@@ -30,10 +30,15 @@ describe("public release metadata", () => {
 
   it("documents a secret-free optional live environment", () => {
     const example = read(".env.example");
+    const readme = read("README.md");
     expect(example).toContain("needs no API key");
     expect(example).toContain("Live mode is never enabled by default");
     expect(example).toMatch(/^OPENAI_API_KEY=$/m);
     expect(example).not.toMatch(/sk-(?:proj-)?[A-Za-z0-9_-]{16,}/);
+    expect(readme).toContain("pnpm install --frozen-lockfile\npnpm demo:verify\npnpm dev");
+    expect(readme).toContain("needs no API key, browser, development server, or live provider");
+    expect(readme).toContain("201 Vitest tests");
+    expect(readme).toContain("23 Playwright tests");
   });
 
   it("states the three mandatory security boundaries exactly", () => {
@@ -50,5 +55,14 @@ describe("public release metadata", () => {
     expect(freeze).toContain("| Meridian | 7 | 0 | 0 | 0 |");
     expect(freeze).toContain("| Atlas | 4 | 1 | 2 | 0 |");
     expect(freeze).toContain("explicit owner approval");
+  });
+
+  it("pins Turbopack to the active repository root for nested clean-room builds", () => {
+    const nextConfig = read("next.config.ts");
+    const vitestConfig = read("vitest.config.ts");
+    expect(nextConfig).toContain("turbopack:");
+    expect(nextConfig).toContain("root: process.cwd()");
+    expect(vitestConfig).toContain("maxWorkers: 2");
+    expect(vitestConfig).toContain("testTimeout: 15_000");
   });
 });

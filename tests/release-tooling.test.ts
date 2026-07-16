@@ -120,5 +120,6 @@ describe("CI and clean-room contracts", () => {
     expect(script).toContain("delete env.OPENAI_API_KEY");
     expect(script).toContain("status.available !== false");
     expect(script).not.toContain("copyFile");
+    expect(script).not.toContain("shell: true");
   });
 });

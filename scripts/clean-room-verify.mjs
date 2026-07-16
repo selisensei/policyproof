@@ -10,8 +10,14 @@ const archivePath = resolve(cleanRoot, "tracked-repository.tar");
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 function run(command, args, cwd = repositoryRoot) {
-  const result = spawnSync(command, args, { cwd, env: process.env, encoding: "utf8", stdio: "inherit", shell: false });
+  console.log(`[clean-room] ${command} ${args.join(" ")}`);
+  const useWindowsCommandShell = process.platform === "win32" && command.endsWith(".cmd");
+  const executable = useWindowsCommandShell ? "cmd.exe" : command;
+  const executableArgs = useWindowsCommandShell ? ["/d", "/s", "/c", command, ...args] : args;
+  const result = spawnSync(executable, executableArgs, { cwd, env: process.env, encoding: "utf8", stdio: "inherit", shell: false });
+  if (result.error) throw new Error(`${command} could not start: ${result.error.message}`);
   if (result.status !== 0) throw new Error(`${command} ${args.join(" ")} failed with exit code ${result.status ?? 1}.`);
+  console.log(`[clean-room] completed: ${args[0] ?? command}`);
 }
 
 async function waitForProductionServer(url, child) {
@@ -29,6 +35,7 @@ async function waitForProductionServer(url, child) {
 }
 
 async function smokeProduction() {
+  console.log("[clean-room] production smoke without OPENAI_API_KEY");
   const port = 3411;
   const env = { ...process.env, PORT: String(port), NEXT_TELEMETRY_DISABLED: "1" };
   delete env.OPENAI_API_KEY;
@@ -51,6 +58,7 @@ async function smokeProduction() {
     if (response.headers.get("x-content-type-options") !== "nosniff") throw new Error("Missing nosniff header in clean-room production smoke.");
     if (response.headers.get("x-frame-options") !== "DENY") throw new Error("Missing frame protection in clean-room production smoke.");
     if (response.headers.get("referrer-policy") !== "strict-origin-when-cross-origin") throw new Error("Missing referrer policy in clean-room production smoke.");
+    console.log("[clean-room] production smoke completed");
   } finally {
     child.kill();
     await Promise.race([

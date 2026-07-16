@@ -33,8 +33,7 @@ Still pending and requiring builder supervision:
 
 - Manual assistive-technology and final browser checks
 - Selection of final screenshots for the public README
-- License selection
-- Commit, repository publication, deployment, public smoke test, video recording, `/feedback` Session ID, and Devpost submission
+- Repository publication, deployment, public smoke test, video recording, `/feedback` Session ID, and Devpost submission
 
 ## Phase status
 
@@ -51,6 +50,7 @@ Still pending and requiring builder supervision:
 | Focused verifiability phase 1 | Judge-first path and deterministic semantic fingerprint | Complete | Focused/Full state preservation, four-stage guide, 7/7 rerun, threshold diff, 19 Playwright paths, and ignored screenshot passes |
 | Verifiable receipt phase 2 | Exact receipt-instance integrity and local verification | Complete | Separate Review Fingerprint and Receipt Integrity Hash, strict schemas, native SHA-256, JSON tamper detection, bilingual responsive UI, and ignored screenshot passes |
 | Competition evaluation phase 3 | Reproducible repository evidence without provider access | Complete | `eval:competition`, `demo:verify`, 3 scenarios / 21 conclusions, 7 mutations, 10 adversarial cases, deterministic reports, and no-network enforcement |
+| Release hardening phase 4 | Frozen, reproducible public repository and submission package | Complete locally | MIT license, Node/pnpm metadata, CI, release checks, clean room, security policy, public README, deployment and accessibility runbooks |
 
 ## Next supervised sequence
 
@@ -58,7 +58,7 @@ Still pending and requiring builder supervision:
 2. Inspect the ignored final viewport and component captures.
 3. Review the sanitized live-validation report and its documented limitations.
 4. Perform the remaining manual screen-reader and deployed-browser checks.
-5. Select a license and final public screenshots.
+5. Select final public screenshots from the deployed build.
 6. With explicit approval, publish, deploy, smoke-test, record the video, and complete submission metadata.
 
 ## Deferred until explicitly approved

@@ -382,3 +382,29 @@ Fresh implementation-gate results before the final documentation commit:
 The first smoke approach failed before product verification because an extra pnpm argument made Next.js interpret `--port` as a directory. The corrected `Start-Process` server then became ready but was unreachable from the parent PowerShell network context. A same-process Node orchestrator preserved the identical production build, completed both HTTP checks, and released the port. No application change or weakened assertion was required.
 
 No live or paid OpenAI request was made. Historical GPT-5.6 evidence was not rerun. `.env.local` was not opened or read. Evaluation network clients were blocked and recorded zero calls. No new product screen, route, dependency, push, deployment, merge, or publication was introduced.
+
+## Build Week release hardening gate — 2026-07-16
+
+Fresh results after the release tooling, CI, public documentation, runtime metadata, Turbopack root, and stable Vitest concurrency changes:
+
+- `pnpm test`: PASS — 27 test files, 201 tests, Vitest duration 87.46 s. The release environment uses two workers and a 15-second test timeout; no assertion or expected result was removed.
+- `pnpm typecheck`: PASS — no TypeScript errors.
+- `pnpm lint`: PASS — no ESLint errors or warnings.
+- `pnpm build`: PASS — compiled in 22.6 s, completed its TypeScript phase in 8.8 s, and produced five unchanged routes: static `/` and `/_not-found`; dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`.
+- `pnpm test:e2e`: PASS — 23 Chromium tests in 1.8 minutes. The suite covers Northstar, Meridian, Atlas, Focused Demo, Full Workspace, English/French, keyboard, reduced motion, mobile, effective 200% zoom, print, JSON, Markdown, CSV, mocked provider failure, fingerprints, and receipt verification.
+- `pnpm audit --prod`: PASS — no known production vulnerabilities.
+- `pnpm eval:competition`: PASS twice — 3/3 scenarios, 21/21 controls and conclusions, 3/3 profiles, 34 evidence references, exact excerpts, isolation, deterministic reproduction, threshold sensitivity, fingerprints, receipts, 7/7 mutations, 10/10 adversarial cases, zero attempted external calls, and zero unexpected failures. Markdown and JSON report SHA-256 hashes were identical across both runs.
+- `pnpm demo:verify`: PASS — evaluation, 3 targeted files / 23 targeted tests, TypeScript, and exact final line `PolicyProof demo verification: PASS`.
+- `pnpm release:docs`: PASS — 60 tracked Markdown files.
+- `pnpm release:hygiene`: PASS — 203 tracked files.
+- Clean-room verification: PASS — `git archive HEAD`, no `.git` or `.env.local`, 435 locked packages reused with zero downloads, offline frozen install, `demo:verify`, empty-cache production build, provider unavailable without a key, production root 200, and expected security headers. The first successful run took approximately 6 minutes 39 seconds on the slow local Windows filesystem.
+- Production smoke: PASS — root returned 200; status returned model `gpt-5.6` and boolean availability; `nosniff`, `DENY`, and `strict-origin-when-cross-origin` were present; the temporary server was stopped.
+- Git ancestry: PASS — live GPT-5.6, Focused Verifiability, Verifiable Receipt, and Competition Evaluation source commits are all ancestors.
+- Repository scans: PASS — zero tracked forbidden artifacts, zero public personal-path files, no lockfile change, required generated roots ignored, and the only generic secret-scan match is the intentional secret-detection regex in `tests/release-metadata.test.ts`.
+- Dependencies: no dependency or lockfile change; package metadata now records the locally validated pnpm 11.9.0 runtime.
+
+Three environmental failures were retained in the release record rather than hidden: the first clean-room launch could not start `pnpm.cmd` directly on Windows; the first extended clean-room attempt exceeded four minutes while still building; and two initial full Vitest attempts encountered worker-start or 5-second UI timeouts after the empty-cache build. The Windows runner now uses explicit `cmd.exe` invocation with constant arguments, Turbopack is rooted at the active repository, and Vitest uses bounded concurrency and a 15-second timeout. The final complete Vitest run passed all 201 unchanged assertions.
+
+`pnpm release:verify` is intentionally run from the clean final commit because it requires both staged and unstaged Git cleanliness. Its final post-commit result is recorded in the release handoff. The registry-dependent production audit and the slower clean-room reconstruction remain separately documented gates.
+
+No live or paid OpenAI request was made. `.env.local` was not opened or read. No API key was displayed. No push, deployment, merge, publication, repository creation, video upload, or Devpost submission occurred.

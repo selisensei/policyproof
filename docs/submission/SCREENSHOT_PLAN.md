@@ -70,3 +70,20 @@ Inspect that the human decision remains visually primary, verification is reacha
 ## Competition evaluation evidence
 
 No new product screenshot is required because the harness adds no visible interface. If a technical terminal capture is useful for private review, store `eval:competition` or `demo:verify` output only under ignored `test-results/competition-evaluation/`. Do not replace the EUR/USD product evidence or publish local paths, environment details, or terminal diagnostics.
+
+## Release captures
+
+All public screenshots remain owner actions after deployment. Capture from the exact deployed release commit in a private-navigation window, then verify that no browser account, local path, key, console, extension, or personal tab is visible.
+
+Required final candidates:
+
+1. Focused Demo opening state.
+2. Exact EUR/USD evidence.
+3. Same-input 7/7 rerun with unchanged Review Fingerprint.
+4. EUR 10,000 to EUR 15,000 approval-only change.
+5. Human decision and generated receipt.
+6. Verified receipt state.
+7. Full Workspace.
+8. One 390 × 844 mobile view.
+
+Optional technical evidence may show the final PASS line from `pnpm demo:verify` or `pnpm release:verify` for only a few seconds. Do not publish ignored clean-room logs or Playwright reports as product screenshots.

@@ -12,7 +12,7 @@ The competition harness provides reproducible repository evidence for the contro
 - Complete harness: `pnpm eval:competition`
 - Focused technical gate: `pnpm demo:verify`
 
-Both commands run locally. They need Node.js 24+, pnpm 11.7.0, and installed repository dependencies. They do not need a browser, development server, `.env.local`, OpenAI API key, or live provider access.
+Both commands run locally. They need Node.js 24, pnpm 11.9.0, and installed repository dependencies. They do not need a browser, development server, `.env.local`, OpenAI API key, or live provider access.
 
 ## Architecture
 

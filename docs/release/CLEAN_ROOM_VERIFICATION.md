@@ -26,4 +26,8 @@ The command performs no live provider request. The offline installation succeeds
 
 ## Result record
 
-Runtime logs and `result.json` are written only below `test-results/release-clean-room/`. They are ignored and must not be committed. The final supervised result is recorded in the release handoff and release manifest after the release commits exist.
+Runtime logs and `result.json` are written only below `test-results/release-clean-room/`. They are ignored and must not be committed.
+
+The first supervised release run passed on 2026-07-16 from tracked commit `e58f4433d2cb2dfbbb4951ed2a172b8a899aa052`: all 435 locked packages were reused from the local store with zero downloads, `demo:verify` passed, the production build passed, the no-key status reported live mode unavailable, and the local production smoke verified the expected security headers. The initial four-minute orchestration attempt timed out because the empty-cache build was still running; the successful rerun completed in approximately six minutes and thirty-nine seconds on the slow local Windows filesystem.
+
+The final release handoff records the post-documentation rerun against the final `HEAD`.

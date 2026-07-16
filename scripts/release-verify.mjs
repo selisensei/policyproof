@@ -19,7 +19,11 @@ export const releaseSteps = Object.freeze([
 ]);
 
 export function runCommand(step) {
-  const result = spawnSync(step.command, step.args, { cwd: root, env: process.env, encoding: "utf8", stdio: "inherit", shell: false });
+  const useWindowsCommandShell = process.platform === "win32" && step.command.endsWith(".cmd");
+  const executable = useWindowsCommandShell ? "cmd.exe" : step.command;
+  const executableArgs = useWindowsCommandShell ? ["/d", "/s", "/c", step.command, ...step.args] : step.args;
+  const result = spawnSync(executable, executableArgs, { cwd: root, env: process.env, encoding: "utf8", stdio: "inherit", shell: false });
+  if (result.error) return 1;
   return result.status ?? 1;
 }
 

@@ -1,294 +1,250 @@
 # PolicyProof
 
-PolicyProof is an OpenAI Build Week 2026 project for the Work & Productivity track. It turns a written business policy into reviewable controls, evaluates controlled fictional document-based cases, and keeps every result connected to supporting, contradictory, or missing evidence.
+**Every result traced. Every decision defensible.**
 
-## Problem and solution
+PolicyProof is a verification layer for procurement review. It turns written policy into reviewable controls, links each conclusion to exact evidence, runs objective checks deterministically, and keeps the final decision human.
 
-Finance, procurement, and internal-control reviewers often compare policy text with scattered business documents. Conclusions can become difficult to reproduce because the underlying evidence is separated from the review result.
+> GPT-5.6 reads and locates.
+>
+> TypeScript checks.
+>
+> A human decides.
 
-PolicyProof provides one focused, bilingual workspace to review controls, run a case, inspect exact excerpts, record human judgment, and produce a local decision receipt. It is a review aid, not an autonomous approval tool or a compliance certification.
+PolicyProof is a solo OpenAI Build Week 2026 project for the **Work & Productivity** track. It is designed for finance, procurement, and internal-control reviewers who need conclusions they can inspect and reproduce.
 
-## Current status
-
-The deterministic demo is the guaranteed, fully tested path. It uses version-controlled fictional fixtures and makes no AI request. A strict scenario contract now drives three profiles through the same procurement policy, seven controls, deterministic engine, evidence surfaces, and human-decision workflow: Northstar mixed-risk, Meridian compliant, and Atlas evidence-deficient. Results are calculated at runtime from scenario documents; expected fixture outcomes are test assertions and are never rendered as precomputed results.
-
-The approved **Proofroom — The Evidence Ledger** interface combines a compact utility header, a horizontal five-step workflow ledger, a bilingual Case Library, policy and case-file folios, dense control and result registers, a split evidence inspector, review-intelligence panels, a prioritized human-decision queue, and a formal decision receipt. Optional Judge Mode guides real actions without performing them. Current-session case comparison, architecture, evidence-trust, and audit surfaces remain secondary and expose no score or ranking.
-
-The default **Focused Demo** presents the same production state through a Northstar-first judge path: one Run review action, compact outcomes, the exact EUR/USD contradiction, deterministic rerun, Review Fingerprint, and human decision. **Open full workspace** exposes every advanced surface without resetting review state. Judge Mode is now a compact four-stage manual guide.
-
-Each deterministic run produces a versioned Review Fingerprint: a lowercase SHA-256 digest of canonical policy, controls, parameters, source documents, structured facts, exact evidence, and deterministic conclusions. A same-input rerun reproduces 7/7 Northstar conclusions and the same digest without replacing human state. A EUR 10,000 → EUR 15,000 change makes only `CTRL-01` pass, leaves six controls unchanged, and changes the digest. The fingerprint is not a signature, identity proof, authorship proof, or trusted timestamp.
-
-After a human decision, PolicyProof can generate a versioned, integrity-protected JSON decision receipt. `policyproof.receipt-integrity.v1` binds that Review Fingerprint to the exact decisions, comments, safe audit metadata, receipt identifier, language, and generation timestamp using native SHA-256. Current or exported JSON receipts can be verified entirely in the browser. A matching hash detects unchanged included content; it does not establish identity, authorship, legal signature, source authenticity, or trusted time. See `docs/VERIFIABLE_RECEIPT_MODEL.md`.
-
-The Live GPT-5.6 path is implemented behind a server-only API boundary. It can compile policy text into proposed controls and extract structured facts from selected text documents. One controlled live validation with the fictional Northstar case passed on 2026-07-14: GPT-5.6 returned seven human-reviewed controls and 14 source-verified evidence items, and the deterministic engine produced the expected 3 PASS, 2 FAIL, 1 MISSING, and 1 WARNING. See `docs/evaluation/LIVE_GPT56_VALIDATION.md`. This single case does not establish general model accuracy.
-
-The live-validation evidence is preserved by commit `eb120feaca78bf3cdbc71b7b7198045f86a44852` (`test: validate live GPT-5.6 evidence pipeline`). Commit `76c6ce62a0fdbefa721e40d6f321fcea4b9e8db4` is the preceding judge-experience redesign, not the validation commit. Release ancestry can be checked with `git merge-base --is-ancestor eb120feaca78bf3cdbc71b7b7198045f86a44852 HEAD`.
-
-## Screenshots
-
-Local Playwright runs generate ignored English and French screenshots at desktop and mobile widths. The Proofroom integration and review-intelligence workspace were inspected through repeated desktop, tablet, mobile, component, decision, receipt, threshold-change, run-comparison, print, loading, and safely mocked provider-error captures. The builder will select production captures for the public repository after deployment so the README does not publish development-only images or local paths.
-
-Mocked provider-error captures remain local-only and are not public product screenshots.
-
-The final verifiable-receipt gate passes 20 Vitest files / 161 tests and 23 Chromium Playwright paths, plus typecheck, lint, production build, production dependency audit, local production smoke, secret/path scans, and three ignored visual-review passes. No dependency was added and no live OpenAI request was made during this phase.
-
-The repository now includes a local Competition Evaluation Harness. `pnpm eval:competition` validates all three controlled scenarios, 21 deterministic conclusions, exact evidence, scenario isolation, Review Fingerprints, receipt integrity, seven business-rule mutations, ten adversarial cases, and a strict no-network boundary. `pnpm demo:verify` provides the focused one-command technical gate. Neither command needs an OpenAI API key or makes a live provider request.
-
-## Product workflow
-
-1. Select one of three controlled fictional cases and review the shared policy.
-2. Review, edit, enable, or disable controls.
-3. Load the bundled demo case or select fictional local text documents.
-4. Run the deterministic review; use outcome composition, evidence coverage, chronology, threshold sensitivity, local search, and filters to direct attention.
-5. Inspect exact evidence, work through the prioritized reviewer queue, record a human decision, generate and locally verify the receipt, then print or export integrity-protected JSON; Markdown and UTF-8 CSV remain available under secondary exports.
-
-The optional guided demo tracks these real actions without performing them automatically. It leads from loading Northstar through the EUR/USD contradiction and receipt to a EUR 15,000 rerun. The previous run is stored as one minimal, versioned local snapshot when browser storage is available; blocked storage never prevents the current review. Desktop uses a ruled horizontal workflow ledger with persistent case context; tablet and mobile preserve it as a compact horizontally scrollable step strip.
-
-## Review intelligence
-
-PolicyProof derives its review intelligence from the same structured controls, results, evidence, and documents used by the deterministic engine. It does not create a composite risk score or a second source of truth.
-
-- **Case Overview** summarizes the current case, method, document set, and unresolved attention.
-- **Outcome Composition** filters the result register through a semantic stacked bar.
-- **Evidence Coverage Map** distinguishes supporting, contradictory, missing, and not-applicable evidence and opens the selected control.
-- **Chronology** orders actual case dates from the fictional documents.
-- **Threshold Sensitivity** explains the purchase amount against the current approval threshold.
-- **Run Comparison** shows the current run beside one previous local snapshot and identifies changed controls.
-- **Evidence Integrity** replaces an unsupported confidence percentage with exact-source, explicit-missing, or needs-review states.
-- **Reviewer Queue** prioritizes unresolved failures, missing items, warnings, and remaining passes without changing their original results.
-
-See `docs/FEATURE_GUIDE.md`, `docs/USER_GUIDE.md`, and `docs/ARCHITECTURE.md` for the complete product and technical guide.
-
-## Proofroom design direction
-
-The production interface translates the approved package in `docs/design/proofroom-ui/` into the validated React architecture. The design package controls visual hierarchy, tokens, evidence-led composition, responsive transformations, motion, and receipt treatment. Existing PolicyProof schemas, exact-excerpt validation, deterministic calculations, GPT-5.6 routes, security boundaries, and human-decision rules remain authoritative.
-
-Codex implemented this direction in the application; the static HTML boards were references, not generated production code. No design-system dependency, remote font, state library, database, or new runtime package was added.
-
-## Technical stack
-
-- Next.js 16.2.10 and React 19.2.7
-- TypeScript 6.0.3 in strict mode
-- Tailwind CSS 4.3.2
-- Zod 4.4.3
-- OpenAI JavaScript SDK 6.46.0
-- Vitest 4.1.10 and Testing Library
-- Playwright 1.61.1 with Chromium
-- pnpm 11.7.0 with a committed lockfile and restricted dependency build scripts
-
-There is no database, authentication, payment system, ERP integration, OCR service, or multi-agent application architecture.
-
-## Prerequisites
-
-- Node.js 24 or newer
-- pnpm 11.7.0
-- Git
-
-Docker, Python, and GitHub CLI are not required to run the application.
-
-## Local setup
-
-From a terminal opened in the cloned repository:
+## Quick verification
 
 ```shell
-pnpm install
+pnpm install --frozen-lockfile
 pnpm demo:verify
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Stop the server with `Ctrl+C`.
+Open [http://localhost:3000](http://localhost:3000). `pnpm demo:verify` needs no API key, browser, development server, or live provider. It validates the three controlled scenarios, 21 conclusions, seven mutations, ten named adversarial cases, Review Fingerprints, Receipt Integrity, TypeScript, and the evaluation no-network guard.
 
-Project commands disable Next.js telemetry. `pnpm-workspace.yaml` allows dependency build scripts only for `sharp` and `unrs-resolver`.
+## Product overview
 
-## One-command repository verification
+A reviewer can load a controlled policy and case, inspect seven controls, run a deterministic review, follow supporting or contradictory excerpts, record a final human decision, and export a locally verifiable receipt. The default Focused Demo makes the evidence path easy to present; Full Workspace retains the complete review, audit, comparison, and export surfaces.
 
-Run:
+PolicyProof is a review aid. It does not approve a payment, certify compliance, establish document authenticity, or replace professional judgment.
 
-```shell
-pnpm demo:verify
-```
+## Primary controlled example
 
-The command validates scenario schemas, all 21 expected deterministic conclusions, seven controlled mutations, ten adversarial boundaries, Review Fingerprint reproduction, strict threshold behavior, Receipt Integrity, modification detection, no-network enforcement, and TypeScript. Its final line is `PolicyProof demo verification: PASS` when every selected check succeeds.
+Northstar is a fictional vendor-change and procurement case. The shared engine produces:
 
-`demo:verify` makes no live provider request, does not read `.env.local`, and does not require an OpenAI API key, browser, development server, or deployed site. The separately documented GPT-5.6 validation is historical evidence from Northstar commit `eb120feaca78bf3cdbc71b7b7198045f86a44852`; it is not rerun by either verification command. This evaluation covers one controlled procurement-policy domain. It does not prove universal policy coverage, universal adversarial safety, or cross-industry accuracy.
+| Outcome | Count |
+| --- | ---: |
+| PASS | 3 |
+| FAIL | 2 |
+| MISSING | 1 |
+| WARNING | 1 |
 
-For the complete report and methodology, see `docs/EVALUATION_HARNESS.md`, `docs/evaluation/COMPETITION_EVALUATION_REPORT.md`, `docs/BUSINESS_RULE_MUTATION_MATRIX.md`, and `docs/ADVERSARIAL_TEST_MATRIX.md`.
+The clearest evidence moment is a purchase order for **12,480 EUR** and an invoice for **12,480 USD**. PolicyProof shows both exact excerpts and fails currency consistency while amount match still passes. With one approver, changing the policy threshold from EUR 10,000 to EUR 15,000 changes only the approval control from FAIL to PASS; the other six conclusions remain unchanged.
 
-## Deterministic demo instructions
+## Why this is not a document chatbot
 
-1. Open PolicyProof and confirm the default **Focused Demo** shows Northstar, seven enabled controls, five fictional records, and no precomputed outcome counts.
-2. Leave the approval threshold at `10000` and select **Run review** in the focused panel.
-3. Confirm the expected outcomes:
-   - Purchase order timing: PASS
-   - Amount match: PASS
-   - Currency consistency: FAIL
-   - Approval threshold: FAIL
-   - Delivery evidence: PASS
-   - Independent bank verification: MISSING
-   - Segregation of duties: WARNING
-4. Inspect **Currency consistency** and confirm the exact `12,480 EUR` purchase-order excerpt and `12,480 USD` invoice excerpt plus their source IDs and locators.
-5. Select **Rerun deterministic checks**. Confirm **7 of 7 conclusions reproduced identically** and **Review fingerprint unchanged**. This action makes no OpenAI request and preserves human decisions.
-6. Change the focused approval threshold to `15000` and rerun. Confirm `CTRL-01: FAIL → PASS`, six unchanged controls, and a changed fingerprint. Parameter-changing reruns intentionally reset prior reviewer decisions.
-7. Record a human decision, then open the full decision to inspect or export the receipt.
-8. Select **Open full workspace** to inspect the five-step workflow, Case Library, analytics, search, audit trail, scenario comparison, print, JSON, Markdown, and CSV exports. Select **Return to focused demo** to confirm state remains intact.
+The model does not make the final control result. GPT-5.6 proposes structured controls and locates structured facts and exact excerpts. Strict schemas and source checks reject unsupported references. The TypeScript engine then performs supported amount, currency, date, threshold, evidence-presence, and role comparisons. A reviewer confirms or overrides the final review with comments.
 
-Use the **English / Français** selector at any point. Navigation, actions, statuses, validation, and the displayed receipt change language immediately. Source documents, exact evidence excerpts, stable control identifiers, and internal enum values remain unchanged.
-
-## Live GPT-5.6 setup
-
-Live mode is disabled when no server-side API key is configured. The deterministic demo remains available.
-
-1. Copy `.env.example` to `.env.local`.
-2. Edit `.env.local` locally and set `OPENAI_API_KEY` to your own key. Never paste the value into chat, documentation, screenshots, or source control.
-3. Restart `pnpm dev`.
-4. Confirm that **Live GPT-5.6** becomes available.
-5. Use only fictional policy text and fictional `.txt`, `.md`, or `.json` documents.
-6. Compile the policy, review and edit the proposed controls, explicitly approve them, then run the case analysis.
-
-Supported local documents are limited to 10 files, 1 MB each. Files are read in the browser and are sent externally only when the user explicitly runs Live analysis. PDF and OCR are not supported.
-
-### Environment variables
-
-| Variable | Required | Scope | Purpose |
-| --- | --- | --- | --- |
-| `OPENAI_API_KEY` | Live mode only | Server only | Authenticates Responses API requests. |
-
-The key is never returned by `/api/ai/status` and is never included in browser code.
-
-## GPT-5.6 integration
-
-The model configuration is isolated in `src/openai/config.ts` and uses the official `gpt-5.6` alias, Responses API, low reasoning effort, request timeout, and Structured Outputs validated with Zod. This follows the official [latest model guide](https://developers.openai.com/api/docs/guides/latest-model) and [Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
-
-GPT-5.6 is responsible for policy interpretation and evidence extraction. TypeScript remains responsible for amount and currency comparison, date ordering, approval counting and thresholds, document presence, segregation-of-duties equality checks, result summaries, human decisions, and receipts.
-
-The server validates that every quoted evidence excerpt exists in the supplied fictional source text. Provider errors are converted into safe user-facing messages. GPT-5.6 does not approve payments and does not issue a legal or compliance certification.
-
-## Architecture overview
+## Architecture
 
 ```mermaid
 flowchart LR
-    U["Reviewer in browser"] --> W["Five-step React workspace"]
-    W --> D["Deterministic demo fixtures"]
-    W --> A["Next.js server API routes"]
-    A --> G["GPT-5.6 Responses API"]
-    G --> Z["Strict Zod validation"]
-    D --> E["Deterministic TypeScript engine"]
-    Z --> X["Source excerpt verification"]
-    X --> E
-    E --> I["Review intelligence and evidence ledger"]
-    I --> R["Reviewer queue and receipt"]
-    R --> H["Human confirm or override"]
+    R["Reviewer"] --> UI["Focused Demo or Full Workspace"]
+    UI --> D["Controlled local fixtures"]
+    UI --> API["Next.js server routes"]
+    API --> G["GPT-5.6 Responses API"]
+    G --> Z["Strict Zod output validation"]
+    Z --> E["Exact excerpt verification"]
+    D --> T["Deterministic TypeScript engine"]
+    E --> T
+    T --> H["Evidence-led human decision"]
+    H --> P["Locally verifiable receipt"]
 ```
 
-The browser never calls OpenAI directly. The deterministic judging path stops at local fixtures and the TypeScript engine; the live path crosses the server boundary only after an explicit user action.
+The deterministic path stops at local fictional fixtures and the TypeScript engine. The optional live path crosses the server boundary only after an explicit user action. The OpenAI key remains server-only.
 
-- `app/` contains the Next.js page, styles, and server API routes.
-- `components/workspace/` contains focused UI sections; `DemoReviewWorkspace` owns temporary page state.
-- `src/domain/` contains Zod schemas and shared domain types.
-- `src/fixtures/` contains the deterministic case plus mocked policy and document evaluation contracts.
-- `src/i18n/` contains the typed English/French presentation dictionary and hydration-safe locale context.
-- `src/lib/` contains deterministic review, review-intelligence, optional run-history, receipt, summary, and local-document logic.
-- `src/openai/` contains server-only client configuration, prompts, mappers, validation, and safe route handlers.
-- `tests/` contains unit, integration, component, and browser tests.
+## GPT-5.6 responsibilities
 
-Live requests pass through server routes, validated structured outputs are mapped into domain objects, and deterministic code calculates supported controls. Missing, refused, incomplete, malformed, or source-inconsistent model output fails closed.
+- Interpret the written procurement policy.
+- Propose structured, editable controls.
+- Extract structured facts from explicitly selected fictional text documents.
+- Locate exact evidence excerpts.
+- Support the historically validated Northstar evidence pipeline.
 
-## Testing
+Northstar has one separate historical live GPT-5.6 validation at commit `eb120feaca78bf3cdbc71b7b7198045f86a44852`. The release checks do not rerun it. See [Live GPT-5.6 validation](docs/evaluation/LIVE_GPT56_VALIDATION.md).
 
-Run the mandatory checks:
+## TypeScript responsibilities
 
-```powershell
+- Validate scenario, provider-output, evidence, fingerprint, receipt, and evaluation schemas.
+- Reject unknown documents and unsupported exact excerpts.
+- Calculate the seven supported deterministic control types.
+- Reproduce same-input conclusions and Review Fingerprints.
+- Isolate threshold mutations and scenario state.
+- Generate and verify receipt integrity locally.
+
+## Human responsibilities
+
+- Confirm or edit model-proposed controls.
+- Interpret business context and exceptions.
+- Review supporting, contradictory, and missing evidence.
+- Record the final decision and comments.
+- Decide whether a case is ready for operational action.
+
+Neither GPT-5.6 nor the deterministic engine issues a legal or compliance certification.
+
+## Focused Demo
+
+Focused Demo is the default Northstar-first presentation. Its path is:
+
+1. Run review.
+2. Inspect the EUR/USD contradiction.
+3. Reproduce all seven conclusions with the same Review Fingerprint.
+4. Change the threshold and inspect the one-control difference.
+5. Record a human decision.
+6. Generate and verify the decision receipt.
+
+It uses the same application state and engine as Full Workspace; it is not a scripted or precomputed second application.
+
+## Full Workspace
+
+Full Workspace adds the Case Library, policy and document registers, editable controls, full result and evidence views, search and filters, current-session comparison, safe audit details, reviewer queue, print, JSON, Markdown, and CSV exports. Switching presentation level preserves active review state.
+
+## Three controlled scenarios
+
+All scenarios use the same procurement policy, seven control types, typed scenario contract, and deterministic engine.
+
+| Scenario | Profile | PASS | FAIL | MISSING | WARNING | Validation boundary |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Northstar | Mixed risk | 3 | 2 | 1 | 1 | Deterministic now; historical live GPT-5.6 evidence |
+| Meridian | Complete, below threshold | 7 | 0 | 0 | 0 | Deterministic and mocked |
+| Atlas | Evidence deficient | 4 | 1 | 2 | 0 | Deterministic and mocked |
+
+Expected fixture outcomes are test assertions. Displayed results are calculated at runtime. See the [scenario validation matrix](docs/evaluation/SCENARIO_VALIDATION_MATRIX.md).
+
+## Review Fingerprint
+
+`policyproof.review-fingerprint.v1` is a lowercase SHA-256 digest of canonical semantic review content: policy, enabled controls and parameters, controlled documents and facts, exact evidence references, and deterministic conclusions. Same semantic inputs reproduce the same fingerprint. Human decisions, comments, language, audit events, receipt identifiers, and timestamps are excluded.
+
+The Review Fingerprint is not a digital signature, identity proof, authorship proof, or trusted timestamp. See the [Review Fingerprint model](docs/REVIEW_FINGERPRINT_MODEL.md).
+
+## Receipt Integrity
+
+`policyproof.receipt-integrity.v1` protects one exact `policyproof.decision-receipt.v1` instance, including the Review Fingerprint, human decisions, comments, safe audit events, receipt identifier, language, and generation time. Current or exported JSON receipts can be checked entirely in the browser.
+
+The integrity check confirms that the receipt content matches its recorded hash. Because the hash is not digitally signed, it does not establish origin, identity, authorship, authenticity or trusted time. Someone who can replace both the content and hash can create a new internally consistent pair. See the [Verifiable Receipt model](docs/VERIFIABLE_RECEIPT_MODEL.md).
+
+## Competition Evaluation Harness
+
+`pnpm eval:competition` exercises the production scenario schemas and shared engine without a browser or provider. Its deterministic report covers:
+
+- 3 of 3 scenarios;
+- 21 of 21 controlled conclusions;
+- 34 controlled evidence references;
+- exact excerpt and evidence-to-control validation;
+- scenario isolation and deterministic reproduction;
+- threshold sensitivity and Review Fingerprints;
+- Receipt Integrity and modification detection;
+- 7 of 7 isolated business-rule mutations;
+- 10 of 10 named adversarial boundaries;
+- zero attempted external calls under its scoped network guard.
+
+The harness distinguishes executed deterministic checks, mocked checks, and historical live evidence. It does not prove universal policy coverage or universal adversarial safety. Read the [methodology](docs/EVALUATION_HARNESS.md) and [deterministic report](docs/evaluation/COMPETITION_EVALUATION_REPORT.md).
+
+## Local installation
+
+Prerequisites:
+
+- Node.js 24 (validated locally with 24.14.0)
+- pnpm 11.9.0
+- Git
+
+```shell
+pnpm install --frozen-lockfile
+pnpm demo:verify
+pnpm dev
+```
+
+The repository remains private as an npm package (`"private": true`) and is not published to npm. Stop the local server with `Ctrl+C`.
+
+## Optional live GPT-5.6 setup
+
+Live mode is optional. The deterministic demo remains the default and works with no environment file.
+
+1. Copy `.env.example` to `.env.local`.
+2. Set `OPENAI_API_KEY` locally to your own key.
+3. Never paste the value into chat, issues, documentation, screenshots, or source control.
+4. Restart `pnpm dev` and explicitly select a live feature.
+5. Use fictional `.txt`, `.md`, or `.json` documents only.
+
+The key is read only on the server. It is never returned by `/api/ai/status` or placed in client code. Missing provider access fails safely while deterministic mode remains available.
+
+## Tests and validation
+
+The current release contains **201 Vitest tests** and **23 Playwright tests**. The principal commands are:
+
+```shell
+pnpm demo:verify
+pnpm eval:competition
 pnpm test
 pnpm typecheck
 pnpm lint
 pnpm build
-```
-
-Install the Playwright browser once, then run the critical journey:
-
-```powershell
-pnpm exec playwright install chromium
 pnpm test:e2e
-```
-
-In the isolated Codex runtime, keep the browser inside the project:
-
-```powershell
-$env:PLAYWRIGHT_BROWSERS_PATH = "0"
-& $pnpm exec playwright install chromium
-& $pnpm test:e2e
-```
-
-Run the production dependency audit with:
-
-```powershell
+pnpm release:verify
 pnpm audit --prod
 ```
 
-The latest recorded results are in `TESTING.md`.
+`pnpm release:verify` runs release hygiene, Markdown link checks, deterministic verification and TypeScript, the full Vitest suite, lint, production build, Playwright, and Git diff/cleanliness checks. It does not include `pnpm audit --prod` because the registry-dependent audit is a separate online gate. Chromium must be installed before the full release command: `pnpm exec playwright install chromium`.
 
-The secret-free GitHub Actions workflow in `.github/workflows/ci.yml` runs frozen installation, unit/component tests, type checking, linting, and the production build. Playwright remains a required local release gate until public-runner reliability is supervised.
+GitHub Actions repeats frozen installation, deterministic verification, full tests, build, Chromium paths, and the production audit without an OpenAI secret or deployment step. See [Testing](TESTING.md) and [clean-room verification](docs/release/CLEAN_ROOM_VERIFICATION.md).
 
-## Deployment preparation
+## Codex collaboration
 
-See `docs/DEPLOYMENT.md` for the supervised Vercel configuration, environment boundary, smoke tests, rollback guidance, and Live GPT-5.6 verification. No deployment is performed by the repository itself.
+The owner selected the problem, domain, audience, controlled cases, human-in-the-loop boundary, scope reductions, and accepted each development phase. Codex accelerated architecture, implementation, testing, diagnosis, documentation, and release preparation under that direction. GPT-5.6 is a product runtime component; Codex is the development collaborator. See [Codex and GPT-5.6 usage](docs/CODEX_AND_GPT56_USAGE.md).
 
-## Security and privacy
+The official `/feedback` Session ID is an owner-supplied submission field and is intentionally not stored or invented here.
 
-- Never commit `.env.local` or any credential; environment files are ignored except `.env.example`.
-- Use fictional demonstration data only.
-- The OpenAI client is server-only.
-- Model output is schema-validated and evidence excerpts are checked against submitted text.
-- Policy and document text are treated as untrusted source material, not as instructions.
-- Local filenames, declared MIME types, count, size, empty content, binary content, duplicates, and JSON syntax are validated.
-- Invalid UTF-8 replacement markers and single lines over 20,000 characters are rejected; HTML-like text remains escaped plain text.
-- Responses use conservative MIME-sniffing, framing, referrer, camera, microphone, and geolocation headers.
-- Deterministic demo mode does not make external requests.
-- Selected local files remain in browser memory until an explicit Live analysis request.
-- Dependency build scripts are restricted and the production dependency audit currently reports no known vulnerabilities.
+## Security boundaries
 
-## Is PolicyProof hard-coded for one demo?
+- Bundled data is fictional.
+- Policy and document text is untrusted data, not application instruction.
+- Structured outputs, document references, exact excerpts, and receipt imports fail closed.
+- Deterministic Demo and repository verification need no provider and make no live model request.
+- The evaluation guard recorded zero attempted external calls for the verified workflow; this is scoped evidence, not a claim about every possible platform primitive.
+- The named prompt-injection test proves only that hostile text remains inert in the tested local structured boundary.
+- The receipt hash detects included-content changes only while the recorded hash is retained; it is unkeyed and unsigned.
+- Browser review and audit state is temporary, not durable secure storage.
 
-No display result is hard-coded for Northstar. Three strict scenario fixtures provide different suppliers, amounts, dates, approvers, document contents, bank-change states, and result profiles. One shared engine produces Northstar 3/2/1/1, Meridian 7/0/0/0, and Atlas 4/1/2/0 from their structured facts. Switching cases clears volatile results and decisions, preserves language, and isolates run-history keys by scenario.
-
-The scope is still intentionally narrow: one fictional procurement policy, three controlled case profiles, five text documents per case, and seven supported rule types. Northstar alone has a sanitized real GPT-5.6 validation; Meridian and Atlas are deterministic and mocked only. See `docs/evaluation/SCENARIO_VALIDATION_MATRIX.md`.
+Read [SECURITY.md](SECURITY.md), [Security and Limitations](docs/SECURITY_AND_LIMITATIONS.md), and the [adversarial matrix](docs/ADVERSARIAL_TEST_MATRIX.md).
 
 ## Known limitations
 
-- The prototype covers one procurement and vendor-change policy domain with three controlled fictional case profiles; it does not prove cross-industry generalization.
-- Most browser review state, completed-case comparison, and the safe audit trail are temporary and lost on refresh. At most one minimal previous-run snapshot per scenario is kept locally when browser storage is available.
-- Live GPT-5.6 passed one paid controlled evaluation with the fictional Northstar case; broader policies, documents, and repeated-run accuracy remain unvalidated.
-- Semantic controls that cannot be computed deterministically are not converted into a final automated approval.
-- Only `.txt`, `.md`, and `.json` local files are supported; there is no PDF or OCR workflow.
-- There is no durable persistence, authentication, collaboration, or external business-system integration.
-- Automated keyboard, accessible-name, responsive overflow, and document-language checks pass; a final assistive-technology review remains before submission.
-- A strict Content Security Policy is deferred until it can be verified against the deployed Next.js runtime.
-- The Review Fingerprint detects changes in canonical review content; it does not prove source authenticity, identity, authorship, legal signature, or trusted time.
-- Receipt Integrity is locally verifiable, but its unkeyed hash is not a digital signature. **EXPECTED SECURITY BOUNDARY:** a party able to modify both receipt content and its hash can create a new internally consistent pair; the mechanism proves no origin, identity, authorship, trusted time, or legal signature.
-- The Competition Evaluation Harness tests named controlled boundaries; it is not a universal policy-coverage, model-accuracy, penetration-testing, or compliance benchmark.
+- One controlled procurement and vendor-change policy domain is supported.
+- The three scenarios are fictional and deliberately bounded; only Northstar has historical live GPT-5.6 evidence.
+- Local inputs are text-based; PDF parsing, OCR, source authentication, and ERP integration are out of scope.
+- Model extraction can fail or omit facts. Exact citation checks reduce unsupported evidence references but do not establish document truth.
+- Receipt integrity is not legal signature, identity, origin, authenticity, or trusted-time proof.
+- Browser state is mostly session-local; there is no authentication, database, durable audit store, or collaboration layer.
+- Automated checks do not replace production, accessibility, security, legal, or user validation.
 
-## How Codex contributed
+## Repository structure
 
-This primary Codex task contains the core build history. Codex inspected the baseline, implemented the deterministic and GPT-5.6 architecture, refactored the interface, added tests, ran quality and security checks, and maintained the English product documentation. The builder remains responsible for product decisions, controlled live-model validation, deployment, demonstration recording, and final submission approval.
+```text
+app/                    Next.js page and server API routes
+components/workspace/   Focused Demo and Full Workspace UI
+src/domain/             Strict schemas and shared types
+src/fixtures/           Controlled fictional scenarios and evaluation data
+src/lib/                Deterministic engine, fingerprints, receipts, exports
+src/openai/             Server-only GPT-5.6 integration
+tests/                  Unit, component, integration, evaluation, and E2E tests
+scripts/                Provider-free verification and release tooling
+docs/evaluation/        Deterministic and historical validation evidence
+docs/release/           Freeze, clean-room, deployment, and release guidance
+docs/submission/        Devpost, video, demo, and owner checklists
+```
 
-## Accounts and credentials needed later
-
-- OpenAI API account with billing or hackathon credits and GPT-5.6 access
-- One OpenAI API key stored only in local and deployment environment settings
-- GitHub account and submission repository
-- Vercel account linked to the repository
-- YouTube account for the public video under three minutes
-
-## Hackathon submission checklist
-
-- [ ] Builder validates the deterministic demo manually
-- [x] Controlled GPT-5.6 evaluation passes with fictional data
-- [ ] Repository is committed and published
-- [ ] Application is deployed and smoke-tested
-- [ ] English README includes final screenshots and deployment URL
-- [ ] Public YouTube demonstration is under three minutes
-- [ ] Primary Codex `/feedback` Session ID is recorded
+Start with this README, then read the [product narrative](docs/PRODUCT_NARRATIVE.md), [architecture](docs/ARCHITECTURE.md), [evaluation harness](docs/EVALUATION_HARNESS.md), and [release manifest](docs/release/RELEASE_MANIFEST.md).
 
 ## License
 
-No license has been selected yet. `docs/submission/LICENSE_RECOMMENDATION.md` compares MIT and Apache-2.0 without making the decision for the builder.
+PolicyProof is available under the [MIT License](LICENSE). Copyright (c) 2026 Ilies Sampaio Fernandes.
