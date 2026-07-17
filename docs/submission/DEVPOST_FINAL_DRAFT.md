@@ -88,7 +88,7 @@ A useful review product states uncertainty clearly. Separating semantic extracti
 
 ## Limitations
 
-PolicyProof is a hackathon prototype and review aid, not a compliance certification or autonomous approval system. It supports one fictional procurement policy, three controlled case profiles, seven rule types, and text-based `.txt`, `.md`, and `.json` files only. Northstar alone has real GPT-5.6 validation; Meridian and Atlas are deterministic and mocked. This does not prove cross-industry generalization or broader model accuracy.
+PolicyProof is a hackathon prototype and review aid, not a compliance certification or autonomous approval system. It supports one fictional procurement policy, three controlled case profiles, seven rule types, and text-based `.txt`, `.md`, and `.json` files only. Northstar alone has historical live GPT-5.6 validation; Meridian and Atlas are deterministic and mocked. This does not prove cross-industry generalization or broader model accuracy.
 
 It has no PDF/OCR ingestion, durable collaboration, identity, authorization, external integrations, or production audit store. Current-session comparison and audit events disappear on refresh. Browser storage retains at most one minimal comparison snapshot per scenario and may be unavailable. The deterministic demo is the reliable judging path; live behavior still depends on valid model access, quota, and provider availability.
 

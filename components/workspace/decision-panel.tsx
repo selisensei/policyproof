@@ -7,6 +7,7 @@ import { controlRef, decisionGlyph, decisionRef, requirementRef } from "@/compon
 import { SectionShell } from "@/components/workspace/section-shell";
 import { StatusBadge } from "@/components/workspace/status-badge";
 import { useLocale } from "@/src/i18n/locale-context";
+import { formatDecisionSummary } from "@/src/i18n/decision-summary";
 import { localizedControl, localizedResultExplanation } from "@/src/i18n/translations";
 import { assessEvidenceIntegrity, buildReviewerQueue } from "@/src/lib/review-intelligence";
 import { ReceiptIntegrityPanel } from "@/components/workspace/receipt-integrity-panel";
@@ -201,7 +202,7 @@ function DecisionReceiptSheet({ receipt, results, summary, decisionCounts, polic
       <dl className="receipt-meta">
         <div><dt>{t("receipt.policy")}</dt><dd>{receipt.policyName}</dd></div><div><dt>{t("receipt.policyVersion")}</dt><dd>{receipt.policyVersion} · {policyReference}</dd></div><div><dt>{t("receipt.case")}</dt><dd>{receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName}</dd></div><div><dt>{t("receipt.mode")} · {t("receipt.language")}</dt><dd>{receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} · {receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")}</dd></div>
       </dl>
-      <div className="receipt-summary"><p><span data-status="PASS">✓ {receipt.summary.PASS} {t("status.PASS")}</span><span data-status="FAIL">× {receipt.summary.FAIL} {t("status.FAIL")}</span><span data-status="MISSING">⌀ {receipt.summary.MISSING} {t("status.MISSING")}</span><span data-status="WARNING">! {receipt.summary.WARNING} {t("status.WARNING")}</span></p><strong>{t("receipt.decisionSummary", { ...decisionCounts, pending: receipt.summary.pending })}</strong></div>
+      <div className="receipt-summary"><p><span data-status="PASS">✓ {receipt.summary.PASS} {t("status.PASS")}</span><span data-status="FAIL">× {receipt.summary.FAIL} {t("status.FAIL")}</span><span data-status="MISSING">⌀ {receipt.summary.MISSING} {t("status.MISSING")}</span><span data-status="WARNING">! {receipt.summary.WARNING} {t("status.WARNING")}</span></p><strong>{formatDecisionSummary(locale, { ...decisionCounts, pending: receipt.summary.pending })}</strong></div>
       <div className="receipt-outcomes" role="table" aria-label={t("receipt.summary")}>
         <div className="receipt-outcome-head" role="row"><span>REF</span><span>{locale === "fr" ? "CONTRÔLE" : "CONTROL"}</span><span>{locale === "fr" ? "CONCLUSION" : "CONCLUSION"}</span><span>{locale === "fr" ? "DÉCISION" : "DECISION"}</span><span>{locale === "fr" ? "COMMENTAIRE" : "REVIEWER COMMENT"}</span></div>
         {receipt.outcomes.map((outcome) => {

@@ -137,7 +137,7 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
 
           <div className="review-workbench" id="result-ledger">
             <div className="result-register">
-              <div className="result-register-heading" aria-hidden="true"><span>REF</span><span>{locale === "fr" ? "CONTRÔLE" : "CONTROL"}</span><span>{locale === "fr" ? "CONCLUSION" : "CONCLUSION"}</span><span>{locale === "fr" ? "GRAVITÉ" : "SEVERITY"}</span><span>{locale === "fr" ? "MÉTHODE" : "METHOD"}</span><span>EV</span><span>{locale === "fr" ? "REVUE" : "REVIEW"}</span></div>
+              <div className="result-register-heading" aria-hidden="true"><span>REF</span><span>{locale === "fr" ? "CONTRÔLE" : "CONTROL"}</span><span>{locale === "fr" ? "CONCLUSION" : "CONCLUSION"}</span><span>{locale === "fr" ? "GRAVITÉ" : "SEVERITY"}</span><span>{locale === "fr" ? "MÉTHODE" : "METHOD"}</span><span>{locale === "fr" ? "PREUVES" : "EVIDENCE"}</span><span>{locale === "fr" ? "REVUE" : "REVIEW"}</span></div>
               <div className="result-register-list">
                 {visibleResults.map((result, index) => {
                   const title = localizedControl(result.controlId, locale, result.title).title;

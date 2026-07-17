@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { demoControls, demoDocuments, demoPolicy } from "@/src/fixtures/demo-case";
+import { formatDecisionSummary } from "@/src/i18n/decision-summary";
 import { createDecisionReceipt, DecisionReceiptSchema, REVIEW_DISCLAIMER } from "@/src/lib/decision-receipt";
 import { createConciseReviewSummary, serializeDecisionReceipt, serializeDecisionReceiptMarkdown } from "@/src/lib/receipt-export";
 import { recordReviewDecision } from "@/src/lib/review-decision";
@@ -8,6 +9,13 @@ import { createAuditEvent } from "@/src/lib/audit-trail";
 
 describe("decision receipt", () => {
   it("creates a validated, reproducible receipt with reviewer decisions", () => {
+    const singular = { confirmed: 1, rejected: 1, exceptions: 1, pending: 1 };
+    const plural = { confirmed: 2, rejected: 2, exceptions: 2, pending: 2 };
+
+    expect(formatDecisionSummary("fr", singular)).toBe("Décisions humaines : 1 confirmée · 1 rejetée · 1 dérogation · 1 non résolue");
+    expect(formatDecisionSummary("fr", plural)).toBe("Décisions humaines : 2 confirmées · 2 rejetées · 2 dérogations · 2 non résolues");
+    expect(formatDecisionSummary("en", singular)).toBe("Human decisions: 1 confirmed · 1 rejected · 1 exception · 1 unresolved");
+    expect(formatDecisionSummary("en", plural)).toBe("Human decisions: 2 confirmed · 2 rejected · 2 exceptions · 2 unresolved");
     const results = runDeterministicReview(demoControls, demoDocuments);
     results[0] = recordReviewDecision(results[0], "CONFIRMED", "Evidence checked.");
     const input = {
