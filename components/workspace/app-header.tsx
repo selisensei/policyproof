@@ -1,4 +1,5 @@
 import type { AiAvailability, AppMode } from "@/components/workspace/types";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { useLocale } from "@/src/i18n/locale-context";
 
 export function AppHeader({
@@ -26,8 +27,7 @@ export function AppHeader({
     <header className="app-header">
       <div className="app-header-inner">
         <div className="product-identity">
-          <span aria-hidden="true" className="brand-mark">P</span>
-          <strong>PolicyProof</strong>
+          <BrandLogo variant="responsive" />
           <span aria-hidden="true" className="identity-rule" />
           <span className="brand-tagline">{t("brand.tagline")}</span>
         </div>

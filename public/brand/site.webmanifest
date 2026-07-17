@@ -1,0 +1,19 @@
+{
+  "name": "PolicyProof",
+  "short_name": "PolicyProof",
+  "icons": [
+    {
+      "src": "/brand/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#18222C",
+  "background_color": "#F7F6F2",
+  "display": "standalone"
+}

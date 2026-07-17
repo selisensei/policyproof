@@ -3,10 +3,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const captureRoot = "test-results/verifiable-receipt";
 const finalCaptureRoot = "test-results/final-human-review/final";
+const brandCaptureRoot = "test-results/final-brand-integration/final";
 mkdirSync(`${captureRoot}/pass-1`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-2`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-3`, { recursive: true });
 mkdirSync(finalCaptureRoot, { recursive: true });
+mkdirSync(brandCaptureRoot, { recursive: true });
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
@@ -61,6 +63,7 @@ test("judge path generates, verifies, exports, imports, and detects one-characte
   expect(requestCountAfterVerification).toBe(requestCountBeforeVerification);
   await integrity.screenshot({ path: `${captureRoot}/pass-2/valid-receipt.png` });
   await integrity.screenshot({ path: `${finalCaptureRoot}/05-verified-receipt-1280x720.png` });
+  await integrity.screenshot({ path: `${brandCaptureRoot}/05-verified-receipt-1280x720.png` });
 
   const downloadPromise = page.waitForEvent("download");
   await integrity.getByRole("button", { name: "Export receipt JSON" }).click();
@@ -87,7 +90,14 @@ test("judge path generates, verifies, exports, imports, and detects one-characte
   await focused.getByRole("button", { name: "Open full workspace" }).click();
   await page.getByRole("button", { name: "Decision", exact: true }).click();
   await expect(page.getByText("Receipt integrity verified")).toBeVisible();
+  await expect(page.locator(".receipt-brand img")).toHaveAttribute("src", "/brand/policyproof-mark-color.svg");
+  await expect(page.locator(".receipt-brand img")).toHaveAttribute("alt", "");
   await expect(page.locator("summary", { hasText: "More exports" })).toBeVisible();
+  const technicalDetails = page.getByRole("button", { name: "Technical details" });
+  if (await technicalDetails.getAttribute("aria-expanded") === "true") await technicalDetails.click();
+  await page.locator(".receipt-section").scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, -160));
+  await page.screenshot({ path: `${brandCaptureRoot}/05-verified-receipt-1280x720.png` });
   await page.screenshot({ path: `${captureRoot}/pass-1/full-workspace-receipt.png`, fullPage: true });
   await page.getByRole("button", { name: "Return to focused demo" }).click();
   await expect(page.getByRole("region", { name: "Focused Demo" }).getByText("Receipt integrity verified")).toBeVisible();

@@ -51,6 +51,10 @@ describe("PolicyProof workspace interactions", () => {
     const user = userEvent.setup();
     renderWorkspace(true);
     const focused = screen.getByRole("region", { name: "Focused Demo" });
+    const brandLogo = screen.getByRole("img", { name: "PolicyProof" });
+    expect(brandLogo.getAttribute("src")).toBe("/brand/policyproof-logo-horizontal-color.svg");
+    expect(brandLogo.closest("picture")?.querySelector("source")?.getAttribute("srcset")).toBe("/brand/policyproof-mark-color.svg");
+    expect(screen.queryByText("PolicyProof", { selector: ".product-identity strong" })).toBeNull();
     expect(within(focused).getByText("Review the Northstar vendor change")).toBeTruthy();
     expect(within(focused).getByText(/7 enabled/)).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Run review" })).toHaveLength(1);

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import type { CaseDocument, ControlResult, ReviewDecision } from "@/src/domain/schemas";
 import type { DecisionReceipt } from "@/src/lib/decision-receipt";
 import { createConciseReviewSummary, serializeDecisionReceiptMarkdown, serializeEvidenceMatrixCsv } from "@/src/lib/receipt-export";
@@ -198,7 +199,7 @@ function DecisionReceiptSheet({ receipt, results, summary, decisionCounts, polic
   const unresolved = receipt.outcomes.filter((outcome) => outcome.reviewerDecision === "PENDING");
   return (
     <article aria-label={t("a11y.receipt")} className="decision-receipt">
-      <header className="receipt-masthead"><div className="receipt-brand"><span aria-hidden="true" className="brand-mark">P</span><div><strong>PolicyProof: {t("receipt.title")}</strong><p>{locale === "fr" ? "Preuves automatisées et décisions du réviseur consignées ensemble" : "Automated evidence and reviewer decisions recorded together"}</p></div></div><div><strong>{receipt.reviewId}</strong><span>{t("receipt.generated", { date: new Date(receipt.generatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) })}</span></div></header>
+      <header className="receipt-masthead"><div className="receipt-brand"><BrandLogo decorative variant="mark" /><div><strong>PolicyProof: {t("receipt.title")}</strong><p>{locale === "fr" ? "Preuves automatisées et décisions du réviseur consignées ensemble" : "Automated evidence and reviewer decisions recorded together"}</p></div></div><div><strong>{receipt.reviewId}</strong><span>{t("receipt.generated", { date: new Date(receipt.generatedAt).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" }) })}</span></div></header>
       <dl className="receipt-meta">
         <div><dt>{t("receipt.policy")}</dt><dd>{receipt.policyName}</dd></div><div><dt>{t("receipt.policyVersion")}</dt><dd>{receipt.policyVersion} · {policyReference}</dd></div><div><dt>{t("receipt.case")}</dt><dd>{receipt.caseName === "Local fictional document review" ? t("receipt.caseLocal") : receipt.caseName}</dd></div><div><dt>{t("receipt.mode")} · {t("receipt.language")}</dt><dd>{receipt.runMode === "DETERMINISTIC_DEMO" ? t("mode.demo") : t("mode.live")} · {receipt.selectedLanguage === "fr" ? t("language.french") : t("language.english")}</dd></div>
       </dl>

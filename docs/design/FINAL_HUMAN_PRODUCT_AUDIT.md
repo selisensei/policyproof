@@ -124,3 +124,9 @@ PolicyProof supports one controlled procurement-policy domain. Northstar has sep
 ## 24. Product behavior not changed
 
 No business rule, comparator, scenario outcome, evidence excerpt, schema meaning, provider route, review state, decision rule, export format, or dependency changed. The work is limited to copy, presentation hierarchy, CSS tokens, progressive disclosure, regression assertions, and ignored screenshots.
+
+## 25. Final brand integration
+
+The approved PolicyProof artwork replaces the provisional typographic `P`. The horizontal color logo identifies the desktop header, while the compact mark preserves space on mobile and within the receipt. The mark remains secondary to the evidence and reviewer decision. Platform icons and the 1200 x 630 social preview are connected through Next.js metadata without a public URL.
+
+Tracked source assets live in `public/brand/`. The charcoal, muted teal, off-white, and white palette is preserved. Artwork must retain its proportions and flat colors; distortion, gradients, effects, and arbitrary recoloring are not permitted. The mark remains legible from 16 px, and the horizontal lockup should not be used below 24 px high. Final ignored integration captures live under `test-results/final-brand-integration/final/` and must be recaptured after deployment for public use.

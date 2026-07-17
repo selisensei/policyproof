@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+      <title id="title">PolicyProof mark</title>
+      <desc id="desc">Geometric PolicyProof mark combining a policy document, control path, and evidence points.</desc>
+
+      <g transform="translate(96 84) scale(1.36)">
+
+    <g id="policyproof-mark">
+      <!-- document/policy stem -->
+      <path d="M48 60 H70 V196 H96 V218 H58 C52.477 218 48 213.523 48 208 Z"
+            fill="#FFFFFF"/>
+      <!-- P loop / control path -->
+      <path d="M82 38 H142
+               C183 38 210 63 210 101
+               C210 139 183 164 142 164
+               H104 V138 H140
+               C164 138 179 124 179 101
+               C179 78 164 64 140 64
+               H82 Z"
+            fill="#FFFFFF"/>
+      <!-- subtle inner anchor -->
+      <rect x="82" y="138" width="28" height="34" rx="2" fill="#FFFFFF"/>
+      <!-- restrained document fold -->
+      <path d="M48 60 L70 38 L70 60 Z" fill="#FFFFFF"/>
+      <!-- evidence/control points -->
+      <line x1="108" y1="112" x2="108" y2="148"
+            stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="108" cy="105" r="9" fill="#FFFFFF"/>
+      <circle cx="88" cy="205" r="8" fill="#FFFFFF"/>
+    </g>
+
+      </g>
+    </svg>

@@ -8,6 +8,11 @@
 - Release branch: `release/build-week-submission`
 - License: MIT
 - Final release commit: reported in the owner handoff to avoid a self-referential commit amendment
+- Brand assets: approved tracked files under `public/brand/`
+- Brand palette: charcoal `#18222C`, muted teal `#4B837D`, off-white `#F7F6F2`, white `#FFFFFF`
+- Desktop identity: horizontal color logo on the light application header
+- Compact identity: PolicyProof mark on mobile and receipt surfaces
+- Platform metadata: SVG/ICO favicons, Apple and Android icons, and a 1200 x 630 Open Graph image
 
 ## Runtime
 
@@ -62,6 +67,7 @@ Northstar's historical live GPT-5.6 evidence is preserved at commit `eb120feaca7
 - Named adversarial tests demonstrate bounded application behavior, not universal security.
 - Text inputs only; no PDF, OCR, ERP, authentication, database, or durable audit store.
 - Physical-device, screen-reader, deployed-production, and real print-dialog checks remain owner actions.
+- Favicon and social-preview rendering must be confirmed against the deployed public URL.
 
 ## Read first
 

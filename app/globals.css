@@ -78,8 +78,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .app-header { position: sticky; top: 0; z-index: 10; height: 54px; border-bottom: 1px solid var(--pp-hairline); background: var(--pp-sheet); }
 .app-header-inner { display: flex; width: 100%; max-width: 1440px; height: 54px; margin: 0 auto; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px; }
 .product-identity { display: flex; min-width: 0; align-items: center; gap: 9px; white-space: nowrap; }
-.brand-mark { display: grid; width: 26px; height: 26px; flex: 0 0 auto; place-items: center; border-bottom: 3px solid var(--pp-petrol); border-radius: 0; background: var(--pp-ink); color: var(--pp-sheet); font-family: var(--pp-font-data); font-size: 12px; font-weight: 600; }
-.product-identity strong { font-size: 14.5px; font-weight: 700; letter-spacing: -.01em; }
+.brand-logo-picture { display: block; width: 124px; flex: 0 0 auto; }
+.brand-logo { display: block; max-width: 100%; object-fit: contain; }
+.brand-logo--responsive, .brand-logo--horizontal { width: 124px; height: auto; }
+.brand-logo--mark { width: 26px; height: 26px; flex: 0 0 auto; }
 .identity-rule { width: 1px; height: 18px; background: var(--pp-hairline); }
 .brand-tagline { overflow: hidden; color: var(--pp-grey); font-size: 12px; text-overflow: ellipsis; }
 .header-tools { display: flex; min-width: 0; align-items: center; gap: 8px; }
@@ -131,6 +133,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 /* Optional first-run folio and guide */
 .intro-panel { max-width: 720px; margin: 0 auto 16px; border: 1px solid var(--pp-frame); border-top: 3px solid var(--pp-ink); background: var(--pp-sheet); padding: 28px 40px; }
 .intro-identity { display: flex; align-items: center; gap: 10px; }
+.intro-identity .brand-logo--mark { width: 28px; height: 28px; }
 .intro-panel > .eyebrow { margin-top: 20px; color: var(--pp-petrol); }
 .intro-panel h1 { max-width: 620px; margin: 8px 0 0; font-size: 20px; font-weight: 600; letter-spacing: -.01em; line-height: 1.35; }
 .intro-workflow { margin: 10px 0 0; color: var(--pp-graphite); }
@@ -499,6 +502,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .decision-receipt { border: 1px solid var(--pp-frame); border-top: 3px solid var(--pp-ink); background: var(--pp-sheet); }
 .receipt-masthead { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--pp-ink); padding: 12px 16px; }
 .receipt-brand { display: flex; align-items: center; gap: 10px; }
+.receipt-brand .brand-logo--mark { width: 28px; height: 28px; }
 .receipt-brand strong { font-size: 13px; }
 .receipt-brand p { margin: 1px 0 0; color: var(--pp-grey); font-size: 9px; }
 .receipt-masthead > div:last-child { text-align: right; }
@@ -873,6 +877,8 @@ body { font-size: 14.5px; }
   .audit-trail li p { grid-column: 1 / -1; }
   .app-header-inner { height: 54px; flex-wrap: nowrap; padding: 0 16px; }
   .product-identity { flex: 0 0 auto; }
+  .brand-logo-picture { width: 28px; }
+  .brand-logo--responsive { width: 28px; height: 28px; }
   .identity-rule, .brand-tagline, .human-review-indicator, .help-button, .run-button { display: none; }
   .workflow-actions .mobile-primary-action { display: inline-flex; }
   .workflow-actions .workflow-next-action { display: none; }

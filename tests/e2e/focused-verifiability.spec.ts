@@ -3,10 +3,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 const captureRoot = "test-results/focused-verifiability";
 const finalCaptureRoot = "test-results/final-human-review/final";
+const brandCaptureRoot = "test-results/final-brand-integration/final";
 mkdirSync(`${captureRoot}/pass-1`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-2`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-3`, { recursive: true });
 mkdirSync(finalCaptureRoot, { recursive: true });
+mkdirSync(brandCaptureRoot, { recursive: true });
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -33,7 +35,10 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await expect(focused.getByText("Review results")).toHaveCount(0);
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-landing-1440x900.png`, fullPage: true });
   await page.setViewportSize({ width: 1280, height: 720 });
+  await expect(page.locator(".product-identity img")).toHaveAttribute("src", "/brand/policyproof-logo-horizontal-color.svg");
+  await expect(page.locator(".product-identity strong")).toHaveCount(0);
   await page.screenshot({ path: `${finalCaptureRoot}/01-focused-initial-1280x720.png`, fullPage: true });
+  await page.screenshot({ path: `${brandCaptureRoot}/01-focused-initial-1280x720.png`, fullPage: true });
 
   await runFocusedReview(page);
   await expect(focused.locator('.focused-outcomes [data-status="PASS"]')).toContainText(/3\s*PASS/);
@@ -46,8 +51,11 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-reviewed-1280x720.png`, fullPage: true });
   await page.screenshot({ path: `${finalCaptureRoot}/02-northstar-completed-1280x720.png`, fullPage: true });
+  await page.screenshot({ path: `${brandCaptureRoot}/02-northstar-completed-1280x720.png`, fullPage: true });
   await focused.locator(".focused-exception").screenshot({ path: `${finalCaptureRoot}/03-currency-evidence-1280x720.png` });
+  await focused.locator(".focused-exception").screenshot({ path: `${brandCaptureRoot}/03-currency-evidence-1280x720.png` });
   await focused.locator(".focused-human-decision").screenshot({ path: `${finalCaptureRoot}/04-reviewer-decision-1280x720.png` });
+  await focused.locator(".focused-human-decision").screenshot({ path: `${brandCaptureRoot}/04-reviewer-decision-1280x720.png` });
 
   await focused.getByRole("button", { name: "Open full workspace" }).click();
   await expect(page.getByRole("navigation", { name: "Review progress" })).toBeVisible();
@@ -56,6 +64,7 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.screenshot({ path: `${captureRoot}/pass-1/full-workspace-1280x720.png`, fullPage: true });
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.screenshot({ path: `${finalCaptureRoot}/06-full-workspace-1440x900.png`, fullPage: true });
+  await page.screenshot({ path: `${brandCaptureRoot}/06-full-workspace-1440x900.png`, fullPage: true });
 
   await page.getByRole("button", { name: "Return to focused demo" }).click();
   await page.getByRole("button", { name: "Demo guide" }).click();
@@ -119,7 +128,10 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
 test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and responsive", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route("**/api/ai/status", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ available: false, model: "gpt-5.6" }) }));
   await page.goto("/");
+  await expect(page.getByRole("button", { name: "Live GPT-5.6" })).toBeDisabled();
+  await page.screenshot({ path: `${brandCaptureRoot}/11-no-key-state.png`, fullPage: true });
   const focused = await runFocusedReview(page);
 
   for (const [width, height, name, fullPage] of [
@@ -131,8 +143,14 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
   ] as const) {
     await page.setViewportSize({ width, height });
     await expectNoHorizontalOverflow(page);
+    if (name === "focused-en-390x844") {
+      await expect.poll(() => page.locator(".product-identity img").evaluate((image: HTMLImageElement) => image.currentSrc)).toContain("/brand/policyproof-mark-color.svg");
+    }
     await page.screenshot({ path: `${captureRoot}/pass-3/${name}.png`, fullPage });
-    if (name === "focused-en-390x844") await page.screenshot({ path: `${finalCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
+    if (name === "focused-en-390x844") {
+      await page.screenshot({ path: `${finalCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
+      await page.screenshot({ path: `${brandCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
+    }
   }
 
   await page.getByRole("button", { name: "Français" }).click();
@@ -143,18 +161,23 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/focused-fr-390x844.png`, fullPage: true });
   await page.screenshot({ path: `${finalCaptureRoot}/08-mobile-french-390x844.png`, fullPage: true });
+  await page.screenshot({ path: `${brandCaptureRoot}/08-mobile-french-390x844.png`, fullPage: true });
 
   await page.getByRole("button", { name: "English" }).click();
   await page.setViewportSize({ width: 640, height: 360 });
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/effective-zoom-200.png`, fullPage: true });
   await page.screenshot({ path: `${finalCaptureRoot}/09-effective-200-percent-zoom.png`, fullPage: true });
+  await page.screenshot({ path: `${brandCaptureRoot}/09-effective-200-percent-zoom.png`, fullPage: true });
 
   const rerun = focused.getByRole("button", { name: "Re-run checks" });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await rerun.scrollIntoViewIfNeeded();
   await rerun.focus();
   await expect(rerun).toBeFocused();
   await page.screenshot({ path: `${captureRoot}/pass-3/keyboard-focus.png`, fullPage: true });
-  await page.screenshot({ path: `${finalCaptureRoot}/10-keyboard-focus.png`, fullPage: true });
+  await page.screenshot({ path: `${finalCaptureRoot}/10-keyboard-focus.png` });
+  await page.screenshot({ path: `${brandCaptureRoot}/10-keyboard-focus.png` });
   const motion = await focused.locator(".review-fingerprint").evaluate((element) => {
     const style = getComputedStyle(element);
     return { animationDuration: style.animationDuration, transitionDuration: style.transitionDuration };

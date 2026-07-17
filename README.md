@@ -232,6 +232,7 @@ Read [SECURITY.md](SECURITY.md), [Security and Limitations](docs/SECURITY_AND_LI
 ```text
 app/                    Next.js page and server API routes
 components/workspace/   Focused Demo and Full Workspace UI
+public/brand/           Approved logo, platform icons, and social preview
 src/domain/             Strict schemas and shared types
 src/fixtures/           Controlled fictional scenarios and evaluation data
 src/lib/                Deterministic engine, fingerprints, receipts, exports
@@ -244,6 +245,12 @@ docs/submission/        Devpost, video, demo, and owner checklists
 ```
 
 Start with this README, then read the [product narrative](docs/PRODUCT_NARRATIVE.md), [architecture](docs/ARCHITECTURE.md), [evaluation harness](docs/EVALUATION_HARNESS.md), and [release manifest](docs/release/RELEASE_MANIFEST.md).
+
+## Brand assets
+
+The approved identity is stored in `public/brand/`. The horizontal color logo is used on light desktop surfaces and the compact mark is used in the mobile header. Dark and white variants are reserved for backgrounds that provide sufficient contrast. The core palette is charcoal `#18222C`, muted teal `#4B837D`, off-white `#F7F6F2`, and white `#FFFFFF`.
+
+Keep the original proportions and colors. Do not distort, apply gradients, add effects, or recolor the artwork. Use the mark at a minimum of 16 px and the horizontal logo at a minimum height of 24 px. Browser, Apple, Android, and Open Graph assets are referenced by the Next.js metadata.
 
 ## License
 

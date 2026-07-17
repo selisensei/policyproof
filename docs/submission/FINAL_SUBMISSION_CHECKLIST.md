@@ -63,5 +63,7 @@ This checklist separates repository-complete evidence from actions that only the
 - [ ] CI is green on the published repository.
 - [ ] Production URL, if submitted, matches the tested commit.
 - [ ] Video shows the same product and truthful results.
+- [ ] Deployed favicon, Apple/Android icons, and Open Graph preview use the approved `public/brand/` assets.
+- [ ] Desktop screenshots show the horizontal logo and mobile screenshots show the compact mark without distortion.
 - [ ] No key, personal file, private document, or ignored artifact appears in repository, video, screenshots, or form.
 - [ ] No owner placeholder token remains in the actual submission form.

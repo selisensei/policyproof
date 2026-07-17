@@ -97,3 +97,9 @@ The local editorial and visual audit uses ignored captures under `test-results/f
 3. `final/` contains the eleven locally accepted states listed in `docs/design/FINAL_HUMAN_PRODUCT_AUDIT.md`.
 
 These images are review evidence only. Recapture the selected public images from the deployed release after checking private navigation, browser chrome, console output, downloads, print, and physical mobile behavior.
+
+## Final brand-integration captures
+
+The approved logo integration is reviewed through ignored captures under `test-results/final-brand-integration/final/`. The set covers the Focused Demo, Northstar results, currency evidence, reviewer decision, verified receipt, Full Workspace, English and French mobile layouts, effective 200 percent zoom, keyboard focus, and the no-key state. Browser-tab chrome cannot be captured reliably with the repository Playwright page-screenshot workflow, so favicon appearance remains a deployed-browser owner check.
+
+Public captures must use the deployed build. Confirm that the horizontal logo appears on desktop, the compact mark appears on mobile, the wordmark is not repeated as adjacent HTML text, and the EUR/USD evidence remains more prominent than the brand.

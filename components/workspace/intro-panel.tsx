@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { useLocale } from "@/src/i18n/locale-context";
 
 export function IntroPanel({ onStartDemo }: { onStartDemo: () => void; compact?: boolean }) {
@@ -5,7 +6,7 @@ export function IntroPanel({ onStartDemo }: { onStartDemo: () => void; compact?:
 
   return (
     <section aria-labelledby="product-introduction" className="intro-panel">
-      <div className="intro-identity"><span aria-hidden="true" className="brand-mark">P</span><strong>PolicyProof</strong></div>
+      <div className="intro-identity"><BrandLogo decorative variant="mark" /><strong>PolicyProof</strong></div>
       <p className="eyebrow">{t("intro.eyebrow")}</p>
       <h1 id="product-introduction">{t("intro.title")}</h1>
       <p className="intro-workflow">{t("intro.workflow")}</p>

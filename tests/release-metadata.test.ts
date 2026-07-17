@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -19,6 +19,26 @@ describe("public release metadata", () => {
     expect(manifest.packageManager).toBe("pnpm@11.9.0");
     expect(manifest.engines?.node).toBe(">=24.0.0");
     expect(read(".nvmrc").trim()).toBe("24");
+
+    const layout = read("app/layout.tsx");
+    const webManifest = JSON.parse(read("public/brand/site.webmanifest")) as {
+      icons: Array<{ src: string; sizes: string }>;
+    };
+    for (const asset of [
+      "favicon.svg",
+      "favicon.ico",
+      "favicon-16x16.png",
+      "favicon-32x32.png",
+      "apple-touch-icon.png",
+      "android-chrome-192x192.png",
+      "android-chrome-512x512.png",
+      "policyproof-social-preview-1200x630.png",
+    ]) {
+      expect(existsSync(resolve(root, "public", "brand", asset))).toBe(true);
+    }
+    expect(layout).toContain('url: "/brand/policyproof-social-preview-1200x630.png"');
+    expect(layout).toContain('manifest: "/brand/site.webmanifest"');
+    expect(webManifest.icons.map(({ sizes }) => sizes)).toEqual(["192x192", "512x512"]);
   });
 
   it("contains the complete MIT license with the owner attribution", () => {
