@@ -13,6 +13,8 @@ import { releaseSteps, runReleaseVerification } from "../scripts/release-verify.
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const temporaryRoot = resolve(repositoryRoot, "test-results", "release-tooling-tests");
 const createdDirectories: string[] = [];
+const normalizeLineEndings = (value: string): string =>
+  value.replace(/\r\n?/g, "\n");
 
 function fixtureDirectory() {
   mkdirSync(temporaryRoot, { recursive: true });
@@ -108,7 +110,7 @@ describe("release verification orchestration", () => {
 
 describe("CI and clean-room contracts", () => {
   it("uses frozen installs, deterministic verification, Chromium, audit, and no OpenAI secret", () => {
-    const workflow = readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+    const workflow = normalizeLineEndings(readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"));
     expect(workflow).toContain("permissions:\n  contents: read");
     expect(workflow.match(/pnpm install --frozen-lockfile/g)).toHaveLength(3);
     expect(workflow).toContain("run: pnpm demo:verify");
@@ -119,7 +121,7 @@ describe("CI and clean-room contracts", () => {
   });
 
   it("builds the clean room from Git-tracked content with an offline frozen install", () => {
-    const script = readFileSync(resolve(repositoryRoot, "scripts/clean-room-verify.mjs"), "utf8");
+    const script = normalizeLineEndings(readFileSync(resolve(repositoryRoot, "scripts/clean-room-verify.mjs"), "utf8"));
     expect(script).toContain("git\", [\"archive\"");
     expect(script).toContain("--offline");
     expect(script).toContain("--frozen-lockfile");

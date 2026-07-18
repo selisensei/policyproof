@@ -3,7 +3,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = resolve(import.meta.dirname, "..");
-const read = (path: string) => readFileSync(resolve(root, path), "utf8");
+const normalizeLineEndings = (value: string): string =>
+  value.replace(/\r\n?/g, "\n");
+const read = (path: string) => normalizeLineEndings(readFileSync(resolve(root, path), "utf8"));
 
 describe("public release metadata", () => {
   it("keeps Node, pnpm, private-package, and MIT metadata coherent", () => {
