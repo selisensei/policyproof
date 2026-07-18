@@ -18,6 +18,11 @@ function visibleCaseName(value: string) {
   return value.replaceAll("\u2014", ":").replaceAll("\u2013", ":");
 }
 
+function scenarioNumericFact(scenario: ReviewScenario, key: string): number | null {
+  const fact = scenario.documents.flatMap((document) => document.facts).find((item) => item.key === key);
+  return typeof fact?.value === "number" && Number.isFinite(fact.value) ? fact.value : null;
+}
+
 export function FocusedDemo({ scenario, results, summary, threshold, enabledControlCount, isRunning, isVerifying, reviewError, fingerprint, fingerprintComparison, divergenceCandidateResults, verifiableReceipt, receiptVerification, isGeneratingReceipt, onRunReview, onRerun, onThresholdChange, onOpenFullWorkspace, onOpenDecision, onCommentChange, onDecision, onGenerateReceipt, onVerifyReceipt, onExportReceipt }: {
   scenario: ReviewScenario;
   results: ControlResult[];
@@ -51,6 +56,8 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
   const invoice = evidenceForDocument(evidence, "INV");
   const integrity = currencyResult ? assessEvidenceIntegrity(currencyResult, scenario.documents) : null;
   const title = currencyResult ? localizedControl(currencyResult.controlId, locale, currencyResult.title).title : "";
+  const transactionAmount = scenarioNumericFact(scenario, "purchaseOrderAmount");
+  const numberLocale = locale === "fr" ? "fr-FR" : "en-US";
 
   return (
     <section className="focused-demo" data-has-results={results.length > 0 || undefined} aria-label={locale === "fr" ? "Démonstration ciblée" : "Focused Demo"}>
@@ -58,9 +65,12 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
         <div>
           <p className="eyebrow">{locale === "fr" ? "REVUE DU CAS NORTHSTAR" : "NORTHSTAR CASE REVIEW"}</p>
           <h1>{locale === "fr" ? "Examiner le changement fournisseur Northstar" : "Review the Northstar vendor change"}</h1>
-          <p>{locale === "fr"
-            ? "Comparez cinq pièces fictives à sept contrôles approuvés. Le réviseur consigne la décision finale après avoir examiné les preuves."
-            : "Compare five fictional records with seven approved controls. The reviewer records the final decision after inspecting the evidence."}</p>
+          <p className="focused-value-proposition">{locale === "fr"
+            ? "Repérez un écart EUR/USD avant paiement, avec les lignes sources exactes."
+            : "Catch a EUR/USD mismatch before payment, with the exact source lines."}</p>
+          <p className="focused-audience">{locale === "fr"
+            ? "Pour les réviseurs en finance, achats et contrôle interne."
+            : "For finance, procurement and internal-control reviewers."}</p>
         </div>
         <button type="button" className="focused-workspace-link" onClick={onOpenFullWorkspace}>{locale === "fr" ? "Ouvrir l’espace de travail complet" : "Open full workspace"}</button>
       </header>
@@ -83,7 +93,13 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
       ) : (
         <>
           <section className="focused-results" aria-labelledby="focused-results-title">
-            <header><div><p className="eyebrow">{locale === "fr" ? "CONCLUSIONS AUTOMATISÉES" : "AUTOMATED RESULTS"}</p><h2 id="focused-results-title">{locale === "fr" ? "Résultats de la revue" : "Review results"}</h2></div><span>{Number(threshold).toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} EUR</span></header>
+            <header>
+              <div><p className="eyebrow">{locale === "fr" ? "CONCLUSIONS AUTOMATISÉES" : "AUTOMATED RESULTS"}</p><h2 id="focused-results-title">{locale === "fr" ? "Résultats de la revue" : "Review results"}</h2></div>
+              <dl className="focused-review-facts">
+                <div><dt>{locale === "fr" ? "Transaction examinée" : "Transaction under review"}</dt><dd>{transactionAmount === null ? (locale === "fr" ? "Non disponible" : "Not available") : `${transactionAmount.toLocaleString(numberLocale)} EUR`}</dd></div>
+                <div><dt>{locale === "fr" ? "Seuil d’approbation" : "Approval threshold"}</dt><dd>{Number(threshold).toLocaleString(numberLocale)} EUR</dd></div>
+              </dl>
+            </header>
             <div className="focused-outcomes" role="list" aria-label={locale === "fr" ? "Composition des résultats" : "Outcome composition"}>
               <div role="listitem" data-status="PASS"><strong>{summary.PASS}</strong><span>{t("status.PASS")}</span></div>
               <div role="listitem" data-status="FAIL"><strong>{summary.FAIL}</strong><span>{t("status.FAIL")}</span></div>

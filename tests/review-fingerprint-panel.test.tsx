@@ -39,6 +39,9 @@ describe("ReviewFingerprintPanel", () => {
       candidateThreshold: 10_000,
     };
     render(<LocaleProvider><ReviewFingerprintPanel fingerprint={comparison.previousFingerprint} comparison={comparison} results={[result("FAIL")]} candidateResults={[result("PASS")]} isVerifying={false} onRerun={vi.fn()} /></LocaleProvider>);
+    expect(screen.getByRole("heading", { name: "Reproducibility check" })).toBeTruthy();
+    expect(screen.getByText("View fingerprint").closest("details")?.hasAttribute("open")).toBe(false);
+    expect(document.querySelector(".review-fingerprint > header code")).toBeNull();
     expect(screen.getByRole("alert").textContent).toContain("Unexpected deterministic divergence");
     expect(screen.getByRole("alert").textContent).toContain("CTRL-01 · FAIL → PASS");
     expect(screen.getByText(/does not prove identity, authorship or legal signature/i)).toBeTruthy();

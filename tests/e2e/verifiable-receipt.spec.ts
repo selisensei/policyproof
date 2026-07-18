@@ -23,9 +23,9 @@ async function generateNorthstarReceipt(page: Page) {
   await expect(focused.locator('.focused-outcomes [data-status="FAIL"]')).toContainText(/2\s*FAIL/);
   await expect(focused.locator('.focused-outcomes [data-status="MISSING"]')).toContainText(/1\s*MISSING/);
   await expect(focused.locator('.focused-outcomes [data-status="WARNING"]')).toContainText(/1\s*WARNING/);
-  await expect(focused.getByText("12,480 EUR", { exact: true })).toBeVisible();
-  await expect(focused.getByText("12,480 USD", { exact: true })).toBeVisible();
-  const initialFingerprint = await focused.locator(".review-fingerprint > header code").textContent();
+  await expect(focused.locator(".focused-currency-comparison").getByText("12,480 EUR", { exact: true })).toBeVisible();
+  await expect(focused.locator(".focused-currency-comparison").getByText("12,480 USD", { exact: true })).toBeVisible();
+  const initialFingerprint = await focused.locator(".fingerprint-details code").textContent();
   await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("7 of 7 conclusions reproduced identically")).toBeVisible();
   await expect(focused.getByText("Review fingerprint unchanged")).toBeVisible();
@@ -33,7 +33,7 @@ async function generateNorthstarReceipt(page: Page) {
   await focused.getByRole("button", { name: "Re-run checks" }).click();
   await expect(focused.getByText("Changed conclusion: CTRL-01: FAIL → PASS")).toBeVisible();
   await expect(focused.getByText("Unchanged: 6 controls")).toBeVisible();
-  await expect(focused.locator(".review-fingerprint > header code")).not.toHaveText(initialFingerprint ?? "");
+  await expect(focused.locator(".fingerprint-details code")).not.toHaveText(initialFingerprint ?? "");
   await focused.getByRole("textbox", { name: "Reviewer comment" }).fill("Currency evidence checked by the fictional reviewer.");
   await focused.getByRole("button", { name: "Confirm" }).click();
   await focused.getByRole("button", { name: "Generate receipt" }).click();

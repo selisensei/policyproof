@@ -4,11 +4,13 @@ import { expect, test, type Page } from "@playwright/test";
 const captureRoot = "test-results/focused-verifiability";
 const finalCaptureRoot = "test-results/final-human-review/final";
 const brandCaptureRoot = "test-results/final-brand-integration/final";
+const finalUiCaptureRoot = "test-results/final-ui-clarity";
 mkdirSync(`${captureRoot}/pass-1`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-2`, { recursive: true });
 mkdirSync(`${captureRoot}/pass-3`, { recursive: true });
 mkdirSync(finalCaptureRoot, { recursive: true });
 mkdirSync(brandCaptureRoot, { recursive: true });
+mkdirSync(finalUiCaptureRoot, { recursive: true });
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -21,7 +23,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 async function runFocusedReview(page: Page) {
   const focused = page.getByRole("region", { name: "Focused Demo" });
   await focused.getByRole("button", { name: "Run review" }).click();
-  await expect(focused.getByRole("heading", { name: "Review fingerprint" })).toBeVisible();
+  await expect(focused.getByRole("heading", { name: "Reproducibility check" })).toBeVisible();
   return focused;
 }
 
@@ -30,6 +32,8 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.goto("/");
   const focused = page.getByRole("region", { name: "Focused Demo" });
   await expect(focused.getByRole("heading", { name: "Review the Northstar vendor change" })).toBeVisible();
+  await expect(focused.getByText("Catch a EUR/USD mismatch before payment, with the exact source lines.")).toBeVisible();
+  await expect(focused.getByText("For finance, procurement and internal-control reviewers.")).toBeVisible();
   await expect(focused).toContainText("Northstar Facilities : Mixed-Risk Case");
   await expect(focused).toContainText("7 enabled");
   await expect(focused.getByText("Review results")).toHaveCount(0);
@@ -37,16 +41,26 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.setViewportSize({ width: 1280, height: 720 });
   await expect(page.locator(".product-identity img")).toHaveAttribute("src", "/brand/policyproof-logo-horizontal-color.svg");
   await expect(page.locator(".product-identity strong")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  const initialWorkflow = await focused.locator(".focused-run-card").boundingBox();
+  expect(initialWorkflow).not.toBeNull();
+  expect((initialWorkflow?.y ?? 0) + (initialWorkflow?.height ?? 0)).toBeLessThanOrEqual(720);
   await page.screenshot({ path: `${finalCaptureRoot}/01-focused-initial-1280x720.png`, fullPage: true });
   await page.screenshot({ path: `${brandCaptureRoot}/01-focused-initial-1280x720.png`, fullPage: true });
+  await page.screenshot({ path: `${finalUiCaptureRoot}/02-home-after.png` });
 
   await runFocusedReview(page);
   await expect(focused.locator('.focused-outcomes [data-status="PASS"]')).toContainText(/3\s*PASS/);
   await expect(focused.locator('.focused-outcomes [data-status="FAIL"]')).toContainText(/2\s*FAIL/);
   await expect(focused.locator('.focused-outcomes [data-status="MISSING"]')).toContainText(/1\s*MISSING/);
   await expect(focused.locator('.focused-outcomes [data-status="WARNING"]')).toContainText(/1\s*WARNING/);
-  await expect(focused.getByText("12,480 EUR", { exact: true })).toBeVisible();
-  await expect(focused.getByText("12,480 USD", { exact: true })).toBeVisible();
+  const reviewFacts = focused.locator(".focused-review-facts");
+  await expect(reviewFacts).toContainText("Transaction under review");
+  await expect(reviewFacts).toContainText("12,480 EUR");
+  await expect(reviewFacts).toContainText("Approval threshold");
+  await expect(reviewFacts).toContainText("10,000 EUR");
+  await expect(focused.locator(".focused-currency-comparison").getByText("12,480 EUR", { exact: true })).toBeVisible();
+  await expect(focused.locator(".focused-currency-comparison").getByText("12,480 USD", { exact: true })).toBeVisible();
   await expect(focused.getByText("✓ Exact excerpts verified")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: `${captureRoot}/pass-1/focused-reviewed-1280x720.png`, fullPage: true });
@@ -54,6 +68,7 @@ test("pass 1 — focuses the Northstar proof while preserving the complete works
   await page.screenshot({ path: `${brandCaptureRoot}/02-northstar-completed-1280x720.png`, fullPage: true });
   await focused.locator(".focused-exception").screenshot({ path: `${finalCaptureRoot}/03-currency-evidence-1280x720.png` });
   await focused.locator(".focused-exception").screenshot({ path: `${brandCaptureRoot}/03-currency-evidence-1280x720.png` });
+  await focused.locator(".focused-exception").screenshot({ path: `${finalUiCaptureRoot}/03-currency-after.png` });
   await focused.locator(".focused-human-decision").screenshot({ path: `${finalCaptureRoot}/04-reviewer-decision-1280x720.png` });
   await focused.locator(".focused-human-decision").screenshot({ path: `${brandCaptureRoot}/04-reviewer-decision-1280x720.png` });
 
@@ -87,9 +102,11 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   const focused = await runFocusedReview(page);
-  const fingerprint = focused.locator(".review-fingerprint > header code");
+  const fingerprintDetails = focused.locator(".fingerprint-details");
+  const fingerprint = fingerprintDetails.locator("code");
+  await expect(fingerprintDetails).not.toHaveAttribute("open", "");
   const initialFingerprint = await fingerprint.textContent();
-  expect(initialFingerprint).toMatch(/^[0-9a-f]{8}…[0-9a-f]{8}$/);
+  expect(initialFingerprint).toMatch(/^[0-9a-f]{64}$/);
   await focused.locator(".focused-exception").screenshot({ path: `${captureRoot}/pass-2/currency-eur-usd.png` });
   await focused.locator(".review-fingerprint").screenshot({ path: `${captureRoot}/pass-2/fingerprint-before-rerun.png` });
 
@@ -97,11 +114,18 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
   await confirm.click();
   await expect(confirm).toHaveAttribute("aria-pressed", "true");
   await focused.getByRole("button", { name: "Re-run checks" }).click();
+  await expect(focused.getByText("Reproduced identically ✓")).toBeVisible();
   await expect(focused.getByText("Same inputs and conclusions reproduced")).toBeVisible();
   await expect(focused.getByText("7 of 7 conclusions reproduced identically")).toBeVisible();
   await expect(focused.getByText("Review fingerprint unchanged")).toBeVisible();
   await expect(fingerprint).toHaveText(initialFingerprint ?? "");
   await expect(confirm).toHaveAttribute("aria-pressed", "true");
+  await focused.locator(".review-fingerprint").screenshot({ path: `${finalUiCaptureRoot}/04-fingerprint-collapsed.png` });
+  await fingerprintDetails.getByText("View fingerprint").click();
+  await expect(fingerprintDetails).toHaveAttribute("open", "");
+  await expect(fingerprint).toBeVisible();
+  await focused.locator(".review-fingerprint").screenshot({ path: `${finalUiCaptureRoot}/05-fingerprint-expanded.png` });
+  await fingerprintDetails.getByText("View fingerprint").click();
   await focused.locator(".review-fingerprint").screenshot({ path: `${captureRoot}/pass-2/same-input-rerun.png` });
 
   const threshold = focused.getByRole("spinbutton", { name: "Approval threshold in EUR" });
@@ -150,13 +174,14 @@ test("pass 3 — remains bilingual, keyboard usable, reduced-motion safe, and re
     if (name === "focused-en-390x844") {
       await page.screenshot({ path: `${finalCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
       await page.screenshot({ path: `${brandCaptureRoot}/07-mobile-english-390x844.png`, fullPage: true });
+      await page.screenshot({ path: `${finalUiCaptureRoot}/06-mobile-after.png`, fullPage: true });
     }
   }
 
   await page.getByRole("button", { name: "Français" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   const focusedFr = page.getByRole("region", { name: "Démonstration ciblée" });
-  await expect(focusedFr.getByRole("heading", { name: "Empreinte de revue", level: 3 })).toBeVisible();
+  await expect(focusedFr.getByRole("heading", { name: "Contrôle de reproductibilité", level: 3 })).toBeVisible();
   await expect(focusedFr.getByRole("button", { name: "Relancer les contrôles" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${captureRoot}/pass-3/focused-fr-390x844.png`, fullPage: true });

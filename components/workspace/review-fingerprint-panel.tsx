@@ -4,10 +4,6 @@ import type { ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
 import { controlRef } from "@/components/workspace/presentation";
 import { useLocale } from "@/src/i18n/locale-context";
 
-function abbreviatedFingerprint(value: string): string {
-  return `${value.slice(0, 8)}…${value.slice(-8)}`;
-}
-
 function localizedStatus(status: string | null, locale: "en" | "fr"): string {
   if (!status) return locale === "fr" ? "Non disponible" : "Not available";
   if (locale === "en") return status;
@@ -25,6 +21,13 @@ export function ReviewFingerprintPanel({ fingerprint, comparison, results, candi
 }) {
   const { locale } = useLocale();
   const [copied, setCopied] = useState(false);
+  const verificationSummary = comparison?.kind === "IDENTICAL"
+    ? (locale === "fr" ? "Reproduit à l’identique ✓" : "Reproduced identically ✓")
+    : comparison?.kind === "CHANGED"
+      ? (locale === "fr" ? "Modification d’entrée détectée" : "Input change detected")
+      : comparison?.kind === "DIVERGED"
+        ? (locale === "fr" ? "Divergence inattendue" : "Unexpected divergence")
+        : (locale === "fr" ? "Prêt à reproduire" : "Ready to reproduce");
 
   async function copyFingerprint() {
     try {
@@ -41,15 +44,17 @@ export function ReviewFingerprintPanel({ fingerprint, comparison, results, candi
       <header>
         <div>
           <p className="eyebrow">{locale === "fr" ? "VÉRIFICATION DE RELANCE" : "RE-RUN CHECK"}</p>
-          <h3 id={compact ? "focused-fingerprint-title" : "workspace-fingerprint-title"}>{locale === "fr" ? "Empreinte de revue" : "Review fingerprint"}</h3>
+          <h3 id={compact ? "focused-fingerprint-title" : "workspace-fingerprint-title"}>{locale === "fr" ? "Contrôle de reproductibilité" : "Reproducibility check"}</h3>
         </div>
-        <code>{abbreviatedFingerprint(fingerprint)}</code>
+        <strong className="fingerprint-summary" data-state={comparison?.kind ?? "READY"}>{verificationSummary}</strong>
       </header>
       <p>{locale === "fr" ? "Calculée à partir des entrées de revue et des conclusions automatisées." : "Generated from review inputs and automated conclusions."}</p>
       <div className="fingerprint-actions">
         <button type="button" className="primary-button" onClick={onRerun} disabled={isVerifying}>{isVerifying ? (locale === "fr" ? "Vérification…" : "Verifying…") : (locale === "fr" ? "Relancer les contrôles" : "Re-run checks")}</button>
-        <button type="button" onClick={() => void copyFingerprint()}>{copied ? (locale === "fr" ? "Copiée" : "Copied") : (locale === "fr" ? "Copier l’empreinte" : "Copy fingerprint")}</button>
-        <details><summary>{locale === "fr" ? "Voir l’empreinte complète" : "View full fingerprint"}</summary><code>{fingerprint}</code></details>
+        <details className="fingerprint-details">
+          <summary>{locale === "fr" ? "Voir l’empreinte" : "View fingerprint"}</summary>
+          <div><code>{fingerprint}</code><button type="button" onClick={() => void copyFingerprint()}>{copied ? (locale === "fr" ? "Copiée" : "Copied") : (locale === "fr" ? "Copier l’empreinte" : "Copy fingerprint")}</button></div>
+        </details>
       </div>
 
       {comparison?.kind === "IDENTICAL" && (

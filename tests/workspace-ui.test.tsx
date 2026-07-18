@@ -56,14 +56,26 @@ describe("PolicyProof workspace interactions", () => {
     expect(brandLogo.closest("picture")?.querySelector("source")?.getAttribute("srcset")).toBe("/brand/policyproof-mark-color.svg");
     expect(screen.queryByText("PolicyProof", { selector: ".product-identity strong" })).toBeNull();
     expect(within(focused).getByText("Review the Northstar vendor change")).toBeTruthy();
+    expect(within(focused).getByText("Catch a EUR/USD mismatch before payment, with the exact source lines.")).toBeTruthy();
+    expect(within(focused).getByText("For finance, procurement and internal-control reviewers.")).toBeTruthy();
     expect(within(focused).getByText(/7 enabled/)).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Run review" })).toHaveLength(1);
     expect(screen.queryByRole("navigation", { name: "Review progress" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Français" }));
+    expect(within(focused).getByText("Repérez un écart EUR/USD avant paiement, avec les lignes sources exactes.")).toBeTruthy();
+    expect(within(focused).getByText("Pour les réviseurs en finance, achats et contrôle interne.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "English" }));
 
     await user.click(within(focused).getByRole("button", { name: "Run review" }));
     expect(await within(focused).findByText("Review results")).toBeTruthy();
-    expect(within(focused).getByText("12,480 EUR")).toBeTruthy();
-    expect(within(focused).getByText("12,480 USD")).toBeTruthy();
+    const reviewFacts = focused.querySelector(".focused-review-facts") as HTMLElement;
+    expect(within(reviewFacts).getByText("Transaction under review")).toBeTruthy();
+    expect(within(reviewFacts).getByText("12,480 EUR")).toBeTruthy();
+    expect(within(reviewFacts).getByText("Approval threshold")).toBeTruthy();
+    expect(within(reviewFacts).getByText("10,000 EUR")).toBeTruthy();
+    const currencyComparison = focused.querySelector(".focused-currency-comparison") as HTMLElement;
+    expect(within(currencyComparison).getByText("12,480 EUR")).toBeTruthy();
+    expect(within(currencyComparison).getByText("12,480 USD")).toBeTruthy();
     expect(within(focused).getByText("✓ Exact excerpts verified")).toBeTruthy();
 
     await user.click(within(focused).getByRole("button", { name: /Open full workspace/ }));
@@ -80,17 +92,22 @@ describe("PolicyProof workspace interactions", () => {
     renderWorkspace(true);
     const focused = screen.getByRole("region", { name: "Focused Demo" });
     await user.click(within(focused).getByRole("button", { name: "Run review" }));
-    expect(await within(focused).findByText("Review fingerprint")).toBeTruthy();
-    const initialAbbreviation = within(focused).getByText(/^[0-9a-f]{8}…[0-9a-f]{8}$/).textContent;
+    expect(await within(focused).findByText("Reproducibility check")).toBeTruthy();
+    const fingerprintDetails = within(focused).getByText("View fingerprint").closest("details") as HTMLDetailsElement;
+    expect(fingerprintDetails.open).toBe(false);
+    await user.click(within(fingerprintDetails).getByText("View fingerprint"));
+    expect(fingerprintDetails.open).toBe(true);
+    const initialFingerprint = within(fingerprintDetails).getByText(/^[0-9a-f]{64}$/).textContent;
 
     const confirm = within(focused).getByRole("button", { name: "Confirm" });
     await user.click(confirm);
     expect(confirm.getAttribute("aria-pressed")).toBe("true");
     await user.click(within(focused).getByRole("button", { name: "Re-run checks" }));
+    expect(await within(focused).findByText("Reproduced identically ✓")).toBeTruthy();
     expect(await within(focused).findByText("Same inputs and conclusions reproduced")).toBeTruthy();
     expect(within(focused).getByText("7 of 7 conclusions reproduced identically")).toBeTruthy();
     expect(within(focused).getByText("Review fingerprint unchanged")).toBeTruthy();
-    expect(within(focused).getByText(/^[0-9a-f]{8}…[0-9a-f]{8}$/).textContent).toBe(initialAbbreviation);
+    expect(within(fingerprintDetails).getByText(/^[0-9a-f]{64}$/).textContent).toBe(initialFingerprint);
     expect(confirm.getAttribute("aria-pressed")).toBe("true");
 
     const threshold = within(focused).getByRole("spinbutton", { name: "Approval threshold in EUR" });
