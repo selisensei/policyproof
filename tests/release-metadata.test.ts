@@ -59,7 +59,7 @@ describe("public release metadata", () => {
     expect(example).not.toMatch(/sk-(?:proj-)?[A-Za-z0-9_-]{16,}/);
     expect(readme).toContain("pnpm install --frozen-lockfile\npnpm demo:verify\npnpm dev");
     expect(readme).toContain("needs no API key, browser, development server, or live provider");
-    expect(readme).toContain("202 Vitest tests");
+    expect(readme).toContain("205 Vitest tests");
     expect(readme).toContain("23 Playwright tests");
   });
 
