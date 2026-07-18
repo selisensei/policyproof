@@ -39,7 +39,7 @@
 | Meridian | 7 | 0 | 0 | 0 |
 | Atlas | 4 | 1 | 2 | 0 |
 
-Current automated evidence: **202 Vitest tests**, **23 Playwright tests**, 3 scenarios, 21 conclusions, 34 evidence references, 7 business-rule mutations, and 10 named adversarial cases.
+Current automated evidence: **205 Vitest tests**, **23 Playwright tests**, 3 scenarios, 21 conclusions, 34 evidence references, 7 business-rule mutations, and 10 named adversarial cases.
 
 ## Expected commands
 

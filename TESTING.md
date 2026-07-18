@@ -387,7 +387,7 @@ No live or paid OpenAI request was made. Historical GPT-5.6 evidence was not rer
 
 Fresh results after the release tooling, CI, public documentation, runtime metadata, Turbopack root, and stable Vitest concurrency changes:
 
-- `pnpm test`: PASS — current release: 27 test files, 202 tests (26.12 s in the final UI-clarity validation). The release environment uses two workers and a 15-second test timeout; no assertion or expected result was removed.
+- `pnpm test`: PASS — current release: 28 test files, 205 tests (26.12 s in the final UI-clarity validation). The release environment uses two workers and a 15-second test timeout; no assertion or expected result was removed.
 - `pnpm typecheck`: PASS — no TypeScript errors.
 - `pnpm lint`: PASS — no ESLint errors or warnings.
 - `pnpm build`: PASS — compiled in 22.6 s, completed its TypeScript phase in 8.8 s, and produced five unchanged routes: static `/` and `/_not-found`; dynamic `/api/ai/status`, `/api/ai/policy`, and `/api/ai/analyze`.

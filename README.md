@@ -180,7 +180,7 @@ The key is read only on the server. It is never returned by `/api/ai/status` or 
 
 ## Tests and validation
 
-The current release contains **202 Vitest tests** and **23 Playwright tests**. The principal commands are:
+The current release contains **205 Vitest tests** and **23 Playwright tests**. The principal commands are:
 
 ```shell
 pnpm demo:verify
