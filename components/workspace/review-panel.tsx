@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useSyncExternalStore, useState, type KeyboardEvent } from "react";
 import type { CaseDocument, ControlDefinition, ControlResult, EvidenceReference } from "@/src/domain/schemas";
 import type { AppMode } from "@/components/workspace/types";
 import type { ResultFilter, ResultSummary } from "@/src/lib/review-summary";
@@ -11,6 +11,7 @@ import { ReviewIntelligencePanels } from "@/components/workspace/review-intellig
 import { assessEvidenceIntegrity, type RunSnapshot } from "@/src/lib/review-intelligence";
 import { ReviewFingerprintPanel } from "@/components/workspace/review-fingerprint-panel";
 import type { ReviewFingerprintComparison } from "@/src/lib/review-fingerprint";
+import { computeDocumentContentHash, locateExactExcerpt } from "@/src/lib/document-source";
 
 const filterOrder: ResultFilter[] = ["ALL", "PASS", "FAIL", "MISSING", "WARNING", "OPEN"];
 
@@ -173,10 +174,34 @@ export function ReviewPanel({ results, visibleResults, summary, filter, selected
 function EvidenceDetails({ result, threshold, mode, documents, policyText, documentTypes, changed, onGoDecision }: { result: ControlResult; threshold: string; mode: AppMode; documents: CaseDocument[]; policyText: string; documentTypes: Record<string, string>; changed: boolean; onGoDecision: () => void }) {
   const { locale, t } = useLocale();
   const [copied, setCopied] = useState<string | null>(null);
+  const [sourceEvidence, setSourceEvidence] = useState<EvidenceReference | null>(null);
+  const [sourceHash, setSourceHash] = useState("");
+  const sourceTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const sourceCloseRef = useRef<HTMLButtonElement | null>(null);
+  const sourceExcerptRef = useRef<HTMLElement | null>(null);
   const title = localizedControl(result.controlId, locale, result.title).title;
   const sequence = Number(requirementRef(result.controlId).replace("R-", ""));
   const requirement = Number.isFinite(sequence) ? policyText.split("\n")[sequence - 1]?.replace(/^\d+\.\s*/, "") : null;
   const integrity = assessEvidenceIntegrity(result, documents);
+  const sourceDocument = sourceEvidence ? documents.find((document) => document.id === sourceEvidence.documentId) ?? null : null;
+  const sourceMatch = sourceEvidence && sourceDocument ? locateExactExcerpt(sourceDocument.content, sourceEvidence.excerpt) : null;
+  const sourceStatus = !sourceDocument ? "MISSING" : sourceMatch ? "VERIFIED" : "REJECTED";
+
+  useEffect(() => {
+    if (!sourceEvidence) return;
+    sourceCloseRef.current?.focus();
+    sourceExcerptRef.current?.scrollIntoView?.({ block: "center" });
+  }, [sourceEvidence, sourceMatch]);
+
+  useEffect(() => {
+    let active = true;
+    if (sourceDocument) {
+      void computeDocumentContentHash(sourceDocument.content).then((hash) => {
+        if (active) setSourceHash(hash);
+      });
+    }
+    return () => { active = false; };
+  }, [sourceDocument]);
 
   async function copy(key: string, value: string) {
     try {
@@ -187,6 +212,18 @@ function EvidenceDetails({ result, threshold, mode, documents, policyText, docum
     } catch {
       setCopied("failed");
     }
+  }
+
+  function openSource(evidence: EvidenceReference, trigger: HTMLButtonElement) {
+    sourceTriggerRef.current = trigger;
+    setSourceHash("");
+    setSourceEvidence(evidence);
+  }
+
+  function closeSource() {
+    setSourceEvidence(null);
+    setSourceHash("");
+    window.setTimeout(() => sourceTriggerRef.current?.focus(), 0);
   }
 
   return (
@@ -205,18 +242,41 @@ function EvidenceDetails({ result, threshold, mode, documents, policyText, docum
       </details>
       <p className="evidence-provenance">{locale === "fr" ? "MÉTHODE" : "METHOD"}: {mode === "DETERMINISTIC_DEMO" ? (locale === "fr" ? "Contrôle déterministe" : "Deterministic check") : (locale === "fr" ? "Revue hybride" : "Hybrid review")} · {evidenceCount(result)} {locale === "fr" ? "FAITS CITÉS" : "FACTS CITED"}</p>
       <div className="evidence-groups">
-        <EvidenceList kind="contradictory" title={t("evidence.contradictory")} items={result.contradictoryEvidence} empty={t("evidence.noContradictory")} documentTypes={documentTypes} copied={copied} onCopy={copy} />
+        <EvidenceList kind="contradictory" title={t("evidence.contradictory")} items={result.contradictoryEvidence} empty={t("evidence.noContradictory")} documentTypes={documentTypes} copied={copied} openEvidenceId={sourceEvidence?.id ?? null} onCopy={copy} onOpenSource={openSource} />
         {result.contradictoryEvidence.length >= 2 && <CurrencyComparison items={result.contradictoryEvidence} locale={locale} />}
-        <EvidenceList kind="supporting" title={t("evidence.supporting")} items={result.supportingEvidence} empty={t("evidence.noSupporting")} documentTypes={documentTypes} copied={copied} onCopy={copy} />
+        <EvidenceList kind="supporting" title={t("evidence.supporting")} items={result.supportingEvidence} empty={t("evidence.noSupporting")} documentTypes={documentTypes} copied={copied} openEvidenceId={sourceEvidence?.id ?? null} onCopy={copy} onOpenSource={openSource} />
         <section className="missing-evidence-section"><h4>{t("evidence.missing")}</h4>{result.missingEvidence.length ? <ul>{result.missingEvidence.map((item) => { const localized = localizedMissingEvidence(result.controlId, locale, item.description, item.expectedSource); return <li key={item.description}><strong>⌀ {localized.description}</strong><span>{t("evidence.expected", { source: localized.source })}</span></li>; })}</ul> : <p className="empty-evidence-row">{t("evidence.noMissing")}</p>}</section>
       </div>
       <footer className="evidence-footer"><span>{decisionRef(result.controlId)} · {t(`decision.${result.reviewerDecision.state}`).toLocaleUpperCase(locale === "fr" ? "fr-FR" : "en-US")}</span><button type="button" onClick={onGoDecision}>{locale === "fr" ? "Enregistrer la décision humaine" : "Record human decision"} →</button></footer>
       <p aria-live="polite" className="copy-feedback">{copied === "failed" ? t("action.copyFailed") : copied ? t("action.copied") : ""}</p>
+      {sourceEvidence && <div className="source-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeSource(); }}>
+        <section className="source-dialog" role="dialog" aria-modal="true" aria-labelledby="source-dialog-title" onKeyDown={(event) => {
+          if (event.key === "Escape") closeSource();
+          if (event.key === "Tab") {
+            event.preventDefault();
+            sourceCloseRef.current?.focus();
+          }
+        }}>
+          <header><div><p className="eyebrow">{t("evidence.fullSource")}</p><h3 id="source-dialog-title">{sourceDocument?.title ?? sourceEvidence.documentTitle}</h3></div><button ref={sourceCloseRef} type="button" onClick={closeSource}>{t("evidence.closeSource")}</button></header>
+          <dl className="source-metadata">
+            <div><dt>{t("evidence.documentId")}</dt><dd>{sourceEvidence.documentId}</dd></div>
+            <div><dt>{t("evidence.evidenceId")}</dt><dd>{sourceEvidence.id}</dd></div>
+            <div><dt>{t("evidence.factId")}</dt><dd>{sourceEvidence.factId}</dd></div>
+            <div><dt>{t("evidence.documentTypeLabel")}</dt><dd>{sourceDocument ? documentTypeLabel(sourceDocument.type, locale) : t("evidence.sourceStatus.missing")}</dd></div>
+            <div><dt>{t("evidence.associatedControl")}</dt><dd>{controlRef(result.controlId)} · {title}</dd></div>
+            <div><dt>{locale === "fr" ? "Localisation" : "Locator"}</dt><dd>{sourceEvidence.locator}</dd></div>
+            <div><dt>{t("evidence.sourceStatus")}</dt><dd data-source-status={sourceStatus}>{sourceStatus === "VERIFIED" ? t("evidence.sourceStatus.verified") : sourceStatus === "MISSING" ? t("evidence.sourceStatus.missing") : t("evidence.sourceStatus.rejected")}</dd></div>
+            <div><dt>{t("evidence.contentHash")}</dt><dd><code>{sourceDocument ? sourceHash || t("evidence.calculatingHash") : t("evidence.sourceStatus.missing")}</code></dd></div>
+          </dl>
+          {sourceDocument ? <div className="source-document-content">{sourceMatch ? <pre><span>{sourceMatch.before}</span><mark ref={sourceExcerptRef}>{sourceMatch.match}</mark><span>{sourceMatch.after}</span></pre> : <><p role="alert" className="source-location-error">{t("evidence.excerptNotLocated")}</p><pre>{sourceDocument.content}</pre></>}</div> : <p role="alert" className="source-location-error">{t("evidence.sourceStatus.missing")}</p>}
+          <p className="source-custody-limit">{t("evidence.localMetadataLimit")}</p>
+        </section>
+      </div>}
     </aside>
   );
 }
 
-function EvidenceList({ title, items, empty, kind, documentTypes, copied, onCopy }: { title: string; items: EvidenceReference[]; empty: string; kind: "supporting" | "contradictory"; documentTypes: Record<string, string>; copied: string | null; onCopy: (key: string, value: string) => Promise<void> }) {
+function EvidenceList({ title, items, empty, kind, documentTypes, copied, openEvidenceId, onCopy, onOpenSource }: { title: string; items: EvidenceReference[]; empty: string; kind: "supporting" | "contradictory"; documentTypes: Record<string, string>; copied: string | null; openEvidenceId: string | null; onCopy: (key: string, value: string) => Promise<void>; onOpenSource: (evidence: EvidenceReference, trigger: HTMLButtonElement) => void }) {
   const { locale, t } = useLocale();
   return <section className="evidence-group" data-kind={kind}><h4>{title} <span>{items.length}</span></h4>{items.length ? <div className="evidence-list">{items.map((item) => <article key={item.id} className="evidence-record" data-kind={kind}>
     <header><span>{item.documentId}</span><small>{t("evidence.documentType", { type: (documentTypes[item.documentId] ?? "OTHER").replaceAll("_", " ") })}</small></header>
@@ -224,9 +284,20 @@ function EvidenceList({ title, items, empty, kind, documentTypes, copied, onCopy
     <p className="evidence-relation">{item.locator}{item.relationToControl ? ` · ${item.relationToControl}` : ""}</p>
     <blockquote>“{item.excerpt}”</blockquote>
     <p className="evidence-fact">{item.factId} · {modeForEvidence(item)}</p>
-    <div className="evidence-actions"><button type="button" onClick={() => onCopy(`${item.id}-excerpt`, item.excerpt)}>{copied === `${item.id}-excerpt` ? `${t("action.copied")} ✓` : t("evidence.copyExcerpt")}</button><button type="button" onClick={() => onCopy(`${item.id}-reference`, `${item.factId} · ${item.documentId} ${item.documentTitle} · ${item.locator}`)}>{copied === `${item.id}-reference` ? `${t("action.copied")} ✓` : t("evidence.copyReference")}</button></div>
+    <div className="evidence-actions"><button type="button" aria-expanded={openEvidenceId === item.id} onClick={(event) => onOpenSource(item, event.currentTarget)}>{t("evidence.openSource")}</button><button type="button" onClick={() => onCopy(`${item.id}-excerpt`, item.excerpt)}>{copied === `${item.id}-excerpt` ? `${t("action.copied")} ✓` : t("evidence.copyExcerpt")}</button><button type="button" onClick={() => onCopy(`${item.id}-reference`, `${item.factId} · ${item.documentId} ${item.documentTitle} · ${item.locator}`)}>{copied === `${item.id}-reference` ? `${t("action.copied")} ✓` : t("evidence.copyReference")}</button></div>
     {locale === "fr" && <span className="source-language-tag">EXTRAIT SOURCE (EN)</span>}
   </article>)}</div> : <p className="empty-evidence-row">{empty}</p>}</section>;
+}
+
+function documentTypeLabel(type: CaseDocument["type"], locale: "en" | "fr"): string {
+  const labels: Record<CaseDocument["type"], { en: string; fr: string }> = {
+    PURCHASE_ORDER: { en: "Purchase order", fr: "Bon de commande" },
+    INVOICE: { en: "Invoice", fr: "Facture" },
+    DELIVERY_NOTE: { en: "Delivery note", fr: "Bon de livraison" },
+    WORKFLOW: { en: "Approval workflow", fr: "Circuit d’approbation" },
+    VENDOR_CHANGE: { en: "Vendor change", fr: "Modification fournisseur" },
+  };
+  return labels[type][locale];
 }
 
 function modeForEvidence(item: EvidenceReference): string {

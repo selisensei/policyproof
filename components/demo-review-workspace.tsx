@@ -748,6 +748,7 @@ export function DemoReviewWorkspace({ initialPresentationLevel = "FOCUSED_DEMO" 
               {currentStepIndex < steps.length - 1 && <button type="button" onClick={() => navigate(steps[currentStepIndex + 1])} className="secondary-button workflow-next-action">{t("action.next")} →</button>}
             </div>
           </div>
+          <p className="operational-limit">{t("product.operationalLimit")}</p>
         </div>
       </div>
     </main>

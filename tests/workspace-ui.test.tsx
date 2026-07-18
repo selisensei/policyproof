@@ -99,7 +99,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(fingerprintDetails.open).toBe(true);
     const initialFingerprint = within(fingerprintDetails).getByText(/^[0-9a-f]{64}$/).textContent;
 
-    const confirm = within(focused).getByRole("button", { name: "Confirm" });
+    const confirm = within(focused).getByRole("button", { name: "Confirm finding" });
     await user.click(confirm);
     expect(confirm.getAttribute("aria-pressed")).toBe("true");
     await user.click(within(focused).getByRole("button", { name: "Re-run checks" }));
@@ -148,6 +148,20 @@ describe("PolicyProof workspace interactions", () => {
     expect(within(evidence).getByText("Why this evidence is trusted")).toBeTruthy();
     expect(within(evidence).getByText(/Purchase order amount: 12,480 EUR/)).toBeTruthy();
     expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
+    const sourceButton = within(evidence).getAllByRole("button", { name: "Open full source" })[0];
+    await user.click(sourceButton);
+    const sourceDialog = screen.getByRole("dialog", { name: "Purchase Order PO-1042" });
+    expect(within(sourceDialog).getByText("Document ID")).toBeTruthy();
+    expect(within(sourceDialog).getByText("Evidence ID")).toBeTruthy();
+    expect(within(sourceDialog).getByText("Fact ID")).toBeTruthy();
+    expect(within(sourceDialog).getByText("Associated control")).toBeTruthy();
+    expect(within(sourceDialog).getByText("Verified exact source")).toBeTruthy();
+    expect(within(sourceDialog).getByText("Purchase order amount: 12,480 EUR.", { selector: "mark" })).toBeTruthy();
+    expect(within(sourceDialog).getByText(/not a legal chain of custody/)).toBeTruthy();
+    await waitFor(() => expect(within(sourceDialog).getByText(/^[0-9a-f]{64}$/)).toBeTruthy());
+    await user.click(within(sourceDialog).getByRole("button", { name: "Close full source" }));
+    expect(screen.queryByRole("dialog", { name: "Purchase Order PO-1042" })).toBeNull();
+    expect(document.activeElement).toBe(sourceButton);
     await user.click(within(evidence).getAllByRole("button", { name: "Copy excerpt" })[0]);
     expect(writeText).toHaveBeenCalledWith("Purchase order amount: 12,480 EUR.");
     await user.click(within(evidence).getAllByRole("button", { name: "Copy reference" })[0]);
@@ -183,6 +197,9 @@ describe("PolicyProof workspace interactions", () => {
     await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Inspect Currency consistency" }));
     await user.click(screen.getByRole("button", { name: "Decision" }));
+
+    expect(screen.getByRole("button", { name: "Confirm finding" })).toBeTruthy();
+    expect(screen.getByText(/does not approve payment or modify vendor data/)).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Reject" }));
     expect(screen.getByRole("alert").textContent).toMatch(/Add a reviewer comment/);
@@ -317,7 +334,7 @@ describe("PolicyProof workspace interactions", () => {
     await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Decision" }));
     expect(screen.getByText(/Exact sources verified/)).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Confirm finding" }));
     await user.click(screen.getAllByRole("button", { name: /^Next unresolved/ })[0]);
     expect(screen.getByRole("heading", { name: "Currency consistency" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Copy receipt ID" }));
@@ -362,7 +379,7 @@ describe("PolicyProof workspace interactions", () => {
 
     await runReviewFromControls(user);
     await user.click(screen.getByRole("button", { name: "Decision" }));
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Confirm finding" }));
     await user.click(screen.getByRole("button", { name: "Français" }));
     await user.click(screen.getByRole("button", { name: "Politique" }));
     const meridian = screen.getByRole("button", { name: /Meridian Office Services/ });
@@ -495,7 +512,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Decision" }));
     await user.type(screen.getByLabelText("Reviewer comment"), "Exact EUR and USD excerpts verified.");
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Confirm finding" }));
     const receipt = screen.getByLabelText("Decision receipt");
     expect(within(receipt).getByText("Exact EUR and USD excerpts verified.")).toBeTruthy();
     expect(within(receipt).getByText(/1 confirmed/)).toBeTruthy();
@@ -534,7 +551,7 @@ describe("PolicyProof workspace interactions", () => {
     expect(within(evidence).getByText(/Invoice amount: 12,480 USD/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Decision" }));
     await user.type(screen.getByLabelText("Reviewer comment"), "Captured EUR and USD excerpts verified.");
-    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    await user.click(screen.getByRole("button", { name: "Confirm finding" }));
     const receipt = screen.getByLabelText("Decision receipt");
     expect(within(receipt).getByText("Captured EUR and USD excerpts verified.")).toBeTruthy();
     expect(within(receipt).getByText(/1 confirmed/)).toBeTruthy();

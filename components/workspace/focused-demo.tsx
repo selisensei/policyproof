@@ -140,11 +140,12 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
               <label>{locale === "fr" ? "Commentaire du réviseur" : "Reviewer comment"}<textarea value={currencyResult.reviewerDecision.comment} onChange={(event) => onCommentChange(currencyResult.controlId, event.target.value)} placeholder={t("decision.commentPlaceholder")} /></label>
               {reviewError && <p role="alert" className="focused-decision-error">{reviewError}</p>}
               <div className="focused-decision-actions">
-                <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "CONFIRMED"} onClick={() => onDecision(currencyResult.controlId, "CONFIRMED")}>{t("decision.confirm")}</button>
+                <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "CONFIRMED"} onClick={() => onDecision(currencyResult.controlId, "CONFIRMED")}>{t("decision.confirmFinding")}</button>
                 <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "REJECTED"} onClick={() => onDecision(currencyResult.controlId, "REJECTED")}>{t("decision.reject")}</button>
                 <button type="button" aria-pressed={currencyResult.reviewerDecision.state === "ACCEPTED_EXCEPTION"} onClick={() => onDecision(currencyResult.controlId, "ACCEPTED_EXCEPTION")}>{t("decision.exception")}</button>
                 <button type="button" className="primary-button" onClick={onOpenDecision}>{currencyResult.reviewerDecision.state === "PENDING" ? (locale === "fr" ? "Ouvrir la décision" : "Open decision") : (locale === "fr" ? "Ouvrir le reçu" : "Open receipt")}</button>
               </div>
+              <p className="decision-authority-limit">{t("decision.confirmMeaning")}</p>
             </section>
           )}
 
@@ -160,6 +161,7 @@ export function FocusedDemo({ scenario, results, summary, threshold, enabledCont
               onExport={onExportReceipt}
             />
           )}
+          <p className="operational-limit">{t("product.operationalLimit")}</p>
         </>
       )}
     </section>

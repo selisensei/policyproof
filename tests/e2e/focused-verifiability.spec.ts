@@ -110,7 +110,7 @@ test("pass 2 — reproduces the fingerprint and explains the threshold change", 
   await focused.locator(".focused-exception").screenshot({ path: `${captureRoot}/pass-2/currency-eur-usd.png` });
   await focused.locator(".review-fingerprint").screenshot({ path: `${captureRoot}/pass-2/fingerprint-before-rerun.png` });
 
-  const confirm = focused.getByRole("button", { name: "Confirm" });
+  const confirm = focused.getByRole("button", { name: "Confirm finding" });
   await confirm.click();
   await expect(confirm).toHaveAttribute("aria-pressed", "true");
   await focused.getByRole("button", { name: "Re-run checks" }).click();

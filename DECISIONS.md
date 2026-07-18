@@ -408,3 +408,12 @@ Record major product and engineering decisions here before or with implementatio
 - **Decision:** Keep product behavior and schemas unchanged while making the primary presentation concrete: case context, automated result, exact evidence, then reviewer decision. Use direct sentence-case copy, reserve technical identifiers and cryptographic detail for secondary surfaces, remove generic AI marketing language, and enforce the public copy rules with a dependency-free release check.
 - **Rationale:** Audit, finance, procurement, and internal-control users need a calm evidence hierarchy. Concrete language and progressive disclosure improve comprehension without changing any calculation or capability.
 - **Consequences:** Machine identifiers, exact source excerpts, schema names, hashes, and required security limitations remain available and accurate. The final polish may change labels, spacing, borders, and presentation order only. Business rules, scenario outcomes, evidence content, API behavior, exports, and dependencies remain frozen.
+
+## D045 - Keep document context verifiable and reviewer authority explicit
+
+- **Date:** 2026-07-18
+- **Status:** Accepted
+- **Context:** Professional reviewers need to move from a cited excerpt to its complete controlled source without leaving the review, and decision labels must not imply that confirming a finding authorizes an operational action.
+- **Decision:** Add a local full-source dialog to each supporting or contradictory evidence record. Locate and highlight only an exact excerpt, fail closed when the source or excerpt cannot be verified, and show safe local metadata plus a native SHA-256 of the exact controlled content. Label non-PASS confirmation as `Confirm finding`, PASS confirmation as `Confirm control result`, and state that neither action approves payment nor modifies vendor data. Repeat a concise operational-boundary statement in both presentation levels.
+- **Rationale:** Source context and precise authority language improve audit usability without changing a control, evidence excerpt, deterministic conclusion, provider boundary, or operational system.
+- **Consequences:** Full-source metadata is local demonstration evidence, not a legal chain of custody. The source viewer makes no network request, preserves the original document content, and returns focus to its opening control. Existing result and receipt semantics remain unchanged.

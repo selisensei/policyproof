@@ -27,7 +27,7 @@ test("runs Meridian with complete evidence and produces a scenario receipt", asy
   await page.getByRole("button", { name: "Inspect Amount match" }).click();
   await expect(page.getByLabel("Evidence details")).toContainText("Purchase order amount: 8,750 EUR");
   await page.getByRole("button", { name: "Decision", exact: true }).click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm control result", exact: true }).click();
   await expect(page.getByLabel("Decision receipt")).toContainText("Meridian Office Services");
   await page.screenshot({ path: `${captures}/meridian-review.png`, fullPage: true });
 });
@@ -42,7 +42,7 @@ test("runs Atlas and keeps missing delivery and bank evidence explicit", async (
   await expect(page.getByLabel("Evidence details")).toContainText(/does not fabricate/i);
   await page.getByRole("button", { name: "Decision", exact: true }).click();
   await expect(page.getByLabel("Human review")).toContainText("Independent bank verification");
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm finding", exact: true }).click();
   await page.screenshot({ path: `${captures}/atlas-review.png`, fullPage: true });
 });
 
@@ -50,7 +50,7 @@ test("confirms a destructive case switch and does not leak Northstar decisions",
   await openFullWorkspace(page);
   await runSelectedScenario(page);
   await page.getByRole("button", { name: "Decision", exact: true }).click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm finding", exact: true }).click();
   await page.getByRole("button", { name: "Policy", exact: true }).click();
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("region", { name: "Choose a controlled case" }).getByRole("button", { name: /Meridian Office Services/ }).click();
@@ -122,6 +122,6 @@ test("captures the competition hardening visual review matrix", async ({ page })
   await page.getByRole("button", { name: "Close guide" }).click();
 
   await page.getByRole("button", { name: "Decision", exact: true }).click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page.getByRole("button", { name: "Confirm finding", exact: true }).click();
   await page.screenshot({ path: `${captures}/northstar-receipt.png`, fullPage: true });
 });

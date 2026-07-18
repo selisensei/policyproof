@@ -91,7 +91,7 @@ test("captures final empty, threshold, print, loading, and provider-error states
   await capture(page, "11-threshold-after-pass");
 
   await page.getByRole("button", { name: "Decision", exact: true }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
+  await page.getByRole("button", { name: "Confirm control result" }).click();
   await expect(page.getByLabel("Decision receipt")).toBeVisible();
   await page.emulateMedia({ media: "print" });
   await page.getByLabel("Decision receipt").screenshot({ path: `${captureRoot}/12-receipt-print.png` });

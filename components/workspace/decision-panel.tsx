@@ -147,11 +147,12 @@ export function DecisionPanel({ results, documents, selectedResult, summary, rec
                 {integrity && <div className="decision-integrity" data-state={integrity.state}><strong>{integrity.state === "VERIFIED" ? (locale === "fr" ? "✓ Sources exactes vérifiées" : "✓ Exact sources verified") : integrity.state === "MISSING" ? (locale === "fr" ? "○ Preuve requise manquante" : "○ Required evidence missing") : (locale === "fr" ? "× Référence rejetée" : "× Reference rejected")}</strong><span>{integrity.verifiedReferences} {locale === "fr" ? "extraits exacts" : "exact excerpts"}</span></div>}
                 <div className="decision-form-grid">
                   <div className="decision-actions">
-                    <button type="button" onClick={() => applyDecision("CONFIRMED")} aria-label={t("decision.confirm")} className="confirm-decision">{locale === "fr" ? `Confirmer la conclusion ${t(`status.${selectedResult.status}`)}` : `Confirm ${selectedResult.status} conclusion`}</button>
+                    <button type="button" onClick={() => applyDecision("CONFIRMED")} aria-label={selectedResult.status === "PASS" ? t("decision.confirmControlResult") : t("decision.confirmFinding")} className="confirm-decision">{selectedResult.status === "PASS" ? t("decision.confirmControlResult") : t("decision.confirmFinding")}</button>
                     <p>{locale === "fr" ? "La conclusion automatisée reste inchangée." : "The automated result remains unchanged."}</p>
                     <div className="override-rule"><span>{locale === "fr" ? "DÉROGATIONS. JUSTIFICATION REQUISE" : "OVERRIDES. COMMENT REQUIRED"}</span></div>
                     <button type="button" aria-label={t("decision.reject")} onClick={() => applyDecision("REJECTED")} className="override-decision is-reject"><span>{t("decision.reject")}</span><small>✎ {locale === "fr" ? "commentaire requis" : "comment required"}</small></button>
                     <button type="button" aria-label={t("decision.exception")} onClick={() => applyDecision("ACCEPTED_EXCEPTION")} className="override-decision"><span>{t("decision.exception")}</span><small>✎ {locale === "fr" ? "commentaire requis" : "comment required"}</small></button>
+                    <p className="decision-authority-limit">{selectedResult.status === "PASS" ? t("decision.confirmControlMeaning") : t("decision.confirmMeaning")}</p>
                   </div>
                   <div className="reviewer-comment">
                     <label htmlFor="review-comment" className="field-label">{t("decision.comment")}<span>{locale === "fr" ? "REQUIS POUR LES DÉROGATIONS" : "REQUIRED FOR OVERRIDES"}</span></label>

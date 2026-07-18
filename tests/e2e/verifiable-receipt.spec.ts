@@ -35,7 +35,7 @@ async function generateNorthstarReceipt(page: Page) {
   await expect(focused.getByText("Unchanged: 6 controls")).toBeVisible();
   await expect(focused.locator(".fingerprint-details code")).not.toHaveText(initialFingerprint ?? "");
   await focused.getByRole("textbox", { name: "Reviewer comment" }).fill("Currency evidence checked by the fictional reviewer.");
-  await focused.getByRole("button", { name: "Confirm" }).click();
+  await focused.getByRole("button", { name: "Confirm finding" }).click();
   await focused.getByRole("button", { name: "Generate receipt" }).click();
   await expect(focused.getByRole("button", { name: "Verify receipt integrity" })).toBeVisible();
   return focused;
